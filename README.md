@@ -7,7 +7,7 @@ Auf dem iPad in Safari öffnen → Teilen ⬆️ → „Zum Home-Bildschirm“.
 
 ## Inhalt
 - Startseite: animierte Weltkarte – Ort antippen und hineinzoomen (auch über „Karte“ in der Leiste)
-- 7 Orte: Haus (Wohnzimmer, Küche, Bad, Schlafzimmer), Café, Supermarkt, Friseur, Badezimmer (Regendusche, Badewanne, Waschbecken, 2 WCs), itmX Büro (Empfang, 3 Büros, Meetingraum), Park
+- 8 Orte: Haus (Wohnzimmer, Küche, Bad, Schlafzimmer), Café, Supermarkt, Friseur, Badezimmer (Regendusche, Badewanne, Waschbecken, 2 WCs), Heylinschule (Flur und Klassenzimmer der 4A), itmX Büro (Empfang, 3 Büros, Meetingraum), Park
 - Auf dem Klo machen die Figuren ein 💩 – Spülung antippen und weg ist es
 - Figuren herumziehen, hinsetzen (Sofa, Stühle, Bett, Badewanne, Schaukel, Rutsche), anziehen und umstylen
 - Über 100 Gegenstände: essen, halten, kochen (🥚→🍳), Kühlschrank (💧→🧊), Geschenke auspacken …

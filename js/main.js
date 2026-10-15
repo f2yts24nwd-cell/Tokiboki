@@ -235,6 +235,7 @@ function applyProp(id) {
   const e = sceneEls[p.sc].propEls[id];
   e.classList.toggle('on', !!st.on);
   e.classList.toggle('open', !!st.open);
+  if (p.kind === 'board') e.dataset.page = st.page || 0;
   sceneEls[p.sc].glows.querySelectorAll(`[data-prop="${id}"]`).forEach((g) => g.classList.toggle('lit', !!st.on));
 }
 
@@ -740,6 +741,24 @@ function tapProp(id) {
       }
       sfx.whoosh();
       break;
+    case 'board':
+      st.page = ((st.page || 0) + 1) % (e.querySelectorAll('.pg').length || 1);
+      applyProp(id);
+      sfx.click(); setTimeout(sfx.click, 90); setTimeout(sfx.click, 180);
+      burst(p.sc, p.x + p.w / 2, p.y + p.h / 2, '✨', 5);
+      break;
+    case 'bell': {
+      sfx.ring();
+      propBump(e, 'ringing');
+      for (const c of Object.values(state.objs)) {
+        if (c.t !== 'c' || c.sc !== p.sc || c._stored) continue;
+        bump(c, 'jump');
+        setMood(c, 'happy', 1500);
+      }
+      const kid = Object.values(state.objs).find((c) => c.t === 'c' && c.sc === p.sc && !c._stored);
+      if (kid) bubble(kid, pick(['Pause! 🎉', 'Juhu, Pause!', 'Ding dong! 🔔']));
+      break;
+    }
     case 'dryer': {
       e.classList.add('on');
       setTimeout(() => e.classList.remove('on'), 1300);
@@ -786,7 +805,7 @@ function tick() {
   const objs = Object.values(state.objs);
   for (const s of SCENES) {
     for (const z of s.zones) {
-      const on = state.props[z.prop].on;
+      const on = z.prop ? state.props[z.prop].on : false;
       if (z.kind === 'cook' && on) {
         for (const o of objs) {
           if (o.t === 'i' && o.sc === s.id && !o.hold && !o._dragging && !falling.has(o) && A.COOK[o.k] && o.x >= z.x1 && o.x <= z.x2 && Math.abs(o.y - z.y) < 1) {
@@ -807,6 +826,12 @@ function tick() {
             o._cold = (o._cold || 0) + 0.5;
             if (o._cold >= 8) { o._cold = 0; transformItem(o, A.COLD[o.k]); }
           }
+        }
+      }
+      if (z.kind === 'learn' && s.id === state.scene) {
+        for (const id of z.seats) {
+          const c = occupant(id);
+          if (c && Math.random() < 0.12) burst(s.id, c.x + 50, c.y - 190, pick(['✏️', '📖', '💡', '✋', '⭐', '🤔', '✅']), 1, 'up');
         }
       }
       if (z.kind === 'desk') {
@@ -1023,7 +1048,7 @@ for (const s of SCENES) {
   const b = document.createElement('button');
   b.className = 'nb place';
   b.dataset.target = s.id;
-  b.innerHTML = `<b>${s.iconHTML || s.icon}</b><i>${s.name}</i>`;
+  b.innerHTML = `<b>${s.iconHTML || s.icon}</b><i>${s.short || s.name}</i>`;
   b.addEventListener('click', () => { unlock(); if (state.scene !== s.id) switchScene(s.id); });
   places.append(b);
 }

@@ -402,6 +402,79 @@ const badFG = [
   { x: 600, y: 588, w: 400, h: 112, svg: tubFront() },
 ];
 
+// ======================= HEYLINSCHULE =======================
+const SDESKS = [1100, 1400, 1700, 2000];
+const BOARD_PAGES = [
+  T(230, 110, 64, '#fff', 'Hallo 4A!') + T(230, 180, 34, '#ffe066', 'Willkommen in der') + T(230, 225, 34, '#ffe066', 'Heylinschule 🏫'),
+  T(230, 100, 56, '#fff', '3 + 4 = 7') + T(230, 170, 56, '#fff', '5 · 6 = 30') + T(230, 236, 46, '#a7f3d0', '12 − 5 = ?'),
+  T(230, 100, 54, '#fff', 'A B C D E') + T(230, 170, 46, '#fde68a', 'Hund · Katze') + T(230, 232, 40, '#fbcfe8', 'Schreibschrift ✍️'),
+  `<text x="70" y="140" font-size="90">🌞</text><text x="250" y="170" font-size="110">🏠</text>` + P('M30 250 L430 250', 'none', 'stroke="#a7f3d0" stroke-width="6"') + T(330, 70, 30, '#fff', 'Kunst 🎨'),
+  T(230, 100, 46, '#fff', 'Hausaufgaben:') + T(230, 160, 34, '#fde68a', 'Mathe S. 42') + T(230, 214, 34, '#fbcfe8', 'Lesen: 10 Minuten 📖'),
+];
+
+function schuleBG() {
+  const W = 2400;
+  let s = patterns('schule');
+  // Flur
+  s += R(0, 0, 700, FLOOR, '#fde68a') + R(0, 0, 700, FLOOR, 'url(#schule-stripes)') + R(0, 470, 700, FLOOR - 470, '#f59e0b') + R(0, 462, 700, 10, '#fff');
+  // Klassenzimmer
+  s += R(700, 0, W - 700, FLOOR, '#e0f2fe') + R(700, 0, W - 700, FLOOR, 'url(#schule-dots)') + R(700, 470, W - 700, FLOOR - 470, '#bae6fd') + R(700, 462, W - 700, 10, '#fff');
+  s += R(0, 0, W, 40, '#dc2626') + R(0, 36, W, 6, '#991b1b');
+  s += R(0, FLOOR, 700, H - FLOOR, '#d6d3d1') + R(0, FLOOR, 700, H - FLOOR, 'url(#schule-tiles)') + R(700, FLOOR, W - 700, H - FLOOR, '#c68b59') + R(700, FLOOR, W - 700, H - FLOOR, 'url(#schule-wood)') + R(0, FLOOR - 14, W, 16, '#92400e');
+  // Schild Heylinschule
+  s += G(60, 70, R(0, 0, 560, 110, '#dc2626', 22) + R(10, 10, 540, 90, '#fff', 16) + T(280, 76, 56, '#dc2626', 'Heylinschule'));
+  s += G(60, 196, `<text x="0" y="40" font-size="40">🏫</text>` + T(300, 36, 26, '#92400e', 'Lernen · Spielen · Lachen'));
+  // Garderobe mit Haken
+  s += G(50, 290, R(0, 0, 400, 16, '#92400e', 6) + [40, 120, 200, 280, 360].map((x) => C(x, 26, 9, '#555')).join(''));
+  // Pinnwand mit Bildern
+  s += G(470, 260, R(0, 0, 200, 170, '#b45309', 10) + R(10, 10, 180, 150, '#fcd34d', 6) +
+    R(24, 22, 60, 50, '#fff', 3, 'transform="rotate(-6 54 47)"') + `<text x="36" y="62" font-size="32">🌈</text>` +
+    R(110, 26, 60, 50, '#fff', 3, 'transform="rotate(5 140 51)"') + `<text x="122" y="66" font-size="32">🐱</text>` +
+    R(60, 92, 70, 54, '#fff', 3, 'transform="rotate(3 95 119)"') + `<text x="76" y="136" font-size="32">🚀</text>`);
+  // Tür zur 4A
+  s += G(560, 470, R(0, -10, 130, 240, '#92400e', 10) + R(10, 0, 110, 230, '#d97706', 6) + C(100, 120, 7, '#fde68a') + R(20, 20, 90, 60, '#bae6fd', 6) + R(25, -60, 80, 40, '#fff', 10) + T(65, -30, 28, '#dc2626', '4A'));
+  // Glaswand-Pfosten
+  s += R(692, 42, 16, FLOOR - 42, '#991b1b');
+  // ABC-Leiste
+  const abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  [...abc].forEach((ch, i) => {
+    const cols = ['#ef4444', '#f59e0b', '#22c55e', '#3b82f6', '#a855f7', '#ec4899'];
+    s += G(740 + i * 62, 52, R(0, 0, 54, 54, cols[i % cols.length], 10) + T(27, 40, 34, '#fff', ch));
+  });
+  // Klassenschild + Uhr
+  s += G(760, 130, R(0, 0, 230, 80, '#22c55e', 16) + T(115, 54, 40, '#fff', 'Klasse 4A'));
+  s += G(2240, 210, C(0, 0, 58, '#fff') + C(0, 0, 58, 'none', 'stroke="#dc2626" stroke-width="8"') +
+    [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => R(-3, -50, 6, 10, '#333', 2, `transform="rotate(${i * 30})"`)).join('') +
+    '');
+  s += `<g class="clockh" style="transform-origin:2240px 210px">${R(2236, 180, 8, 32, '#333', 4)}</g><g class="clockm" style="transform-origin:2240px 210px">${R(2237, 164, 6, 48, '#555', 3)}</g>` + C(2240, 210, 6, '#dc2626');
+  // Fenster
+  s += windowSVG(2120, 330, 220, 120, '#22c55e');
+  // Weltkarte-Poster, Regal
+  s += G(1880, 150, R(0, 0, 200, 140, '#fff', 8) + R(8, 8, 184, 124, '#7dd3fc', 4) + E(60, 60, 34, 26, '#22c55e') + E(130, 80, 40, 30, '#16a34a') + E(150, 40, 20, 14, '#84cc16') + T(100, 128, 16, '#1e3a8a', 'WELT'));
+  // Lehrerpult (hinten) und Tafelleiste
+  s += G(1060, 404, R(0, 0, 500, 12, '#6b7280', 4));
+  s += plant(30, 700, 1) + plant(2370, 700, 1.1);
+  s += hangLamp(350, 40, '#dc2626');
+  return svgWrap(W, s);
+}
+
+const deskFront = (w) => svgWrap0(w, 144, R(0, 0, w, 16, '#fbbf24', 6) + R(8, 16, w - 16, 70, '#3b82f6', 6) + R(16, 86, 10, 58, '#6b7280', 3) + R(w - 26, 86, 10, 58, '#6b7280', 3) +
+  R(w / 2 - 50, 30, 100, 40, '#60a5fa', 6));
+
+const schuleProps = [
+  { id: 'tafel', kind: 'board', x: 1060, y: 130, w: 500, h: 280, sound: 'click',
+    svg: svgWrap0(500, 280, R(0, 0, 500, 280, '#92400e', 12) + R(14, 14, 472, 252, '#14532d', 6) +
+      BOARD_PAGES.map((pg, i) => `<g class="pg pg${i}" transform="translate(20 0)">${pg}</g>`).join('') +
+      R(380, 266, 60, 10, '#fff', 3) + R(100, 266, 40, 10, '#fde68a', 3)) },
+  { id: 'schulglocke', kind: 'bell', x: 250, y: 330, w: 110, h: 110,
+    svg: svgWrap0(110, 110, R(45, 0, 20, 20, '#999', 4) + P('M20 90 Q20 30 55 22 Q90 30 90 90Z', '#fbbf24', 'class="bellb"') + R(10, 86, 90, 14, '#f59e0b', 7) + C(55, 104, 9, '#92400e')) },
+];
+
+const schuleFG = [
+  { x: 760, y: 560, w: 260, h: 144, svg: svgWrap0(260, 144, R(0, 0, 260, 18, '#92400e', 8) + R(10, 18, 240, 126, '#b45309', 6) + R(30, 40, 200, 70, '#d97706', 6) + T(130, 88, 26, '#fff', 'Lehrerin')) },
+  ...SDESKS.map((x) => ({ x, y: 560, w: 240, h: 144, svg: deskFront(240) })),
+];
+
 // ======================= itmX BÜRO =======================
 const ITMX = '#50af30';
 const ITMX_D = '#3d8a24';
@@ -565,6 +638,19 @@ export const SCENES = [
     ],
   },
   {
+    id: 'schule', name: 'Heylinschule', short: 'Schule', icon: '🏫', W: 2400, ceil: 120, bg: schuleBG(), props: schuleProps, fg: schuleFG,
+    glows: [{ x: 350, y: 120, r: 280 }, { x: 1100, y: 130, r: 300 }, { x: 1700, y: 130, r: 300 }],
+    surfaces: [
+      { x1: 50, x2: 450, y: 306 },
+      { x1: 760, x2: 1020, y: 560 }, ...SDESKS.map((x) => ({ x1: x, x2: x + 240, y: 560 })),
+    ],
+    seats: [
+      { id: 'schule:lehrer', x: 890, y: 600, pose: 'sit' },
+      ...SDESKS.flatMap((x, i) => [{ id: `schule:${i}a`, x: x + 60, y: 600, pose: 'sit' }, { id: `schule:${i}b`, x: x + 180, y: 600, pose: 'sit' }]),
+    ],
+    zones: [{ kind: 'learn', seats: SDESKS.flatMap((x, i) => [`schule:${i}a`, `schule:${i}b`]) }],
+  },
+  {
     id: 'buero', name: 'itmX Büro', icon: '🏢', iconHTML: '<img src="icons/itmx-x.png" alt="">', W: 3100, ceil: 70, bg: bueroBG(), props: bueroProps, fg: bueroFG,
     glows: [{ x: 1000, y: 120, r: 300 }, { x: 1600, y: 120, r: 300 }, { x: 2200, y: 120, r: 300 }, { x: 2800, y: 120, r: 300 }, { x: 2750, y: 260, r: 220, prop: 'beamer' }],
     surfaces: [
@@ -635,6 +721,12 @@ export function initialObjects() {
   // Badezimmer
   o.push(it('bad', '🧴', 130, 380), it('bad', '🧼', 190, 380), it('bad', '🦆', 700, 640), it('bad', '🦆', 900, 640), it('bad', '🪥', 1130, 560), it('bad', '🧼', 1290, 560));
   o.push(it('bad', '💩', 1555, 612), it('bad', '💩', 1825, 612), it('bad', '🧻', 1540, 520), it('bad', '🧻', 1825, 520), it('bad', '💩', 2000, 700), it('bad', '🧻', 1460, 700));
+  // Heylinschule
+  o.push(it('schule', '🎒', 90, 700), it('schule', '🎒', 170, 700), it('schule', '🎒', 250, 306), it('schule', '🧢', 330, 306), it('schule', '⚽', 420, 700));
+  o.push(it('schule', '🍎', 800, 560), it('schule', '📚', 960, 560), it('schule', '🌍', 1000, 700), it('schule', '🧮', 2340, 700));
+  SDESKS.forEach((x, i) => {
+    o.push(it('schule', ['✏️', '📓', '🖍️', '📏'][i], x + 30, 560), it('schule', ['📖', '✏️', '📐', '📓'][i], x + 120, 560), it('schule', ['🖍️', '🍌', '✏️', '🍪'][i], x + 210, 560));
+  });
   // itmX Büro
   o.push(it('buero', '🔔', 140, 520), it('buero', '📄', 220, 520), it('buero', '🖊️', 300, 520), it('buero', '🪴', 390, 520), it('buero', '☕', 560, 540), it('buero', '☕', 670, 540));
   OFFICES.forEach((d, i) => {
@@ -648,6 +740,11 @@ export function initialObjects() {
   o.push(ch('friseur', 240, 572, { skin: '#b97a4a', hair: 'lang', hc: '#3b2416', style: 'tshirt', shirt: '#ff924c', pants: '#00bbf9', shoes: '#ff6fb5', hat: '', glasses: '' }, 'friseur:s1'));
   o.push(ch('park', 1905, 612, { skin: '#e0a46e', hair: 'irokese', hc: '#9b5de5', style: 'pulli', shirt: '#00bbf9', pants: '#333333', shoes: '#ffca3a', hat: '', glasses: 'sonne' }, 'park:bank1'));
   o.push(ch('bad', 300, 700, { skin: '#ffe3cf', hair: 'pony', hc: '#4f8cff', style: 'streifen', shirt: '#2ec4b6', pants: '#ffca3a', shoes: '#ff595e', hat: '', glasses: '' }));
+  o.push(ch('schule', 890, 600, { skin: '#f8c9a0', hair: 'dutt', hc: '#9b5de5', style: 'kleid', shirt: '#22c55e', pants: '#ffffff', shoes: '#333333', hat: '', glasses: 'rund' }, 'schule:lehrer'));
+  o.push(ch('schule', 1160, 600, { skin: '#ffe3cf', hair: 'zoepfe', hc: '#f2c94c', style: 'tshirt', shirt: '#ff6fb5', pants: '#1982c4', shoes: '#ffffff', hat: '', glasses: '' }, 'schule:0a'));
+  o.push(ch('schule', 1580, 600, { skin: '#8a5530', hair: 'kurz', hc: '#111111', style: 'streifen', shirt: '#ff924c', pants: '#333333', shoes: '#ff595e', hat: 'cap', glasses: '' }, 'schule:1b'));
+  o.push(ch('schule', 1760, 600, { skin: '#e0a46e', hair: 'afro', hc: '#c8501e', style: 'pulli', shirt: '#8ac926', pants: '#6a4c93', shoes: '#ffca3a', hat: '', glasses: '' }, 'schule:2a'));
+  o.push(ch('schule', 2180, 600, { skin: '#ffe3cf', hair: 'pony', hc: '#3b2416', style: 'kleid', shirt: '#00bbf9', pants: '#ffffff', shoes: '#ff6fb5', hat: 'schleife', glasses: '' }, 'schule:3b'));
   o.push(ch('buero', 790, 592, { skin: '#f8c9a0', hair: 'kurz', hc: '#3b2416', style: 'pulli', shirt: '#50af30', pants: '#333333', shoes: '#333333', hat: '', glasses: 'rund' }, 'buero:0a'));
   o.push(ch('buero', 1680, 592, { skin: '#b97a4a', hair: 'dutt', hc: '#111111', style: 'tshirt', shirt: '#ffffff', pants: '#1982c4', shoes: '#50af30', hat: '', glasses: '' }, 'buero:1b'));
   o.push(ch('buero', 1990, 592, { skin: '#ffe3cf', hair: 'lang', hc: '#f2c94c', style: 'streifen', shirt: '#575757', pants: '#6a4c93', shoes: '#ffffff', hat: '', glasses: 'rund' }, 'buero:2a'));

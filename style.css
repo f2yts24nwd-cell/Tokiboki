@@ -592,3 +592,19 @@ body.map-open #nav, body.map-open #drawer { display: none; }
 @keyframes wbob { from { transform: scale(0.4) translateY(0) rotate(-4deg); } to { transform: scale(0.4) translateY(-14px) rotate(4deg); } }
 @keyframes conf { 0% { transform: translate(0, 0) rotate(0); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) rotate(var(--r)); opacity: 0.9; } }
 @keyframes confpop { 0% { transform: translate(0, 0) rotate(0) scale(1); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) rotate(var(--r)) scale(0.6); opacity: 0; } }
+
+/* Schule */
+.prop .pg { display: none; }
+.prop[data-page="0"] .pg0, .prop[data-page="1"] .pg1, .prop[data-page="2"] .pg2, .prop[data-page="3"] .pg3, .prop[data-page="4"] .pg4 { display: inline; }
+.prop .bellb { transform-box: fill-box; transform-origin: 50% 0; }
+.prop.ringing .bellb { animation: ring 0.15s ease-in-out 8 alternate; }
+.clockm, .clockh { transform-box: view-box; }
+.clockm { animation: spin 60s linear infinite; }
+.clockh { animation: spin 720s linear infinite; }
+@keyframes ring { from { transform: rotate(-18deg); } to { transform: rotate(18deg); } }
+#drawer .tab i { font-size: 13px; }
+#drawer .tabs { gap: 4px; }
+
+.flag { transform-box: fill-box; transform-origin: 0 50%; animation: flag 0.8s ease-in-out infinite alternate; }
+.mbell { transform-box: fill-box; transform-origin: 50% 0; animation: ring 1.2s ease-in-out infinite alternate; }
+@keyframes flag { from { transform: scaleX(1) skewY(0); } to { transform: scaleX(0.8) skewY(6deg); } }
