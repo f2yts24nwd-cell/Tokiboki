@@ -1,6 +1,6 @@
 import { sfx, unlock, setMuted, music } from './sound.js';
 import * as A from './art.js';
-import { SCENES, H, initialObjects } from './world.js';
+import { SCENES, H, initialObjects, GLOBAL_DEFS } from './world.js';
 import { createMap } from './map.js';
 
 const SAVE_KEY = 'kunterbunt-welt-v1';
@@ -175,6 +175,7 @@ function place(o) {
   }
   const p = poseOf(o);
   if (p.sit !== o._sit) rerenderChar(o);
+  e.classList.toggle('seated', !!o.seat);
   e.style.transformOrigin = `${p.ax}px ${p.ay}px`;
   e.style.transform = `translate(${o.x - p.ax}px,${o.y - p.ay}px)` + (p.r ? ` rotate(${p.r}deg)` : '');
 }
@@ -295,7 +296,7 @@ function stepFalling(dt) {
     let landY = null;
     if (o._vy > 0) {
       for (const s of surfacesOf(o)) {
-        if (nx >= s.x1 && nx <= s.x2 && s.y >= o.y - 0.5 && s.y <= ny && (landY === null || s.y < landY)) landY = s.y;
+        if (nx >= s.x1 && nx <= s.x2 && s.y >= o.y - 2 && s.y <= ny && (landY === null || s.y < landY)) landY = s.y;
       }
       if (ny >= FLOOR && (landY === null || landY > FLOOR)) landY = FLOOR;
     }
@@ -1185,6 +1186,7 @@ const ED_ROWS = [
   { key: 'skin', label: 'Haut', colors: A.SKINS },
   { key: 'hair', label: 'Frisur', opts: A.HAIR_STYLES, vb: '-12 -40 144 150' },
   { key: 'hc', label: 'Haarfarbe', colors: A.HAIR_COLORS },
+  { key: 'eyes', label: 'Augen', colors: A.EYE_COLORS },
   { key: 'style', label: 'Kleidung', opts: A.SHIRT_STYLES, vb: '0 80 120 130' },
   { key: 'shirt', label: 'Oberteil', colors: A.CLOTH_COLORS },
   { key: 'pants', label: 'Hose', colors: A.CLOTH_COLORS },
@@ -1266,6 +1268,7 @@ $('#rotateOk').addEventListener('click', () => document.body.classList.add('rota
 function init() {
   state = load();
   setMuted(state.muted);
+  document.body.insertAdjacentHTML('afterbegin', GLOBAL_DEFS);
   SCENES.forEach(buildScene);
   const all = Object.values(state.objs);
   for (const c of all) {
@@ -1304,7 +1307,7 @@ function init() {
   setInterval(tick, 500);
   let last = performance.now();
   const loop = (t) => {
-    const dt = Math.min(0.05, (t - last) / 1000);
+    const dt = clamp((t - last) / 1000, 0, 0.05);
     last = t;
     stepFalling(dt);
     stepSlides(dt);

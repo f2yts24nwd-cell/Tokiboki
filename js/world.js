@@ -12,6 +12,40 @@ const P = (d, fill, extra = '') => `<path d="${d}" fill="${fill}" ${extra}/>`;
 const G = (x, y, inner) => `<g transform="translate(${x} ${y})">${inner}</g>`;
 const T = (x, y, s, fill, txt, extra = '') => `<text x="${x}" y="${y}" font-size="${s}" fill="${fill}" text-anchor="middle" font-family="ui-rounded, 'Arial Rounded MT Bold', system-ui, sans-serif" font-weight="800" ${extra}>${txt}</text>`;
 
+// ---------- gemeinsame Verläufe & Muster (einmal im Dokument) ----------
+export const GLOBAL_DEFS = `<svg id="gdefs" width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <radialGradient id="g-sh"><stop offset="0" stop-color="#000" stop-opacity=".5"/><stop offset=".6" stop-color="#000" stop-opacity=".18"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+  <linearGradient id="g-vol" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".28"/><stop offset=".35" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient>
+  <linearGradient id="g-volh" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".18"/><stop offset=".3" stop-color="#fff" stop-opacity=".18"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".2"/></linearGradient>
+  <linearGradient id="g-wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".1"/><stop offset=".18" stop-color="#000" stop-opacity="0"/><stop offset=".85" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".12"/></linearGradient>
+  <linearGradient id="g-floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#000" stop-opacity=".3"/><stop offset=".15" stop-color="#000" stop-opacity=".06"/><stop offset=".6" stop-color="#fff" stop-opacity=".05"/><stop offset="1" stop-color="#000" stop-opacity=".12"/></linearGradient>
+  <linearGradient id="g-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#62bff5"/><stop offset="1" stop-color="#d4f1ff"/></linearGradient>
+  <linearGradient id="g-beam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff8d6" stop-opacity=".3"/><stop offset="1" stop-color="#fff8d6" stop-opacity="0"/></linearGradient>
+  <linearGradient id="g-folds" x1="0" y1="0" y2="0" spreadMethod="repeat" gradientUnits="userSpaceOnUse" x2="22">
+    <stop offset="0" stop-color="#000" stop-opacity=".2"/><stop offset=".45" stop-color="#fff" stop-opacity=".22"/><stop offset="1" stop-color="#000" stop-opacity=".2"/></linearGradient>
+  <linearGradient id="g-glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".4" stop-color="#fff" stop-opacity=".08"/><stop offset=".55" stop-color="#fff" stop-opacity=".3"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  <linearGradient id="g-metal" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8d939a"/><stop offset=".35" stop-color="#e9edf1"/><stop offset=".6" stop-color="#b4bac1"/><stop offset="1" stop-color="#7c828a"/></linearGradient>
+  <linearGradient id="g-pot" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#b9502c"/><stop offset=".4" stop-color="#f0895c"/><stop offset="1" stop-color="#9e3f1d"/></linearGradient>
+  <radialGradient id="g-bulb"><stop offset="0" stop-color="#fffbe0"/><stop offset=".5" stop-color="#fff3b0" stop-opacity=".6"/><stop offset="1" stop-color="#fff3b0" stop-opacity="0"/></radialGradient>
+  <pattern id="p-grain" width="140" height="40" patternUnits="userSpaceOnUse">
+    <path d="M0 8 q35 -5 70 0 t70 0 M0 22 q30 4 60 0 t80 2 M0 33 q40 -4 80 0 t60 -1" stroke="#000" stroke-width="1.2" fill="none" opacity=".12"/>
+    <ellipse cx="96" cy="16" rx="7" ry="3" fill="none" stroke="#000" stroke-width="1" opacity=".1"/></pattern>
+  <pattern id="p-planks" width="200" height="34" patternUnits="userSpaceOnUse">
+    <rect width="200" height="2" y="32" fill="#000" opacity=".22"/><rect x="0" width="2" height="34" fill="#000" opacity=".18"/><rect x="1" y="1" width="198" height="2" fill="#fff" opacity=".1"/>
+    <path d="M14 12 q40 -5 80 0 t90 2 M8 24 q50 4 100 0 t80 -2" stroke="#000" stroke-width="1.2" fill="none" opacity=".1"/></pattern>
+  <pattern id="p-tiles" width="56" height="56" patternUnits="userSpaceOnUse"><rect width="56" height="56" fill="none" stroke="#000" stroke-opacity=".1" stroke-width="3"/><rect x="3" y="3" width="50" height="10" fill="#fff" opacity=".18" rx="2"/></pattern>
+  <pattern id="p-noise" width="24" height="24" patternUnits="userSpaceOnUse"><circle cx="4" cy="6" r="1" fill="#000" opacity=".08"/><circle cx="16" cy="14" r="1" fill="#000" opacity=".08"/><circle cx="10" cy="20" r="1" fill="#fff" opacity=".12"/><circle cx="20" cy="3" r="1" fill="#fff" opacity=".12"/></pattern>
+  <pattern id="p-damask" width="70" height="80" patternUnits="userSpaceOnUse">
+    <path d="M35 10 q10 14 0 28 q-10 -14 0 -28z M35 50 q8 10 0 20 q-8 -10 0 -20z" fill="#000" opacity=".05"/><path d="M0 40 q8 -8 0 -16 M70 40 q-8 -8 0 -16" stroke="#fff" stroke-width="2" fill="none" opacity=".25"/>
+    <circle cx="35" cy="44" r="2.5" fill="#fff" opacity=".35"/></pattern>
+</defs></svg>`;
+
+const VOL = (x, y, w, h, rx = 0) => R(x, y, w, h, 'url(#g-vol)', rx);
+const VOLH = (x, y, w, h, rx = 0) => R(x, y, w, h, 'url(#g-volh)', rx);
+const SH = (cx, cy, rx, ry = 10, o = 1) => E(cx, cy, rx, ry, 'url(#g-sh)', `opacity="${o}"`);
+const GRAIN = (x, y, w, h, rx = 0) => R(x, y, w, h, 'url(#p-grain)', rx);
+const GLASS = (x, y, w, h, rx = 0) => R(x, y, w, h, 'url(#g-glass)', rx);
+
 function stars(x, y, w, h, n = 10) {
   let s = '';
   for (let i = 0; i < n; i++) {
@@ -21,22 +55,47 @@ function stars(x, y, w, h, n = 10) {
   return `<g class="stars">${s}</g>`;
 }
 
+function cityView(w, h) {
+  // Blick nach draußen: Hügel, Häuser mit Fenstern, Baum
+  let s = E(w * 0.25, h * 0.95, w * 0.5, h * 0.28, '#7ccf7a') + E(w * 0.85, h, w * 0.4, h * 0.25, '#62b862');
+  const hs = [[0.08, 0.55, 0.16, '#a9bccd'], [0.28, 0.42, 0.18, '#c3d1de'], [0.5, 0.6, 0.14, '#b5c6d6'], [0.68, 0.48, 0.17, '#d0dbe5']];
+  for (const [fx, fy, fw, c] of hs) {
+    const x = w * fx, y = h * fy, ww = w * fw;
+    s += R(x, y, ww, h - y, c) + R(x, y, ww * 0.3, h - y, '#fff', 0, 'opacity=".18"');
+    for (let r = 0; r < 3; r++) for (let k = 0; k < 2; k++) s += R(x + ww * (0.18 + k * 0.42), y + 8 + r * 16, ww * 0.25, 8, '#fff8c4', 1, 'class="cwin"');
+  }
+  s += R(w * 0.86, h * 0.62, 6, h * 0.38, '#795548') + C(w * 0.87, h * 0.58, w * 0.1, '#4caf50') + C(w * 0.83, h * 0.64, w * 0.07, '#5cbf60');
+  return `<g class="city">${s}</g>`;
+}
+
+let winId = 0;
 function windowSVG(x, y, w, h, curtain = '#ff8fab', round = false) {
+  const cid = 'wclip' + ++winId;
   const inner = round
-    ? `${C(w / 2, h / 2, w / 2, '#fff')}${C(w / 2, h / 2, w / 2 - 10, '#9ee7ff', 'class="sky"')}
+    ? `${C(w / 2, h / 2, w / 2 + 4, '#d9e2ea')}${C(w / 2, h / 2, w / 2, '#fff')}${C(w / 2, h / 2, w / 2 - 10, 'url(#g-sky)', 'class="sky"')}
        ${C(w * 0.35, h * 0.38, 12, '#ffe066', 'class="daysun"')}${C(w * 0.6, h * 0.4, 11, '#fff8c4', 'class="moon"')}
        ${stars(w * 0.25, h * 0.25, w * 0.5, h * 0.5, 4)}
-       ${R(w / 2 - 3, 10, 6, h - 20, '#fff')}${R(10, h / 2 - 3, w - 20, 6, '#fff')}`
-    : `${R(-8, -8, w + 16, h + 16, '#fff', 14)}${R(0, 0, w, h, '#9ee7ff', 8, 'class="sky"')}
-       ${E(w * 0.3, h * 0.72, w * 0.4, h * 0.18, '#a7e08a', 'class="daysun"')}
-       ${C(w * 0.72, h * 0.28, 16, '#ffe066', 'class="daysun"')}${C(w * 0.7, h * 0.3, 14, '#fff8c4', 'class="moon"')}
-       ${E(w * 0.3, h * 0.3, 26, 10, '#fff', 'class="daysun"')}
-       ${stars(10, 10, w - 20, h * 0.6, 7)}
-       ${R(w / 2 - 4, 0, 8, h, '#fff')}${R(0, h / 2 - 4, w, 8, '#fff')}
-       ${P(`M-14 -14 Q${w * 0.25} ${h * 0.3} -6 ${h + 10} L-24 ${h + 10} L-24 -14Z`, curtain)}
-       ${P(`M${w + 14} -14 Q${w * 0.75} ${h * 0.3} ${w + 6} ${h + 10} L${w + 24} ${h + 10} L${w + 24} -14Z`, curtain)}
-       ${R(-30, -22, w + 60, 10, shadeHex(curtain), 5)}
-       ${R(-14, h + 8, w + 28, 12, '#f1e3d3', 5)}`;
+       ${R(w / 2 - 3, 10, 6, h - 20, '#fff')}${R(10, h / 2 - 3, w - 20, 6, '#fff')}
+       ${P(`M${w * 0.3} ${h * 0.18} L${w * 0.45} ${h * 0.12} L${w * 0.2} ${h * 0.55} L${w * 0.14} ${h * 0.45}Z`, '#fff', 'opacity=".35"')}`
+    : `<g class="daysun">${P(`M0 ${h + 14} L${w} ${h + 14} L${w + 140} ${FLOOR - y} L${-140} ${FLOOR - y}Z`, 'url(#g-beam)')}</g>
+       ${R(-12, -12, w + 24, h + 24, '#fff', 14)}${R(-12, -12, w + 24, h + 24, 'url(#g-vol)', 14)}${R(-4, -4, w + 8, h + 8, '#d9d2c6', 8)}
+       <clipPath id="${cid}"><rect width="${w}" height="${h}" rx="6"/></clipPath><g clip-path="url(#${cid})">
+       ${R(0, 0, w, h, 'url(#g-sky)', 6, 'class="sky"')}
+       ${C(w * 0.72, h * 0.26, 16, '#ffe066', 'class="daysun"')}${C(w * 0.72, h * 0.26, 26, '#ffe066', 'class="daysun" opacity=".25"')}
+       ${C(w * 0.7, h * 0.3, 14, '#fff8c4', 'class="moon"')}
+       <g class="daysun">${E(w * 0.28, h * 0.22, 24, 9, '#fff')}${E(w * 0.36, h * 0.18, 16, 9, '#fff')}</g>
+       ${stars(10, 10, w - 20, h * 0.45, 7)}
+       ${cityView(w, h)}</g>
+       ${P(`M${w * 0.06} 0 L${w * 0.3} 0 L0 ${h * 0.4} L0 ${h * 0.16}Z`, '#fff', 'opacity=".28"')}${P(`M${w * 0.6} ${h * 0.55} L${w * 0.75} ${h * 0.55} L${w * 0.55} ${h * 0.85} L${w * 0.52} ${h * 0.75}Z`, '#fff', 'opacity=".18"')}
+       ${R(w / 2 - 4, 0, 8, h, '#fff')}${R(0, h / 2 - 4, w, 8, '#fff')}${R(w / 2 + 2, 0, 2, h, '#000', 0, 'opacity=".08"')}
+       ${R(-20, h + 8, w + 40, 14, '#fff', 4)}${R(-20, h + 8, w + 40, 4, '#fff', 2)}${R(-20, h + 20, w + 40, 6, '#000', 0, 'opacity=".1"')}
+       ${curtain ? `
+       ${P(`M-16 -14 Q${w * 0.22} ${h * 0.3} ${w * 0.12} ${h * 0.62} Q${w * 0.02} ${h * 0.8} -8 ${h + 18} L-30 ${h + 18} L-30 -14Z`, curtain)}
+       ${P(`M-16 -14 Q${w * 0.22} ${h * 0.3} ${w * 0.12} ${h * 0.62} Q${w * 0.02} ${h * 0.8} -8 ${h + 18} L-30 ${h + 18} L-30 -14Z`, 'url(#g-folds)')}
+       ${P(`M${w + 16} -14 Q${w * 0.78} ${h * 0.3} ${w * 0.88} ${h * 0.62} Q${w * 0.98} ${h * 0.8} ${w + 8} ${h + 18} L${w + 30} ${h + 18} L${w + 30} -14Z`, curtain)}
+       ${P(`M${w + 16} -14 Q${w * 0.78} ${h * 0.3} ${w * 0.88} ${h * 0.62} Q${w * 0.98} ${h * 0.8} ${w + 8} ${h + 18} L${w + 30} ${h + 18} L${w + 30} -14Z`, 'url(#g-folds)')}
+       ${R(w * 0.02 - 6, h * 0.6, 26, 8, '#d4a017', 4)}${R(w * 0.86, h * 0.6, 26, 8, '#d4a017', 4)}
+       ${R(-40, -24, w + 80, 9, shadeHex(curtain), 4)}${C(-40, -19.5, 8, '#d4a017')}${C(w + 40, -19.5, 8, '#d4a017')}` : ''}`;
   return G(x, y, inner);
 }
 
@@ -47,54 +106,100 @@ function shadeHex(hex) {
 }
 
 function frame(x, y, w, h, color, art) {
-  return G(x, y, R(0, 0, w, h, color, 6) + R(8, 8, w - 16, h - 16, '#fffaf0', 3) + art);
+  return G(x, y, R(4, 6, w, h, '#000', 6, 'opacity=".12"') + R(0, 0, w, h, color, 6) + R(0, 0, w, h, 'url(#g-volh)', 6) + R(3, 3, w - 6, 3, '#fff', 2, 'opacity=".35"') +
+    R(8, 8, w - 16, h - 16, '#fffaf0', 3) + R(8, 8, w - 16, 3, '#000', 0, 'opacity=".12"') + art +
+    P(`M10 10 L${w * 0.4} 10 L10 ${h * 0.5}Z`, '#fff', 'opacity=".18"'));
 }
 
 function plant(x, y, s = 1) {
-  return G(x, y, `<g transform="scale(${s})">${E(0, -70, 22, 40, '#52b788')}${E(-24, -50, 18, 30, '#40916c', 'transform="rotate(-30 -24 -50)"')}${E(24, -50, 18, 30, '#40916c', 'transform="rotate(30 24 -50)"')}${P('M-24 -30 L24 -30 L18 0 L-18 0Z', '#e76f51')}</g>`);
+  const leaf = (lx, ly, r, c) => `<g transform="translate(${lx} ${ly}) rotate(${r})">${E(0, 0, 14, 30, c)}${P('M0 -28 L0 28', 'none', 'stroke="#b7e4c7" stroke-width="2" opacity=".7"')}${P('M0 -10 L-9 -18 M0 4 L-10 -2 M0 -10 L9 -18 M0 4 L10 -2', 'none', 'stroke="#b7e4c7" stroke-width="1.2" opacity=".6"')}</g>`;
+  return G(x, y, `<g transform="scale(${s})">${SH(0, 0, 34, 6)}
+    ${P('M0 -30 Q-6 -60 -24 -78 M0 -30 Q2 -70 4 -98 M0 -30 Q10 -60 28 -80', 'none', 'stroke="#2d6a4f" stroke-width="3"')}
+    ${leaf(-26, -80, -35, '#40916c')}${leaf(4, -98, 0, '#52b788')}${leaf(28, -82, 35, '#40916c')}${leaf(-22, -52, -70, '#2d6a4f')}${leaf(24, -54, 70, '#2d6a4f')}${leaf(0, -66, 10, '#74c69d')}
+    ${P('M-24 -32 L24 -32 L18 0 L-18 0Z', 'url(#g-pot)')}${R(-27, -38, 54, 9, '#e07a50', 4)}${R(-27, -38, 54, 3, '#ffb08a', 2)}${E(0, -34, 22, 3, '#5a3a22')}</g>`);
 }
 
 function hangLamp(x, len, color = '#ffca3a') {
-  return G(x, 0, R(-2, 0, 4, len, '#555') + P(`M-34 ${len + 34} Q0 ${len - 14} 34 ${len + 34}Z`, color) + E(0, len + 36, 12, 6, '#fff7c2'));
+  return G(x, 0, R(-1.5, 0, 3, len, '#444') + R(-6, len - 4, 12, 8, '#666', 2) +
+    C(0, len + 40, 60, 'url(#g-bulb)', 'opacity=".55"') +
+    P(`M-36 ${len + 34} Q0 ${len - 16} 36 ${len + 34}Z`, color) + P(`M-36 ${len + 34} Q0 ${len - 16} 36 ${len + 34}Z`, 'url(#g-volh)') +
+    P(`M-20 ${len + 14} Q-6 ${len + 2} 6 ${len + 2}`, 'none', 'stroke="#fff" stroke-width="3" opacity=".45" stroke-linecap="round"') +
+    E(0, len + 34, 36, 4, shadeHex(color)) + E(0, len + 37, 13, 6, '#fffbe0'));
 }
 
 function chair(x, y, color) {
   // y = Sitzhöhe
-  return G(x, y, R(6, -90, 14, 96, shadeHex(color), 6) + R(0, -4, 90, 16, color, 8) + R(10, 10, 10, 90, shadeHex(color), 4) + R(70, 10, 10, 90, shadeHex(color), 4));
+  const d = shadeHex(color);
+  return G(x, y, SH(45, FLOOR - y, 50, 6) +
+    R(6, -90, 14, 96, d, 6) + VOLH(6, -90, 14, 96, 6) + R(4, -94, 48, 14, d, 6) + R(4, -94, 48, 5, '#fff', 3, 'opacity=".2"') +
+    R(10, 10, 10, FLOOR - y - 10, d, 4) + R(70, 10, 10, FLOOR - y - 10, d, 4) + R(12, 10, 3, FLOOR - y - 12, '#fff', 1, 'opacity=".2"') +
+    R(0, -4, 90, 16, color, 8) + R(0, -4, 90, 16, 'url(#g-vol)', 8) + R(0, -4, 90, 16, 'url(#p-grain)', 8) + R(14, 50, 60, 6, d, 3));
 }
 
 function table(x, y, w, color) {
   // y = Tischplatte oben
-  return G(x, y, R(0, 0, w, 16, color, 8) + R(w / 2 - 9, 14, 18, FLOOR - y - 20, shadeHex(color), 4) + E(w / 2, FLOOR - y - 4, 50, 8, shadeHex(color)));
+  const d = shadeHex(color);
+  return G(x, y, SH(w / 2, FLOOR - y, w * 0.45, 8) +
+    R(w / 2 - 9, 14, 18, FLOOR - y - 20, d, 4) + VOLH(w / 2 - 9, 14, 18, FLOOR - y - 20, 4) + E(w / 2, FLOOR - y - 4, 50, 8, d) + E(w / 2, FLOOR - y - 7, 44, 4, '#fff', 'opacity=".2"') +
+    R(0, 0, w, 16, color, 8) + R(0, 0, w, 16, 'url(#g-vol)', 8) + R(4, 1, w - 8, 3, '#fff', 2, 'opacity=".55"') + R(6, 16, w - 12, 5, '#000', 2, 'opacity=".12"'));
 }
 
 function shelfUnit(x, y, w, h, color, levels) {
-  let s = R(0, 0, w, h, color, 10) + R(10, 10, w - 20, h - 20, shadeHex(color), 6);
-  for (const l of levels) s += R(4, l - y, w - 8, 14, '#fff', 4) + R(4, l - y + 12, w - 8, 6, '#e8e8e8');
+  let s = SH(w / 2, h, w * 0.55, 10) + R(0, 0, w, h, color, 10) + R(0, 0, w, h, 'url(#g-volh)', 10) + R(10, 10, w - 20, h - 20, shadeHex(color), 6) + R(10, 10, w - 20, 24, '#000', 6, 'opacity=".12"');
+  for (const l of levels) s += R(10, l - y - 22, w - 20, 22, '#000', 0, 'opacity=".08"') + R(4, l - y, w - 8, 14, '#fff', 4) + R(4, l - y, w - 8, 3, '#fff', 2) + R(4, l - y + 10, w - 8, 8, '#d7dbe0') + R(w * 0.1, l - y + 4, 30, 8, '#ffd166', 2) + R(w * 0.6, l - y + 4, 30, 8, '#ffd166', 2);
   return G(x, y, s);
 }
 
-// Bodenmuster
+// Bodenmuster (szenenspezifische Varianten)
 function patterns(id) {
   return `<defs>
-    <pattern id="${id}-stripes" width="60" height="10" patternUnits="userSpaceOnUse">${R(0, 0, 30, 10, '#fff', 0, 'opacity=".22"')}</pattern>
-    <pattern id="${id}-dots" width="50" height="50" patternUnits="userSpaceOnUse">${C(12, 12, 5, '#fff', 'opacity=".35"')}${C(37, 37, 5, '#fff', 'opacity=".35"')}</pattern>
-    <pattern id="${id}-tiles" width="48" height="48" patternUnits="userSpaceOnUse">${R(0, 0, 48, 48, 'none', 0, 'stroke="#fff" stroke-width="3" opacity=".6"')}</pattern>
-    <pattern id="${id}-checker" width="68" height="68" patternUnits="userSpaceOnUse">${R(0, 0, 34, 34, '#000', 0, 'opacity=".12"')}${R(34, 34, 34, 34, '#000', 0, 'opacity=".12"')}</pattern>
-    <pattern id="${id}-wood" width="160" height="34" patternUnits="userSpaceOnUse">${R(0, 32, 160, 2, '#000', 0, 'opacity=".15"')}${R(80, 0, 2, 32, '#000', 0, 'opacity=".12"')}</pattern>
+    <pattern id="${id}-stripes" width="60" height="10" patternUnits="userSpaceOnUse">${R(0, 0, 30, 10, '#fff', 0, 'opacity=".22"')}${R(29, 0, 2, 10, '#000', 0, 'opacity=".04"')}</pattern>
+    <pattern id="${id}-dots" width="50" height="50" patternUnits="userSpaceOnUse">${C(12, 12, 5, '#fff', 'opacity=".35"')}${C(37, 37, 5, '#fff', 'opacity=".35"')}${C(37, 12, 2, '#000', 'opacity=".05"')}</pattern>
+    <pattern id="${id}-tiles" width="48" height="48" patternUnits="userSpaceOnUse">${R(0, 0, 48, 48, 'none', 0, 'stroke="#fff" stroke-width="3" opacity=".6"')}${R(2, 2, 44, 10, '#fff', 2, 'opacity=".15"')}${R(46, 0, 2, 48, '#000', 0, 'opacity=".05"')}</pattern>
+    <pattern id="${id}-checker" width="68" height="68" patternUnits="userSpaceOnUse">${R(0, 0, 34, 34, '#000', 0, 'opacity=".12"')}${R(34, 34, 34, 34, '#000', 0, 'opacity=".12"')}${R(0, 0, 68, 2, '#fff', 0, 'opacity=".2"')}</pattern>
+    <pattern id="${id}-wood" width="200" height="34" patternUnits="userSpaceOnUse">${R(0, 32, 200, 2, '#000', 0, 'opacity=".2"')}${R(100, 0, 2, 32, '#000', 0, 'opacity=".16"')}<path d="M10 10 q40 -5 80 0 t100 2 M6 22 q50 4 100 0 t90 -2" stroke="#000" stroke-width="1.2" fill="none" opacity=".1"/></pattern>
     <pattern id="${id}-planks" width="120" height="44" patternUnits="userSpaceOnUse">${R(0, 0, 2, 44, '#000', 0, 'opacity=".12"')}${R(60, 22, 2, 22, '#000', 0, 'opacity=".1"')}</pattern>
   </defs>`;
 }
 
 function room(id, x, w, wall, pat, floor, fpat) {
-  return R(x, 36, w, FLOOR - 36, wall) + (pat ? R(x, 36, w, FLOOR - 36, `url(#${id}-${pat})`) : '') +
-    R(x, FLOOR, w, H - FLOOR, floor) + (fpat ? R(x, FLOOR, w, H - FLOOR, `url(#${id}-${fpat})`) : '') +
-    R(x, FLOOR - 14, w, 16, shadeHex(wall));
+  return R(x, 36, w, FLOOR - 36, wall) + (pat ? R(x, 36, w, FLOOR - 36, `url(#${id}-${pat})`) : R(x, 36, w, FLOOR - 36, 'url(#p-damask)')) +
+    R(x, 36, w, FLOOR - 36, 'url(#g-wall)') +
+    R(x, 40, w, 16, '#fff') + R(x, 54, w, 4, '#000', 0, 'opacity=".07"') + R(x, 40, w, 3, '#fff') +
+    R(x, FLOOR, w, H - FLOOR, floor) + (fpat ? R(x, FLOOR, w, H - FLOOR, `url(#${id}-${fpat})`) : R(x, FLOOR, w, H - FLOOR, 'url(#p-noise)')) +
+    R(x, FLOOR, w, H - FLOOR, 'url(#g-floor)') +
+    R(x, FLOOR - 18, w, 20, '#fffaf2') + R(x, FLOOR - 18, w, 3, '#fff') + R(x, FLOOR - 2, w, 3, '#000', 0, 'opacity=".12"') + R(x, FLOOR - 18, w, 20, shadeHex(wall), 0, 'opacity=".25"');
 }
 
 const svgWrap = (W, inner) => `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" overflow="visible">${inner}</svg>`;
 
 // ======================= HAUS =======================
+function roofBand(W, c1 = '#ff6b6b', c2 = '#e05252') {
+  let s = R(0, 0, W, 40, c1);
+  for (let x = 0; x < W; x += 36) s += P(`M${x} 26 q18 16 36 0 v14 h-36z`, c2) + P(`M${x + 4} 8 q14 10 28 0`, 'none', 'stroke="#fff" stroke-width="2" opacity=".25"');
+  return s + R(0, 34, W, 8, c2) + R(0, 40, W, 4, '#000', 0, 'opacity=".12"');
+}
+
+function socket(x, y) {
+  return G(x, y, R(0, 0, 32, 32, '#fdfdfd', 6) + R(0, 0, 32, 32, 'none', 6, 'stroke="#d8d8d8" stroke-width="1.5"') + C(16, 16, 10, '#f0f0f0') + C(12, 16, 2.4, '#888') + C(20, 16, 2.4, '#888'));
+}
+function lightSwitch(x, y) {
+  return G(x, y, R(0, 0, 32, 46, '#fdfdfd', 6) + R(0, 0, 32, 46, 'none', 6, 'stroke="#d8d8d8" stroke-width="1.5"') + R(9, 10, 14, 26, '#eee', 3) + R(9, 10, 14, 12, '#fff', 3) + R(9, 22, 14, 2, '#ccc'));
+}
+function rug(cx, cy, rx, ry, c1, c2, c3 = '#ffd166') {
+  let s = E(cx, cy + 4, rx + 6, ry + 4, '#000', 'opacity=".12"') + E(cx, cy, rx, ry, c1) + E(cx, cy, rx - 12, ry - 6, c2) + E(cx, cy, rx - 12, ry - 6, 'url(#p-noise)') +
+    E(cx, cy, rx * 0.7, ry * 0.6, 'none', `stroke="${c3}" stroke-width="3" stroke-dasharray="10 6"`) + E(cx, cy, rx * 0.4, ry * 0.32, c1, 'opacity=".6"');
+  for (let a = 0; a < 40; a++) {
+    const t = Math.PI * 0.08 + (a / 39) * Math.PI * 0.84;
+    const x = cx - Math.cos(t) * rx, y = cy + Math.sin(t) * ry;
+    s += R(x - 1, y, 2, 7, '#f6e2c0');
+  }
+  return s;
+}
+function book(x, y, w, h, c) {
+  return R(x, y - h, w, h, c, 2) + R(x, y - h, w, h, 'url(#g-volh)', 2) + R(x, y - h + 6, w, 3, '#fff', 0, 'opacity=".5"') + R(x, y - 12, w, 3, '#000', 0, 'opacity=".2"');
+}
+
 function hausBG() {
   const W = 3600;
   let s = patterns('haus');
@@ -102,74 +207,140 @@ function hausBG() {
   s += room('haus', 900, 900, '#c7f0c2', null, '#f1f1f1', 'checker');
   s += room('haus', 1800, 900, '#bde8f6', 'tiles', '#e0f4ff', 'tiles');
   s += room('haus', 2700, 900, '#e4c9f7', 'dots', '#ff99c8', null);
-  s += R(0, 0, W, 40, '#ff6b6b') + R(0, 34, W, 8, '#e05252');
-  for (const x of [900, 1800, 2700]) s += R(x - 14, 40, 28, FLOOR - 40, '#fff4e6') + R(x - 14, 40, 6, FLOOR - 40, '#000', 0, 'opacity=".06"');
-  // Wohnzimmer
+  s += roofBand(W);
+  for (const x of [900, 1800, 2700]) s += R(x - 14, 40, 28, FLOOR - 40, '#fff4e6') + R(x - 14, 40, 28, FLOOR - 40, 'url(#g-volh)') + R(x - 14, 40, 6, FLOOR - 40, '#000', 0, 'opacity=".06"');
+
+  // ---------- Wohnzimmer ----------
   s += windowSVG(330, 150, 170, 170, '#ff8fab');
-  s += frame(110, 170, 110, 90, '#8d5524', P('M18 74 L45 38 L62 58 L76 44 L94 74Z', '#52b788') + C(80, 28, 9, '#ffca3a'));
-  s += frame(650, 110, 90, 110, '#e76f51', C(45, 55, 26, '#ff8fab') + C(36, 50, 4, '#333') + C(54, 50, 4, '#333') + P('M36 64 Q45 72 54 64', 'none', 'stroke="#333" stroke-width="3"'));
-  s += E(330, 770, 280, 34, '#ff9f9f') + E(330, 770, 230, 24, '#ffc2c2');
-  // Sofa
-  s += G(80, 500, R(20, 0, 360, 120, '#4d96ff', 34) + R(10, 88, 380, 64, '#6ba8ff', 22) + R(0, 40, 54, 130, '#3a7fe0', 24) + R(346, 40, 54, 130, '#3a7fe0', 24) +
-    R(40, 168, 16, 32, '#2b5fab', 4) + R(344, 168, 16, 32, '#2b5fab', 4) + R(70, 20, 120, 70, '#5aa0ff', 26) + R(210, 20, 120, 70, '#5aa0ff', 26));
+  s += frame(100, 165, 130, 100, '#8d5524', R(14, 14, 102, 72, 'url(#g-sky)') + P('M14 86 L48 42 L68 64 L86 46 L116 86Z', '#5b8a5b') + P('M48 42 L55 52 L41 52Z M86 46 L92 54 L80 54Z', '#fff') + E(84, 82, 26, 5, '#4aa3df') + C(100, 28, 8, '#ffe066'));
+  s += frame(645, 105, 100, 120, '#e76f51', R(14, 14, 72, 92, '#ffe7ef') + C(36, 52, 11, '#e0a46e') + C(62, 52, 11, '#f8c9a0') + R(25, 62, 22, 34, '#4f8cff', 8) + R(51, 62, 22, 34, '#ff6fb5', 8) + P('M30 38 q6 -10 12 0 M56 38 q6 -10 12 0', '#7a4a26'));
+  s += lightSwitch(250, 330) + socket(560, 630);
+  s += rug(330, 768, 280, 34, '#e15f4f', '#ff8f7f');
+  // Sofa (Seitenansicht, Sitzfläche bei y=590)
+  s += SH(280, 702, 230, 12) + G(80, 500,
+    R(20, 0, 360, 120, '#4d96ff', 34) + VOL(20, 0, 360, 120, 34) +
+    R(36, 14, 160, 92, '#6ba8ff', 26) + R(204, 14, 160, 92, '#6ba8ff', 26) + VOL(36, 14, 160, 92, 26) + VOL(204, 14, 160, 92, 26) +
+    [76, 116, 156, 244, 284, 324].map((x) => C(x, 58, 3.5, '#2d67c4') + C(x - 1, 57, 1.4, '#a8d0ff')).join('') +
+    R(10, 88, 380, 64, '#3f86ef', 22) + R(22, 88, 176, 44, '#7cb5ff', 18) + R(202, 88, 176, 44, '#7cb5ff', 18) + VOL(22, 88, 176, 44, 18) + VOL(202, 88, 176, 44, 18) +
+    R(28, 90, 164, 5, '#fff', 3, 'opacity=".35"') + R(208, 90, 164, 5, '#fff', 3, 'opacity=".35"') +
+    R(0, 40, 54, 130, '#3a7fe0', 24) + R(346, 40, 54, 130, '#3a7fe0', 24) + VOLH(0, 40, 54, 130, 24) + VOLH(346, 40, 54, 130, 24) + R(8, 48, 12, 70, '#fff', 6, 'opacity=".2"') +
+    R(40, 168, 16, 32, '#5e3613', 4) + R(344, 168, 16, 32, '#5e3613', 4) + R(42, 168, 5, 30, '#a86b3c', 2) +
+    `<g transform="rotate(-12 90 60)">${R(52, 28, 70, 58, '#ffd166', 16)}${R(52, 28, 70, 58, 'none', 16, 'stroke="#e9a93a" stroke-width="3" stroke-dasharray="4 4"')}${VOL(52, 28, 70, 58, 16)}</g>` +
+    `<g transform="rotate(10 320 60)">${R(284, 30, 66, 56, '#fff', 16)}${[0, 1, 2].map((i) => R(284, 38 + i * 16, 66, 7, '#ff6fb5')).join('')}${VOL(284, 30, 66, 56, 16)}</g>` +
+    P('M344 40 q34 -8 58 6 l-4 124 q-26 6 -50 -6z', '#9b5de5') + P('M348 48 q26 -4 50 6 M350 80 q22 0 46 6 M352 112 q22 2 44 4', 'none', 'stroke="#7b3fc4" stroke-width="3"') +
+    Array.from({ length: 8 }, (_, i) => R(352 + i * 6, 162 + (i % 2) * 2, 2, 10, '#7b3fc4')).join(''));
   // Stehlampe
-  s += G(520, 300, R(-3, 30, 6, 370, '#555') + E(0, 398, 34, 8, '#555') + P('M-40 40 L40 40 L26 0 L-26 0Z', '#ffca3a'));
-  // TV-Möbel + Regal
-  s += G(600, 590, R(0, 0, 270, 110, '#8d5524', 10) + R(14, 18, 112, 72, '#a86b3c', 8) + R(144, 18, 112, 72, '#a86b3c', 8) + C(116, 54, 5, '#ffd166') + C(154, 54, 5, '#ffd166'));
-  s += G(600, 300, R(0, 0, 270, 14, '#8d5524', 6) + P('M20 14 L36 14 L20 40Z', '#6b3f1d') + P('M250 14 L234 14 L250 40Z', '#6b3f1d'));
-  // Küche
+  s += SH(520, 702, 40, 6) + G(520, 300, C(0, 40, 90, 'url(#g-bulb)', 'opacity=".45"') + R(-3, 40, 6, 360, 'url(#g-metal)') + E(0, 398, 34, 8, '#555') + E(0, 396, 30, 5, '#777') +
+    P('M-42 44 L42 44 L28 0 L-28 0Z', '#ffca3a') + P('M-42 44 L42 44 L28 0 L-28 0Z', 'url(#g-volh)') + R(-42, 40, 84, 5, '#e9a93a', 2) + P('M-20 6 L-30 38', 'none', 'stroke="#fff" stroke-width="3" opacity=".4"'));
+  // Regal
+  s += G(600, 300, R(0, 0, 270, 14, '#8d5524', 6) + GRAIN(0, 0, 270, 14, 6) + R(0, 0, 270, 3, '#c68b59', 2) + P('M20 14 L40 14 L20 44Z', '#6b3f1d') + P('M250 14 L230 14 L250 44Z', '#6b3f1d') +
+    book(136, 0, 16, 56, '#e63946') + book(154, 0, 14, 64, '#457b9d') + book(170, 0, 15, 50, '#2a9d8f') + E(200, -2, 12, 3, '#000', 'opacity=".1"'));
+  // TV-Möbel
+  s += SH(735, 704, 160, 10) + G(600, 590, R(0, 0, 270, 110, '#8d5524', 10) + GRAIN(0, 0, 270, 110, 10) + VOL(0, 0, 270, 110, 10) + R(0, 0, 270, 8, '#c68b59', 6) +
+    R(14, 18, 112, 72, '#a86b3c', 8) + R(144, 18, 112, 72, '#a86b3c', 8) + GRAIN(14, 18, 112, 72, 8) + GRAIN(144, 18, 112, 72, 8) +
+    R(14, 18, 112, 4, '#000', 0, 'opacity=".12"') + R(144, 18, 112, 4, '#000', 0, 'opacity=".12"') +
+    R(110, 44, 6, 22, 'url(#g-metal)', 3) + R(154, 44, 6, 22, 'url(#g-metal)', 3) + R(16, 108, 14, 8, '#4a2c14') + R(240, 108, 14, 8, '#4a2c14'));
+
+  // ---------- Küche ----------
+  s += G(940, 330, R(0, 0, 520, 190, '#fdfdfd') + R(0, 0, 520, 190, 'url(#p-tiles)') + R(0, 0, 520, 190, 'url(#g-wall)'));
   s += hangLamp(1350, 60);
   s += windowSVG(1270, 120, 150, 130, '#ffca3a');
-  s += G(960, 190, R(0, 0, 250, 130, '#ffffff', 12) + R(10, 10, 110, 110, '#fde2e4', 8) + R(130, 10, 110, 110, '#fde2e4', 8) + R(105, 55, 6, 30, '#999', 3) + R(139, 55, 6, 30, '#999', 3));
-  s += G(1240, 300, R(0, 0, 210, 12, '#e9c46a', 6));
-  s += G(940, 520, R(0, 0, 280, 16, '#ff9f1c', 6) + R(6, 16, 268, 164, '#ffe5b4') + R(20, 34, 112, 130, '#fff3dc', 8) + R(148, 34, 112, 130, '#fff3dc', 8) +
-    C(120, 98, 6, '#c68b59') + C(160, 98, 6, '#c68b59') + R(40, -4, 100, 8, '#bbb', 4) + P('M110 -4 L110 -50 Q110 -60 120 -60 L140 -60', 'none', 'stroke="#999" stroke-width="8" stroke-linecap="round"'));
-  // Bad
+  s += G(1480, 190, C(0, 0, 30, '#fff') + C(0, 0, 30, 'none', 'stroke="#2a9d8f" stroke-width="5"') + R(-2, -20, 4, 22, '#333', 2) + R(-2, -2, 18, 4, '#333', 2) + C(0, 0, 3, '#e63946'));
+  s += G(960, 190, SH(125, 136, 120, 6, 0.6) + R(0, 0, 250, 130, '#ffffff', 12) + VOL(0, 0, 250, 130, 12) + R(10, 10, 110, 110, '#fde2e4', 8) + R(130, 10, 110, 110, '#fde2e4', 8) +
+    R(10, 10, 110, 110, 'url(#g-vol)', 8) + R(130, 10, 110, 110, 'url(#g-vol)', 8) + R(20, 20, 90, 90, 'none', 6, 'stroke="#f5c2c9" stroke-width="2"') + R(140, 20, 90, 90, 'none', 6, 'stroke="#f5c2c9" stroke-width="2"') +
+    R(103, 50, 7, 30, 'url(#g-metal)', 3) + R(140, 50, 7, 30, 'url(#g-metal)', 3));
+  s += G(1240, 300, R(0, 0, 210, 12, '#e9c46a', 6) + GRAIN(0, 0, 210, 12, 6) + R(0, 0, 210, 3, '#fff', 2, 'opacity=".4"') + P('M14 12 L28 12 L14 32Z M196 12 L182 12 L196 32Z', '#b8913a'));
+  s += SH(1080, 704, 150, 8) + G(940, 520, R(0, 0, 280, 18, '#ff9f1c', 6) + R(0, 0, 280, 5, '#ffc46b', 3) + R(0, 14, 280, 4, '#c66f00') +
+    R(6, 18, 268, 162, '#ffe5b4') + VOL(6, 18, 268, 162) + R(20, 36, 112, 126, '#fff3dc', 8) + R(148, 36, 112, 126, '#fff3dc', 8) + VOL(20, 36, 112, 126, 8) + VOL(148, 36, 112, 126, 8) +
+    R(104, 80, 8, 36, 'url(#g-metal)', 4) + R(168, 80, 8, 36, 'url(#g-metal)', 4) + R(6, 172, 268, 8, '#000', 0, 'opacity=".12"') +
+    R(36, -4, 108, 10, '#c9d1d9', 5) + E(90, 0, 50, 4, '#9aa5b1') + P('M110 -4 L110 -50 Q110 -62 122 -62 L140 -62', 'none', 'stroke="url(#g-metal)" stroke-width="8" stroke-linecap="round"') +
+    P('M110 -4 L110 -50 Q110 -62 122 -62 L140 -62', 'none', 'stroke="#aab4be" stroke-width="8" stroke-linecap="round"') + R(100, -20, 20, 8, '#aab4be', 4) + C(140, -62, 3, '#4cc9f0') +
+    R(230, 22, 30, 60, '#e63946', 4) + [0, 1, 2].map((i) => R(230, 30 + i * 16, 30, 4, '#fff')).join(''));
+  // ---------- Bad ----------
   s += windowSVG(1960, 150, 120, 120, null, true);
-  s += G(1850, 560, R(0, 0, 400, 50, '#d9f2ff', 24) + E(200, 18, 180, 14, '#8fd3ff'));
-  s += G(2480, 290, R(0, 0, 150, 190, '#ffffff', 75) + R(10, 10, 130, 170, '#d8f3ff', 65) + P('M40 40 L70 30 L40 110Z', '#fff', 'opacity=".6"'));
-  s += G(2470, 560, R(0, 0, 170, 22, '#ffffff', 10) + P('M30 22 L140 22 L110 140 L60 140Z', '#f5f5f5') + R(78, -40, 14, 42, '#aaa', 6) + R(78, -40, 40, 10, '#aaa', 5));
-  s += G(2420, 420, R(0, 0, 50, 8, '#999', 4) + R(4, 8, 40, 90, '#ff99c8', 6));
-  // Schlafzimmer
+  s += G(1850, 560, R(0, 0, 400, 50, '#d9f2ff', 24) + E(200, 18, 180, 14, '#8fd3ff') + E(200, 14, 160, 8, '#c4ecff'));
+  s += G(2480, 290, R(4, 6, 150, 190, '#000', 75, 'opacity=".1"') + R(0, 0, 150, 190, '#ffffff', 75) + R(0, 0, 150, 190, 'url(#g-volh)', 75) + R(10, 10, 130, 170, '#d8f3ff', 65) + R(10, 10, 130, 170, 'url(#g-glass)', 65) + P('M40 40 L70 30 L40 110Z', '#fff', 'opacity=".55"'));
+  s += SH(2555, 704, 70, 7) + G(2470, 560, R(0, 0, 170, 22, '#ffffff', 10) + R(0, 0, 170, 22, 'url(#g-vol)', 10) + E(85, 6, 60, 6, '#d9eef7') + P('M30 22 L140 22 L110 140 L60 140Z', '#f5f5f5') + P('M30 22 L140 22 L110 140 L60 140Z', 'url(#g-volh)') +
+    R(78, -40, 14, 42, 'url(#g-metal)', 6) + R(78, -40, 40, 10, '#aab4be', 5) + C(85, -44, 6, '#e63946') + C(101, -44, 6, '#4f8cff'));
+  s += G(2420, 420, R(0, 0, 50, 8, 'url(#g-metal)', 4) + R(4, 8, 40, 90, '#ff99c8', 6) + VOLH(4, 8, 40, 90, 6) + R(4, 74, 40, 6, '#fff', 0, 'opacity=".6"') + R(4, 84, 40, 3, '#fff', 0, 'opacity=".6"'));
+  s += G(2300, 735, R(0, 0, 240, 50, '#7ad6c8', 20) + R(8, 8, 224, 34, 'none', 14, 'stroke="#fff" stroke-width="3" stroke-dasharray="6 6"') + R(0, 0, 240, 50, 'url(#p-noise)', 20));
+  s += plant(2680, 700, 0.9);
+  // ---------- Schlafzimmer ----------
   s += windowSVG(2800, 150, 170, 170, '#9b5de5');
-  s += frame(3060, 160, 100, 120, '#ffca3a', P('M50 30 L58 52 L82 52 L62 66 L70 90 L50 76 L30 90 L38 66 L18 52 L42 52Z', '#ffca3a'));
-  s += E(3000, 770, 260, 32, '#c77dff') + E(3000, 770, 210, 22, '#e0aaff');
-  s += G(2740, 480, R(0, 0, 54, 220, '#9b5de5', 22) + R(420, 70, 40, 150, '#9b5de5', 18) + R(20, 150, 430, 50, '#7b3fc4', 10) +
-    R(40, 108, 400, 52, '#ffffff', 18) + E(116, 98, 58, 24, '#fff') + E(116, 98, 58, 24, 'none', 'stroke="#eee" stroke-width="3"') + R(40, 190, 20, 30, '#5a2a9a', 4) + R(400, 190, 20, 30, '#5a2a9a', 4));
-  s += G(3215, 600, R(0, 0, 90, 100, '#c77dff', 10) + R(10, 36, 70, 6, '#fff', 3) + C(45, 66, 5, '#fff'));
+  s += frame(3060, 160, 100, 120, '#ffca3a', R(14, 14, 72, 92, '#1d2559') + P('M50 30 L58 52 L82 52 L62 66 L70 90 L50 76 L30 90 L38 66 L18 52 L42 52Z', '#ffca3a') + C(24, 24, 2, '#fff') + C(76, 30, 2, '#fff') + C(70, 100, 2, '#fff'));
+  // Lichterkette
+  s += P('M2720 70 Q2900 120 3080 70 Q3260 120 3440 70', 'none', 'stroke="#6b5b7a" stroke-width="2"');
+  for (let i = 0; i < 14; i++) {
+    const t = i / 13, x = 2720 + t * 720, yy = 70 + Math.sin((t * 2) * Math.PI) ** 2 * 26 + 6;
+    s += C(x, yy, 6, ['#ffd166', '#ff6fb5', '#4cc9f0', '#8ac926'][i % 4]) + C(x - 2, yy - 2, 2, '#fff', 'opacity=".7"');
+  }
+  s += lightSwitch(3010, 330) + socket(3180, 640);
+  s += rug(3000, 770, 260, 32, '#c77dff', '#e0aaff', '#fff');
+  s += SH(2960, 704, 240, 12) + G(2740, 480,
+    R(0, 0, 54, 220, '#9b5de5', 22) + R(0, 0, 54, 220, 'url(#g-volh)', 22) + [40, 80, 120].map((y) => C(27, y, 4, '#7b3fc4') + C(26, y - 1, 1.5, '#d6b6ff')).join('') +
+    R(420, 70, 40, 150, '#9b5de5', 18) + R(420, 70, 40, 150, 'url(#g-volh)', 18) +
+    R(20, 150, 430, 50, '#7b3fc4', 10) + GRAIN(20, 150, 430, 50, 10) + VOL(20, 150, 430, 50, 10) +
+    R(40, 108, 400, 52, '#ffffff', 18) + VOL(40, 108, 400, 52, 18) + R(40, 140, 400, 6, '#e8e0f5') +
+    E(116, 98, 60, 25, '#fff') + E(116, 98, 60, 25, 'url(#g-vol)') + P('M66 98 q50 -8 100 0', 'none', 'stroke="#e6dff2" stroke-width="2"') + C(84, 92, 4, '#ff6fb5', 'opacity=".5"') + C(130, 104, 4, '#ff6fb5', 'opacity=".5"') +
+    R(40, 190, 20, 30, '#5a2a9a', 4) + R(400, 190, 20, 30, '#5a2a9a', 4));
+  s += SH(3260, 704, 50, 6) + G(3215, 600, R(0, 0, 90, 100, '#c77dff', 10) + GRAIN(0, 0, 90, 100, 10) + VOL(0, 0, 90, 100, 10) + R(0, 0, 90, 6, '#e0aaff', 4) +
+    R(8, 16, 74, 34, '#b565f0', 6) + R(8, 56, 74, 36, '#b565f0', 6) + C(45, 33, 4, '#ffd166') + C(45, 74, 4, '#ffd166'));
   return svgWrap(W, s);
 }
 
 function fridgeSVG() {
   const w = 220, h = 410;
   return svgWrap0(w, h,
-    R(0, 0, w, h, '#dbe9ff', 20) + R(12, 12, w - 24, h - 24, '#ffffff', 12) + R(12, 112, w - 24, 8, '#cfe3ff', 3) + R(12, 232, w - 24, 8, '#cfe3ff', 3) +
-    E(110, 24, 40, 8, '#fffbe6') +
-    `<g class="dclosed">${R(0, 0, w, h, '#8ecae6', 20)}${R(0, 128, w, 6, '#6aaecc')}${R(188, 40, 12, 60, '#fff', 6)}${R(188, 160, 12, 90, '#fff', 6)}
-      ${C(50, 60, 12, '#ff595e')}${C(80, 74, 10, '#ffca3a')}${R(36, 190, 60, 74, '#fff', 4, 'transform="rotate(-6 66 227)"')}${C(66, 222, 14, '#ffb703')}${P('M50 250 L82 250', 'none', 'stroke="#219ebc" stroke-width="5"')}</g>
-     <g class="dopen">${P(`M0 0 L-64 18 L-64 ${h - 18} L0 ${h}Z`, '#8ecae6')}${R(-44, 60, 30, 10, '#fff', 4)}${R(-44, 180, 30, 10, '#fff', 4)}</g>`);
+    SH(110, h + 2, 120, 8) + R(0, 0, w, h, '#dbe9ff', 20) + R(12, 12, w - 24, h - 24, '#ffffff', 12) + R(12, 12, w - 24, h - 24, 'url(#g-vol)', 12) +
+    R(12, 112, w - 24, 8, '#cfe3ff', 3) + R(12, 232, w - 24, 8, '#cfe3ff', 3) + R(12, 112, w - 24, 2, '#fff', 1) + R(12, 232, w - 24, 2, '#fff', 1) +
+    R(20, 350, w - 40, 40, '#e6f0ff', 8) + R(20, 350, w - 40, 40, 'url(#g-glass)', 8) +
+    E(110, 24, 40, 8, '#fffbe6') + C(110, 60, 70, 'url(#g-bulb)', 'opacity=".5"') +
+    `<g class="dclosed">${R(0, 0, w, h, '#8ecae6', 20)}${R(0, 0, w, h, 'url(#g-volh)', 20)}${R(0, 128, w, 6, '#6aaecc')}${R(0, 134, w, 3, '#fff', 0, 'opacity=".35"')}
+      ${R(186, 36, 14, 66, 'url(#g-metal)', 7)}${R(186, 156, 14, 100, 'url(#g-metal)', 7)}
+      ${P('M14 14 L60 14 L14 120Z', '#fff', 'opacity=".18"')}${P('M14 150 L50 150 L14 260Z', '#fff', 'opacity=".14"')}
+      ${C(50, 60, 12, '#ff595e')}${C(47, 57, 4, '#fff', 'opacity=".5"')}${C(80, 74, 10, '#ffca3a')}${R(110, 50, 40, 30, '#8ac926', 4, 'transform="rotate(8 130 65)"')}
+      <g transform="rotate(-6 66 227)">${R(36, 190, 64, 78, '#fff', 3)}${C(66, 214, 13, '#ffb703')}${P('M46 256 L56 240 L64 252 L74 236 L88 256Z', '#52b788')}${R(36, 190, 64, 78, 'none', 3, 'stroke="#ddd"')}${C(68, 192, 5, '#e63946')}</g>
+      ${R(20, 390, 180, 8, '#6aaecc', 4)}</g>
+     <g class="dopen">${P(`M0 0 L-64 18 L-64 ${h - 18} L0 ${h}Z`, '#8ecae6')}${P(`M0 0 L-64 18 L-64 ${h - 18} L0 ${h}Z`, 'url(#g-vol)')}
+       ${R(-50, 50, 36, 10, '#fff', 4)}${R(-50, 170, 36, 10, '#fff', 4)}${R(-50, 290, 36, 10, '#fff', 4)}${R(-46, 36, 28, 14, '#ffd166', 3)}${R(-46, 156, 28, 14, '#e63946', 3)}</g>`);
 }
 
 function wardrobeSVG() {
   const w = 240, h = 450;
+  const door = (x, c) => R(x, 0, w / 2, h, c, 16) + R(x, 0, w / 2, h, 'url(#p-grain)', 16) + R(x, 0, w / 2, h, 'url(#g-volh)', 16) +
+    R(x + 18, 28, w / 2 - 36, 154, '#000', 12, 'opacity=".08"') + R(x + 20, 30, w / 2 - 40, 150, shade2(c), 12) + R(x + 20, 30, w / 2 - 40, 150, 'url(#g-vol)', 12) +
+    R(x + 18, 248, w / 2 - 36, 174, '#000', 12, 'opacity=".08"') + R(x + 20, 250, w / 2 - 40, 170, shade2(c), 12) + R(x + 20, 250, w / 2 - 40, 170, 'url(#g-vol)', 12);
   return svgWrap0(w, h,
-    R(0, 0, w, h, '#a06cd5', 16) + R(12, 12, w - 24, h - 24, '#f3e8ff', 10) + R(12, 162, w - 24, 8, '#c8a2ff', 3) + R(12, 302, w - 24, 8, '#c8a2ff', 3) +
-    R(20, 40, w - 40, 6, '#999', 3) +
-    `<g class="dclosed">${R(0, 0, w / 2, h, '#c77dff', 16)}${R(w / 2, 0, w / 2, h, '#b565f0', 16)}${C(w / 2 - 16, h / 2, 7, '#ffd166')}${C(w / 2 + 16, h / 2, 7, '#ffd166')}
-      ${R(20, 30, w / 2 - 40, 150, '#d9a4ff', 12)}${R(w / 2 + 20, 30, w / 2 - 40, 150, '#c681ff', 12)}${R(20, 250, w / 2 - 40, 170, '#d9a4ff', 12)}${R(w / 2 + 20, 250, w / 2 - 40, 170, '#c681ff', 12)}</g>
-     <g class="dopen">${P(`M0 0 L-56 20 L-56 ${h - 20} L0 ${h}Z`, '#c77dff')}${P(`M${w} 0 L${w + 56} 20 L${w + 56} ${h - 20} L${w} ${h}Z`, '#b565f0')}</g>`);
+    SH(120, h + 2, 130, 8) + R(0, 0, w, h, '#a06cd5', 16) + R(12, 12, w - 24, h - 24, '#f3e8ff', 10) + R(12, 12, w - 24, 30, '#000', 10, 'opacity=".08"') +
+    R(12, 162, w - 24, 8, '#c8a2ff', 3) + R(12, 302, w - 24, 8, '#c8a2ff', 3) + R(20, 40, w - 40, 6, 'url(#g-metal)', 3) +
+    [50, 90, 130, 170].map((x) => P(`M${x} 46 q-14 10 -18 22 h36 q-4 -12 -18 -22`, 'none', 'stroke="#999" stroke-width="2"')).join('') +
+    `<g class="dclosed">${door(0, '#c77dff')}${door(w / 2, '#b565f0')}${R(w / 2 - 22, h / 2 - 20, 6, 40, 'url(#g-metal)', 3)}${R(w / 2 + 16, h / 2 - 20, 6, 40, 'url(#g-metal)', 3)}
+      ${R(-4, -10, w + 8, 16, '#8f55c9', 6)}${R(-4, -10, w + 8, 4, '#fff', 3, 'opacity=".25"')}</g>
+     <g class="dopen">${P(`M0 0 L-56 20 L-56 ${h - 20} L0 ${h}Z`, '#c77dff')}${P(`M0 0 L-56 20 L-56 ${h - 20} L0 ${h}Z`, 'url(#g-vol)')}
+       ${P(`M${w} 0 L${w + 56} 20 L${w + 56} ${h - 20} L${w} ${h}Z`, '#b565f0')}${P(`M${w} 0 L${w + 56} 20 L${w + 56} ${h - 20} L${w} ${h}Z`, 'url(#g-vol)')}
+       ${R(-36, 200, 8, 50, 'url(#g-metal)', 4)}${R(w + 28, 200, 8, 50, 'url(#g-metal)', 4)}</g>`);
+}
+
+function shade2(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  const f = (v) => Math.min(255, Math.round(v + (255 - v) * 0.18));
+  return '#' + ((1 << 24) + (f((n >> 16) & 255) << 16) + (f((n >> 8) & 255) << 8) + f(n & 255)).toString(16).slice(1);
 }
 
 function toiletSVG(seat = '#f4f4f4') {
-  return svgWrap0(130, 180, R(20, 0, 90, 80, '#fff', 12) + R(84, 12, 16, 8, '#aaa', 4) + E(65, 96, 58, 14, seat) + E(65, 92, 50, 10, '#e0e0e0') +
-    P('M14 100 Q20 150 44 160 L86 160 Q110 150 116 100Z', '#fff') + R(40, 158, 50, 22, '#f4f4f4', 6) +
-    `<g class="swirl">${E(65, 92, 34, 6, '#4cc9f0')}</g>`);
+  return svgWrap0(130, 180, SH(65, 180, 60, 6) +
+    R(20, 0, 90, 80, '#fff', 12) + R(20, 0, 90, 80, 'url(#g-volh)', 12) + R(16, -4, 98, 12, '#f7f7f7', 6) + R(16, -4, 98, 3, '#fff', 2) + R(84, 14, 18, 8, 'url(#g-metal)', 4) +
+    E(65, 96, 58, 14, seat) + E(65, 96, 58, 14, 'url(#g-vol)') + E(65, 92, 50, 10, '#e3eef3') + E(65, 92, 40, 6, '#c9e6f2') +
+    P('M14 100 Q20 150 44 160 L86 160 Q110 150 116 100Z', '#fff') + P('M14 100 Q20 150 44 160 L86 160 Q110 150 116 100Z', 'url(#g-volh)') +
+    P('M26 108 Q32 140 50 150', 'none', 'stroke="#fff" stroke-width="4" opacity=".9"') + R(40, 158, 50, 22, '#f4f4f4', 6) + R(40, 158, 50, 22, 'url(#g-volh)', 6) +
+    `<g class="swirl">${E(65, 92, 34, 6, '#4cc9f0')}${E(58, 90, 12, 2.5, '#fff', 'opacity=".7"')}</g>`);
 }
 
 function tubFront() {
   return svgWrap0(400, 112,
-    R(0, 0, 400, 92, '#ffffff', 40) + R(16, 12, 368, 10, '#e9f6ff', 5) + R(40, 88, 30, 24, '#ffd166', 8) + R(330, 88, 30, 24, '#ffd166', 8) +
-    C(60, 2, 16, '#fff') + C(90, -4, 20, '#fff') + C(126, 0, 14, '#fff') + C(300, 0, 16, '#fff') + C(330, -6, 20, '#fff') + C(355, 2, 13, '#fff'));
+    R(0, 0, 400, 92, '#ffffff', 40) + R(0, 0, 400, 92, 'url(#g-vol)', 40) + R(16, 12, 368, 10, '#e9f6ff', 5) + P('M40 30 Q200 44 360 30', 'none', 'stroke="#fff" stroke-width="5" opacity=".9" stroke-linecap="round"') +
+    R(40, 86, 30, 26, '#ffd166', 8) + R(330, 86, 30, 26, '#ffd166', 8) + R(40, 86, 30, 26, 'url(#g-volh)', 8) + R(330, 86, 30, 26, 'url(#g-volh)', 8) +
+    [[60, 2, 16], [90, -4, 20], [126, 0, 14], [300, 0, 16], [330, -6, 20], [355, 2, 13], [110, 8, 9], [270, 6, 10]].map(([x, y, r]) => C(x, y, r, '#fff') + C(x - r * 0.35, y - r * 0.35, r * 0.3, '#e3f6ff')).join(''));
 }
 
 function svgWrap0(w, h, inner) {
@@ -178,24 +349,31 @@ function svgWrap0(w, h, inner) {
 
 const hausProps = [
   { id: 'tv', kind: 'toggle', x: 620, y: 430, w: 230, h: 160, sound: 'tv',
-    svg: svgWrap0(230, 160, R(0, 0, 230, 150, '#2b2d42', 14) + R(12, 12, 206, 126, '#111', 8) +
-      `<g class="tvon">${R(12, 12, 206, 126, '#ff595e', 8, 'class="tvcol"')}${C(70, 75, 26, '#fff', 'class="tvball"')}${P('M120 120 L160 50 L200 120Z', '#fff', 'opacity=".7"')}</g>` +
-      R(95, 150, 40, 10, '#2b2d42', 3)) },
+    svg: svgWrap0(230, 160, R(95, 146, 40, 12, '#2b2d42', 3) + R(70, 154, 90, 6, '#1e1f2e', 3) + R(0, 0, 230, 150, '#1e1f2e', 12) + R(0, 0, 230, 4, '#4a4d6a', 2) + R(8, 8, 214, 134, '#0b0d14', 6) +
+      R(8, 8, 214, 134, 'url(#g-glass)', 6) + C(214, 142, 2.5, '#e63946') +
+      `<g class="tvon">${R(8, 8, 214, 134, '#ff595e', 6, 'class="tvcol"')}${E(115, 130, 100, 20, '#2b9348', 'opacity=".7"')}${C(70, 75, 26, '#fff', 'class="tvball"')}${P('M120 130 L160 50 L200 130Z', '#fff', 'opacity=".7"')}${R(8, 8, 214, 134, 'url(#g-glass)', 6)}</g>`) },
   { id: 'radio', kind: 'toggle', x: 620, y: 222, w: 110, h: 78, sound: 'music',
-    svg: svgWrap0(110, 78, R(0, 10, 110, 68, '#e76f51', 14) + C(34, 46, 20, '#333') + C(34, 46, 12, '#555') + R(64, 30, 34, 8, '#fff', 4) + R(64, 46, 34, 8, '#fff', 4) + C(90, 66, 5, '#ffca3a', 'class="led"') + P('M20 10 L50 -14', 'none', 'stroke="#555" stroke-width="4" stroke-linecap="round"')) },
+    svg: svgWrap0(110, 78, P('M20 12 L50 -16', 'none', 'stroke="url(#g-metal)" stroke-width="4" stroke-linecap="round"') + P('M20 12 L50 -16', 'none', 'stroke="#999" stroke-width="3" stroke-linecap="round"') + C(50, -16, 3, '#999') +
+      R(0, 10, 110, 68, '#e76f51', 14) + R(0, 10, 110, 68, 'url(#g-vol)', 14) + R(0, 10, 110, 12, '#f4a582', 12) +
+      C(34, 46, 21, '#3a3a3a') + Array.from({ length: 16 }, (_, i) => C(24 + (i % 4) * 7, 36 + Math.floor(i / 4) * 7, 2, '#777')).join('') +
+      R(62, 30, 38, 18, '#fff3d6', 4) + R(66, 34, 30, 2, '#c66', 1) + R(78, 32, 2, 14, '#e63946') + C(70, 62, 6, 'url(#g-metal)') + C(90, 62, 6, 'url(#g-metal)') + C(100, 26, 3.5, '#ffca3a', 'class="led"')) },
   { id: 'stove', kind: 'toggle', x: 1220, y: 470, w: 220, h: 230, sound: 'sizzle',
-    svg: svgWrap0(220, 230, R(0, 50, 220, 180, '#f1f1f1', 10) + R(0, 44, 220, 12, '#cfcfcf', 4) + E(60, 50, 36, 6, '#333') + E(160, 50, 36, 6, '#333') +
+    svg: svgWrap0(220, 230, R(0, 50, 220, 180, '#f1f1f1', 10) + R(0, 50, 220, 180, 'url(#g-volh)', 10) + R(0, 44, 220, 12, '#cfcfcf', 4) + R(0, 44, 220, 3, '#fff', 2) +
+      E(60, 50, 36, 6, '#2b2b2b') + E(160, 50, 36, 6, '#2b2b2b') + E(60, 49, 24, 3, '#555') + E(160, 49, 24, 3, '#555') +
       `<g class="flame">${E(60, 46, 30, 6, '#ff9f1c')}${E(160, 46, 30, 6, '#ff9f1c')}${E(60, 46, 18, 4, '#ffd60a')}${E(160, 46, 18, 4, '#ffd60a')}</g>` +
-      C(40, 76, 8, '#555') + C(80, 76, 8, '#555') + C(140, 76, 8, '#555') + C(180, 76, 8, '#555') + R(40, 98, 140, 8, '#999', 4) +
-      R(30, 116, 160, 92, '#333', 12) + R(30, 116, 160, 92, '#ff9f1c', 12, 'class="ovenglow"')) },
+      R(10, 62, 200, 28, '#e3e3e3', 6) + [40, 80, 140, 180].map((x) => C(x, 76, 9, '#444') + C(x, 76, 9, 'url(#g-vol)') + R(x - 1.5, 68, 3, 8, '#bbb', 1)).join('') + R(103, 72, 14, 8, '#222', 3) + R(105, 74, 4, 4, '#4cc9f0') +
+      R(36, 100, 148, 10, 'url(#g-metal)', 5) +
+      R(30, 116, 160, 92, '#2b2b2b', 12) + R(38, 124, 144, 76, '#3a3a3a', 8) + R(30, 116, 160, 92, '#ff9f1c', 12, 'class="ovenglow"') + R(38, 124, 144, 76, 'url(#g-glass)', 8) + R(50, 168, 120, 3, '#777', 1) + R(10, 216, 200, 8, '#d0d0d0', 3)) },
   { id: 'fridge', kind: 'container', x: 1520, y: 290, w: 220, h: 410, sound: 'door', svg: fridgeSVG(),
     region: { x1: 1530, x2: 1730, y1: 300, y2: 692 } },
   { id: 'shower', kind: 'toggle', x: 2150, y: 190, w: 110, h: 140, sound: 'splash',
-    svg: svgWrap0(110, 140, R(80, 0, 12, 110, '#aaa', 6) + R(40, 98, 52, 12, '#aaa', 6) + P('M20 112 L70 112 L60 130 L30 130Z', '#bbb') +
-      `<g class="water">${[28, 38, 48, 58].map((x) => `<path d="M${x + 2} 132 L${x - 6} 400" stroke="#4cc9f0" stroke-width="5" stroke-linecap="round" stroke-dasharray="14 18" class="drops"/>`).join('')}</g>`) },
+    svg: svgWrap0(110, 140, R(80, 0, 12, 110, 'url(#g-metal)', 6) + R(40, 98, 52, 12, '#b9c0c7', 6) + R(40, 98, 52, 4, '#fff', 3, 'opacity=".6"') + P('M18 112 L72 112 L62 132 L28 132Z', 'url(#g-metal)') +
+      E(45, 132, 17, 3, '#7c828a') + [30, 38, 46, 54, 62].map((x) => C(x - 1, 132, 1.5, '#555')).join('') + C(86, 60, 9, '#e9edf1') + C(86, 60, 4, '#e63946') +
+      `<g class="water">${[28, 38, 48, 58].map((x) => `<path d="M${x + 2} 134 L${x - 6} 400" stroke="#4cc9f0" stroke-width="5" stroke-linecap="round" stroke-dasharray="14 18" class="drops"/>`).join('')}</g>`) },
   { id: 'toilet', kind: 'flush', x: 2300, y: 520, w: 130, h: 180, sound: 'flush', svg: toiletSVG(), bowl: { x1: 2310, x2: 2420, y: 612 } },
   { id: 'lamp', kind: 'toggle', x: 3225, y: 470, w: 70, h: 130, init: true,
-    svg: svgWrap0(70, 130, R(32, 50, 6, 70, '#666') + E(35, 124, 24, 6, '#666') + P('M6 56 L64 56 L52 4 L18 4Z', '#ffd166', 'class="shade"')) },
+    svg: svgWrap0(70, 130, R(32, 50, 6, 70, 'url(#g-metal)') + E(35, 124, 24, 6, '#666') + E(35, 122, 20, 3, '#999') + P('M6 56 L64 56 L52 4 L18 4Z', '#ffd166', 'class="shade"') +
+      P('M6 56 L64 56 L52 4 L18 4Z', 'url(#g-volh)') + R(4, 52, 62, 6, '#e9a93a', 3) + P('M22 10 L14 50', 'none', 'stroke="#fff" stroke-width="3" opacity=".45"')) },
   { id: 'wardrobe', kind: 'container', x: 3330, y: 250, w: 240, h: 450, sound: 'door', svg: wardrobeSVG(),
     region: { x1: 3342, x2: 3558, y1: 262, y2: 692 } },
 ];
@@ -203,68 +381,110 @@ const hausProps = [
 const hausFG = [
   { x: 1850, y: 588, w: 400, h: 112, svg: tubFront() },
   { x: 2930, y: 548, w: 260, h: 110, svg: svgWrap0(260, 110,
-    R(0, 0, 260, 96, '#ff99c8', 26) + R(0, 0, 40, 96, '#ffc8dd', 20) + C(90, 40, 8, '#fff', 'opacity=".6"') + C(150, 60, 8, '#fff', 'opacity=".6"') + C(210, 34, 8, '#fff', 'opacity=".6"')) },
+    R(0, 0, 260, 96, '#ff99c8', 26) + R(0, 0, 260, 96, 'url(#g-vol)', 26) + R(0, 0, 44, 96, '#ffc8dd', 20) + R(0, 0, 44, 96, 'url(#g-volh)', 20) +
+    [[90, 40], [150, 60], [210, 34], [120, 74], [190, 78]].map(([x, y]) => P(`M${x} ${y - 8} l2.5 5.5 6 .5 -4.5 4 1.5 6 -5.5 -3 -5.5 3 1.5 -6 -4.5 -4 6 -.5z`, '#fff', 'opacity=".65"')).join('') +
+    P('M60 20 q60 14 190 4 M60 86 q80 -10 190 0', 'none', 'stroke="#e86aa6" stroke-width="2" opacity=".6"') + R(0, 88, 260, 6, '#e86aa6', 3, 'opacity=".5"')) },
 ];
 
 // ======================= CAFÉ =======================
 function cafeBG() {
   const W = 1800;
   let s = patterns('cafe');
-  s += R(0, 0, W, FLOOR, '#ffc8dd') + R(0, 0, W, FLOOR, 'url(#cafe-stripes)') + R(0, 470, W, FLOOR - 470, '#bde0fe') + R(0, 462, W, 12, '#fff') +
-    R(0, FLOOR, W, H - FLOOR, '#ffffff') + R(0, FLOOR, W, H - FLOOR, 'url(#cafe-checker)') + R(0, FLOOR - 14, W, 16, '#8ec5f5');
-  for (let x = 30; x < W; x += 120) s += R(x, 490, 90, 180, '#a9d6ff', 10);
-  s += G(260, 110, R(-10, -10, 540, 290, '#fff', 18) + R(0, 0, 520, 270, '#9ee7ff', 10, 'class="sky"') +
-    `<g class="daysun">${R(30, 140, 90, 130, '#ffadad')}${R(130, 100, 100, 170, '#ffd6a5')}${R(250, 160, 80, 110, '#caffbf')}${R(350, 120, 120, 150, '#bdb2ff')}${C(440, 60, 24, '#ffe066')}</g>` +
-    C(440, 60, 20, '#fff8c4', 'class="moon"') + stars(20, 20, 480, 110, 9) + R(255, 0, 10, 270, '#fff') +
-    T(130, 60, 44, '#ff5d8f', 'CAFÉ', 'opacity=".9"'));
-  for (let i = 0; i < 9; i++) s += P(`M${250 + i * 60} 80 L${310 + i * 60} 80 L${300 + i * 60} 116 Q${280 + i * 60} 130 ${260 + i * 60} 116Z`, i % 2 ? '#fff' : '#ff5d8f', 'transform="translate(0 -6)"');
+  s += R(0, 0, W, FLOOR, '#ffc8dd') + R(0, 0, W, FLOOR, 'url(#cafe-stripes)') + R(0, 0, W, FLOOR, 'url(#g-wall)') +
+    R(0, 470, W, FLOOR - 470, '#bde0fe') + R(0, 462, W, 14, '#fff') + R(0, 462, W, 4, '#fff') + R(0, 474, W, 4, '#000', 0, 'opacity=".08"') +
+    R(0, FLOOR, W, H - FLOOR, '#ffffff') + R(0, FLOOR, W, H - FLOOR, 'url(#cafe-checker)') + R(0, FLOOR, W, H - FLOOR, 'url(#g-floor)') +
+    R(0, FLOOR - 16, W, 18, '#8ec5f5') + R(0, FLOOR - 16, W, 3, '#cfe6fb') + R(0, 0, W, 30, '#ff5d8f') + R(0, 26, W, 6, '#d6336c');
+  for (let x = 30; x < W; x += 120) s += R(x, 492, 90, 176, '#a9d6ff', 10) + R(x, 492, 90, 176, 'url(#g-vol)', 10) + R(x + 6, 498, 78, 164, 'none', 7, 'stroke="#fff" stroke-width="2" opacity=".6"');
+  // Schaufenster mit Straße
+  s += G(260, 110, R(-14, -14, 548, 298, '#fff', 18) + R(-14, -14, 548, 298, 'url(#g-vol)', 18) +
+    `<clipPath id="cafewin"><rect width="520" height="270" rx="10"/></clipPath><g clip-path="url(#cafewin)">` +
+    R(0, 0, 520, 270, 'url(#g-sky)', 10, 'class="sky"') + stars(20, 20, 480, 110, 9) + C(440, 60, 20, '#fff8c4', 'class="moon"') +
+    `<g class="daysun">${C(440, 60, 24, '#ffe066')}${C(440, 60, 36, '#ffe066', 'opacity=".25"')}${E(120, 40, 34, 12, '#fff')}${E(150, 32, 22, 12, '#fff')}</g>` +
+    [[20, 140, 100, 130, '#ffadad'], [130, 100, 110, 170, '#ffd6a5'], [250, 160, 90, 110, '#caffbf'], [350, 120, 130, 150, '#bdb2ff']].map(([x, y, w, h, c]) =>
+      R(x, y, w, h, c) + R(x, y, w * 0.25, h, '#fff', 0, 'opacity=".2"') + R(x - 4, y - 8, w + 8, 10, shadeHex(c), 2) +
+      [0, 1].map((k) => [0, 1, 2].map((r) => R(x + 12 + k * (w / 2), y + 16 + r * 34, w / 2 - 24, 22, '#fff8c4', 2, 'class="cwin"') + R(x + 12 + k * (w / 2), y + 16 + r * 34, w / 2 - 24, 4, '#fff', 0, 'opacity=".6"')).join('')).join('')).join('') +
+    R(0, 250, 520, 20, '#9aa0a6') + R(0, 250, 520, 3, '#c9ced3') + R(466, 150, 6, 100, '#444') + C(469, 146, 10, '#ffe08a') +
+    `</g>` + P('M20 0 L120 0 L0 120 L0 40Z', '#fff', 'opacity=".22"') + P('M300 0 L340 0 L250 270 L210 270Z', '#fff', 'opacity=".12"') + R(255, 0, 10, 270, '#fff') +
+    T(130, 64, 46, '#ff5d8f', 'CAFÉ', 'opacity=".92" stroke="#fff" stroke-width="2" paint-order="stroke"') + R(-20, 276, 560, 16, '#fff', 4) + R(-20, 290, 560, 6, '#000', 0, 'opacity=".1"'));
+  for (let i = 0; i < 9; i++) {
+    const x = 250 + i * 60;
+    s += P(`M${x} 74 L${x + 60} 74 L${x + 50} 110 Q${x + 30} 124 ${x + 10} 110Z`, i % 2 ? '#fff' : '#ff5d8f') + P(`M${x} 74 L${x + 60} 74 L${x + 50} 110 Q${x + 30} 124 ${x + 10} 110Z`, 'url(#g-vol)');
+  }
+  s += R(244, 66, 552, 10, '#d6336c', 4);
   s += hangLamp(260, 30, '#ff5d8f') + hangLamp(720, 30, '#ff5d8f') + hangLamp(1300, 30, '#ffca3a');
-  s += G(1130, 110, R(0, 0, 340, 200, '#2d6a4f', 14) + R(10, 10, 320, 180, '#1b4332', 8) + T(170, 56, 32, '#fff', 'MENÜ') +
-    `<text x="40" y="104" font-size="26">☕ 🧁 🍰</text><text x="40" y="150" font-size="26">🥐 🍩 🍪</text>` + T(270, 104, 22, '#ffd166', '1 🪙') + T(270, 150, 22, '#ffd166', '2 🪙'));
+  // Tafel
+  s += G(1130, 110, R(4, 6, 340, 200, '#000', 14, 'opacity=".12"') + R(0, 0, 340, 200, '#8d5524', 14) + GRAIN(0, 0, 340, 200, 14) + R(10, 10, 320, 180, '#1b4332', 8) + R(10, 10, 320, 180, 'url(#p-noise)', 8) +
+    T(170, 56, 32, '#fff', 'MENÜ') + P('M110 66 h120', 'none', 'stroke="#fff" stroke-width="2" opacity=".6"') +
+    `<text x="40" y="104" font-size="26">☕ 🧁 🍰</text><text x="40" y="150" font-size="26">🥐 🍩 🍪</text>` + T(270, 104, 22, '#ffd166', '1 🪙') + T(270, 150, 22, '#ffd166', '2 🪙') +
+    R(30, 176, 40, 8, '#fff', 2) + R(80, 176, 26, 8, '#fde68a', 2));
+  // Bild mit Kaffeetasse
+  s += frame(900, 150, 120, 140, '#ffca3a', R(14, 14, 92, 112, '#fff1e6') + P('M34 70 h44 v30 q0 16 -22 16 q-22 0 -22 -16z', '#e76f51') + P('M78 76 q14 0 12 12 q-2 10 -12 8', 'none', 'stroke="#e76f51" stroke-width="5"') +
+    P('M46 60 q6 -10 0 -18 M58 60 q6 -10 0 -18', 'none', 'stroke="#c9a" stroke-width="3" stroke-linecap="round"') + E(56, 118, 34, 5, '#d4a373'));
   s += chair(50, 600, '#ff924c') + chair(370, 600, '#ff924c') + chair(510, 600, '#8ac926') + chair(830, 600, '#8ac926');
-  s += table(140, 560, 220, '#ffffff') + table(600, 560, 220, '#ffffff');
-  s += G(1040, 500, R(0, 0, 700, 20, '#8d5524', 8) + R(10, 20, 680, 180, '#c68b59') + R(30, 40, 640, 140, '#a86b3c', 12) +
-    `<text x="200" y="128" font-size="60" opacity=".35">☕</text><text x="420" y="128" font-size="60" opacity=".35">🧁</text>`);
-  s += G(1250, 380, R(0, 108, 230, 14, '#ddd', 6) + R(4, 0, 222, 110, '#e8f8ff', 10, 'opacity=".5"') + R(4, 56, 222, 6, '#fff'));
+  s += table(140, 560, 220, '#f4f1ee') + table(600, 560, 220, '#f4f1ee');
+  s += P('M160 562 q40 6 90 2 t80 4 M620 563 q50 -4 90 2 t70 0', 'none', 'stroke="#c9c2bb" stroke-width="1.5" opacity=".7"');
+  // Theke
+  s += SH(1390, 704, 360, 12) + G(1040, 500, R(10, 20, 680, 180, '#c68b59') + GRAIN(10, 20, 680, 180) + VOL(10, 20, 680, 180) +
+    [0, 1, 2, 3].map((i) => R(30 + i * 165, 40, 145, 130, '#a86b3c', 10) + GRAIN(30 + i * 165, 40, 145, 130, 10) + R(30 + i * 165, 40, 145, 4, '#000', 0, 'opacity=".15"') + R(30 + i * 165, 166, 145, 4, '#fff', 0, 'opacity=".2"')).join('') +
+    `<text x="200" y="128" font-size="60" opacity=".3">☕</text><text x="420" y="128" font-size="60" opacity=".3">🧁</text>` +
+    R(10, 182, 680, 8, 'url(#g-metal)', 4) + R(0, 0, 700, 22, '#eae6e1', 8) + R(0, 0, 700, 5, '#fff', 4) + P('M40 8 q60 8 140 2 t200 6 t180 -2', 'none', 'stroke="#c9c2bb" stroke-width="1.5" opacity=".8"') + R(0, 20, 700, 4, '#000', 0, 'opacity=".12"'));
+  // Vitrine (Rückseite)
+  s += G(1250, 380, R(0, 108, 230, 14, '#d4a017', 6) + R(0, 108, 230, 4, '#fff3b0', 3) + R(4, 0, 222, 110, '#e8f8ff', 10, 'opacity=".5"') + R(4, 56, 222, 6, '#fff') + R(4, 60, 222, 3, '#000', 0, 'opacity=".08"'));
   s += plant(40, 700, 1.1) + plant(1000, 700, 1);
   return svgWrap(W, s);
 }
 
 const cafeProps = [
   { id: 'kaffee', kind: 'spawn', x: 1080, y: 356, w: 140, h: 144, spawn: ['☕', '☕', '🥛', '🍵'], sound: 'pop', from: [1260, 360],
-    svg: svgWrap0(140, 144, R(0, 0, 140, 144, '#333', 16) + R(10, 10, 120, 40, '#555', 10) + C(40, 30, 8, '#ff595e') + C(70, 30, 8, '#8ac926') + C(100, 30, 8, '#ffca3a') +
-      R(50, 56, 40, 18, '#777', 6) + R(30, 126, 80, 10, '#777', 4) + R(64, 74, 12, 20, '#7f5539', 4, 'class="pour"')) },
+    svg: svgWrap0(140, 144, R(0, 0, 140, 144, '#2f2f33', 16) + R(0, 0, 140, 144, 'url(#g-volh)', 16) + R(10, 10, 120, 40, '#4a4a50', 10) + R(14, 14, 112, 6, '#fff', 3, 'opacity=".15"') +
+      C(40, 30, 8, '#ff595e') + C(70, 30, 8, '#8ac926') + C(100, 30, 8, '#ffca3a') + C(38, 28, 2.5, '#fff', 'opacity=".6"') + C(68, 28, 2.5, '#fff', 'opacity=".6"') + C(98, 28, 2.5, '#fff', 'opacity=".6"') +
+      R(46, 56, 48, 20, 'url(#g-metal)', 6) + R(60, 76, 6, 10, '#999') + R(74, 76, 6, 10, '#999') + R(64, 86, 12, 18, '#7f5539', 4, 'class="pour"') +
+      R(26, 122, 88, 12, 'url(#g-metal)', 4) + Array.from({ length: 8 }, (_, i) => R(32 + i * 10, 125, 5, 6, '#555', 1)).join('') + R(126, 50, 8, 60, '#555', 4)) },
   { id: 'kasse', kind: 'spawn', x: 1580, y: 410, w: 130, h: 90, spawn: ['🪙'], sound: 'coin', from: [1640, 380],
-    svg: svgWrap0(130, 90, P('M10 30 L120 30 L130 90 L0 90Z', '#ff595e') + R(30, 0, 70, 34, '#333', 8) + T(65, 26, 20, '#8ac926', '2,50') + R(20, 50, 90, 10, '#fff', 4) + R(20, 66, 90, 10, '#fff', 4)) },
+    svg: svgWrap0(130, 90, P('M10 30 L120 30 L130 90 L0 90Z', '#ff595e') + P('M10 30 L120 30 L130 90 L0 90Z', 'url(#g-vol)') + R(30, 0, 70, 34, '#2b2b2b', 8) + R(36, 6, 58, 20, '#1b3b1b', 3) + T(65, 22, 18, '#8ac926', '2,50') +
+      [0, 1, 2, 3].map((i) => [0, 1].map((r) => R(22 + i * 22, 44 + r * 16, 18, 11, '#fff', 3) + R(22 + i * 22, 52 + r * 16, 18, 3, '#ddd', 1)).join('')).join('') + R(0, 84, 130, 6, '#c1121f', 3)) },
 ];
 
 const cafeFG = [
-  { x: 1250, y: 380, w: 230, h: 120, svg: svgWrap0(230, 120, R(4, 0, 222, 120, '#bfefff', 10, 'opacity=".25"') + P('M20 10 L60 10 L30 100 L10 100Z', '#fff', 'opacity=".35"') + R(0, 0, 230, 8, '#ddd', 4)) },
+  { x: 1250, y: 380, w: 230, h: 120, svg: svgWrap0(230, 120, R(4, 0, 222, 120, '#bfefff', 10, 'opacity=".22"') + R(4, 0, 222, 120, 'url(#g-glass)', 10) + P('M20 10 L60 10 L30 100 L10 100Z', '#fff', 'opacity=".35"') +
+    R(0, 0, 230, 8, '#d4a017', 4) + R(0, 0, 230, 3, '#fff3b0', 2) + R(0, 0, 6, 120, '#d4a017', 3) + R(224, 0, 6, 120, '#d4a017', 3)) },
 ];
 
 // ======================= SUPERMARKT =======================
 function marktBG() {
   const W = 2300;
   let s = patterns('markt');
-  s += R(0, 0, W, FLOOR, '#d8f3dc') + R(0, 0, W, 120, '#52b788') + R(0, 116, W, 10, '#40916c') +
-    T(700, 86, 64, '#fff', 'SUPERMARKT') + T(1900, 86, 50, '#ffd166', 'KASSE') +
-    R(0, FLOOR, W, H - FLOOR, '#e9ecef') + R(0, FLOOR, W, H - FLOOR, 'url(#markt-tiles)') + R(0, FLOOR - 14, W, 16, '#95d5b2');
+  s += R(0, 0, W, FLOOR, '#d8f3dc') + R(0, 0, W, FLOOR, 'url(#p-damask)') + R(0, 0, W, FLOOR, 'url(#g-wall)') +
+    R(0, 480, W, FLOOR - 480, '#e9f5ec') + R(0, 480, W, FLOOR - 480, 'url(#p-tiles)') + R(0, 476, W, 6, '#95d5b2') +
+    R(0, 0, W, 120, '#52b788') + R(0, 0, W, 120, 'url(#g-vol)') + R(0, 116, W, 10, '#40916c') + R(0, 126, W, 6, '#000', 0, 'opacity=".1"') +
+    T(704, 90, 64, '#000', 'SUPERMARKT', 'opacity=".15"') + T(700, 86, 64, '#fff', 'SUPERMARKT') + T(1904, 90, 50, '#000', 'KASSE', 'opacity=".15"') + T(1900, 86, 50, '#ffd166', 'KASSE') +
+    R(0, FLOOR, W, H - FLOOR, '#e9ecef') + R(0, FLOOR, W, H - FLOOR, 'url(#markt-tiles)') + R(0, FLOOR, W, H - FLOOR, 'url(#g-floor)') + R(0, FLOOR - 16, W, 18, '#95d5b2') + R(0, FLOOR - 16, W, 3, '#c7ead4');
+  // Deckenleuchten
+  for (const x of [300, 760, 1220, 1680, 2060]) s += R(x - 90, 132, 180, 10, '#f8f9fa', 4) + R(x - 90, 140, 180, 4, '#ced4da') + E(x, 150, 120, 26, '#fffbe0', 'opacity=".35"');
   s += shelfUnit(100, 250, 400, 450, '#ff8fab', [370, 490, 610]);
   s += shelfUnit(560, 250, 400, 450, '#ffd166', [370, 490, 610]);
   s += shelfUnit(1020, 250, 400, 450, '#90e0ef', [370, 490, 610]);
-  s += G(150, 160, R(0, 0, 300, 60, '#fff', 30) + T(150, 42, 32, '#ff5d8f', 'Obst & Gemüse'));
-  s += G(610, 160, R(0, 0, 300, 60, '#fff', 30) + T(150, 42, 32, '#e09f3e', 'Süßes & Brot'));
-  s += G(1070, 160, R(0, 0, 300, 60, '#fff', 30) + T(150, 42, 32, '#0096c7', 'Getränke'));
-  s += G(1500, 560, R(0, 0, 280, 140, '#4ea8de', 16) + R(12, 12, 256, 30, '#caf0f8', 8) + T(140, 100, 30, '#fff', 'EIS ❄️'));
-  s += G(1500, 220, R(0, 0, 280, 90, '#fff', 20) + T(140, 60, 36, '#ff595e', '% ANGEBOT %'));
-  s += G(1880, 540, R(0, 0, 360, 160, '#adb5bd', 12) + R(0, 0, 360, 22, '#343a40', 8) + R(20, 40, 320, 100, '#ced4da', 10));
-  s += plant(1830, 700, 1.1);
+  const sign = (x, c, txt) => G(x, 160, P('M150 -24 L150 0', 'none', 'stroke="#999" stroke-width="2"') + R(4, 6, 300, 60, '#000', 30, 'opacity=".1"') + R(0, 0, 300, 60, '#fff', 30) + R(0, 0, 300, 60, 'url(#g-vol)', 30) + T(150, 42, 32, c, txt));
+  s += sign(150, '#ff5d8f', 'Obst & Gemüse') + sign(610, '#e09f3e', 'Süßes & Brot') + sign(1070, '#0096c7', 'Getränke');
+  // Tiefkühltruhe
+  s += SH(1640, 704, 160, 9) + G(1500, 560, R(0, 0, 280, 140, '#4ea8de', 16) + R(0, 0, 280, 140, 'url(#g-vol)', 16) + R(12, 12, 256, 30, '#caf0f8', 8) + R(12, 12, 256, 30, 'url(#g-glass)', 8) +
+    T(140, 100, 30, '#fff', 'EIS ❄️') + R(10, 124, 260, 8, '#3a86b8', 4) + [30, 80, 200, 250].map((x) => C(x, 30, 3, '#fff', 'opacity=".8"')).join(''));
+  // Angebotsplakat
+  s += G(1500, 220, R(4, 6, 280, 90, '#000', 20, 'opacity=".1"') + R(0, 0, 280, 90, '#fff', 20) + R(0, 0, 280, 90, 'url(#g-vol)', 20) + R(8, 8, 264, 74, 'none', 14, 'stroke="#ff595e" stroke-width="3" stroke-dasharray="8 6"') + T(140, 60, 36, '#ff595e', '% ANGEBOT %'));
+  // Einkaufskörbe-Stapel
+  s += G(1790, 600, [0, 1, 2].map((i) => P(`M0 ${-i * 16} h80 l-8 40 h-64z`, '#e63946') + P(`M8 ${-i * 16 + 8} h64`, 'none', 'stroke="#fff" stroke-width="2" opacity=".5"')).join('') + R(0, 34, 80, 6, '#b5162b', 3));
+  // Kasse mit Förderband
+  s += SH(2060, 704, 190, 10) + G(1880, 540, R(0, 0, 360, 160, '#adb5bd', 12) + R(0, 0, 360, 160, 'url(#g-vol)', 12) + R(0, 0, 360, 22, '#343a40', 8) +
+    Array.from({ length: 18 }, (_, i) => R(6 + i * 20, 4, 3, 14, '#4a5057')).join('') + R(0, 0, 360, 4, '#6c757d', 3) +
+    R(20, 40, 320, 100, '#ced4da', 10) + R(20, 40, 320, 100, 'url(#g-vol)', 10) + R(36, 56, 140, 70, '#bfc6cc', 8) + R(190, 56, 134, 70, '#bfc6cc', 8) + R(176, 80, 8, 30, 'url(#g-metal)', 4) +
+    R(150, -10, 50, 12, '#1d3557', 4) + R(154, -8, 42, 6, '#e63946', 2, 'opacity=".8"'));
   return svgWrap(W, s);
 }
 
 const marktProps = [
   { id: 'kasse2', kind: 'spawn', x: 2110, y: 430, w: 120, h: 110, spawn: ['🪙', '🪙', '🪙', '💎'], sound: 'coin', from: [2000, 420],
-    svg: svgWrap0(120, 110, P('M10 40 L110 40 L120 110 L0 110Z', '#4361ee') + R(20, 0, 80, 44, '#222', 8) + T(60, 30, 22, '#8ac926', '9,99') + R(20, 64, 80, 10, '#fff', 4) + R(20, 82, 80, 10, '#fff', 4)) },
+    svg: svgWrap0(120, 110, P('M10 40 L110 40 L120 110 L0 110Z', '#4361ee') + P('M10 40 L110 40 L120 110 L0 110Z', 'url(#g-vol)') + R(20, 0, 80, 44, '#1e1e1e', 8) + R(26, 6, 68, 26, '#0f2a0f', 3) + T(60, 26, 20, '#8ac926', '9,99') +
+      [0, 1, 2].map((i) => [0, 1].map((r) => R(22 + i * 26, 58 + r * 18, 22, 12, '#fff', 3) + R(22 + i * 26, 67 + r * 18, 22, 3, '#ccd', 1)).join('')).join('') + R(0, 104, 120, 6, '#2b3fa8', 3)) },
 ];
 
 const marktFG = [
@@ -272,110 +492,159 @@ const marktFG = [
 ];
 
 // ======================= FRISEUR =======================
+function finish(W, wallC) {
+  // Licht/Schatten an Wand und Boden + Fußleiste
+  return R(0, 0, W, FLOOR, 'url(#g-wall)') + R(0, FLOOR, W, H - FLOOR, 'url(#g-floor)') + R(0, FLOOR - 2, W, 3, '#000', 0, 'opacity=".12"') + (wallC ? R(0, 40, W, 3, '#fff', 0, 'opacity=".5"') : '');
+}
+
 function friseurBG() {
   const W = 1500;
   let s = patterns('fris');
-  s += R(0, 0, W, FLOOR, '#ffe5ec') + R(0, 0, W, FLOOR, 'url(#fris-stripes)') + R(0, FLOOR, W, H - FLOOR, '#ffb3c6') + R(0, FLOOR, W, H - FLOOR, 'url(#fris-checker)') + R(0, FLOOR - 14, W, 16, '#fb6f92');
-  s += G(560, 40, R(0, 0, 380, 70, '#fb6f92', 35) + T(190, 50, 40, '#fff', 'FRISEUR ✂️'));
+  s += R(0, 0, W, FLOOR, '#ffe5ec') + R(0, 0, W, FLOOR, 'url(#fris-stripes)') + R(0, 0, W, FLOOR, 'url(#p-damask)') +
+    R(0, 480, W, FLOOR - 480, '#ffd1dc') + R(0, 474, W, 10, '#fff') + R(0, 482, W, 4, '#000', 0, 'opacity=".06"') +
+    R(0, FLOOR, W, H - FLOOR, '#ffb3c6') + R(0, FLOOR, W, H - FLOOR, 'url(#fris-checker)') + R(0, FLOOR - 16, W, 18, '#fb6f92') + R(0, FLOOR - 16, W, 3, '#ffc2d1') + finish(W);
+  s += R(0, 0, W, 30, '#fb6f92') + R(0, 26, W, 6, '#c9184a');
+  s += G(560, 40, R(4, 8, 380, 70, '#000', 35, 'opacity=".12"') + R(0, 0, 380, 70, '#fb6f92', 35) + R(0, 0, 380, 70, 'url(#g-vol)', 35) + T(190, 50, 40, '#fff', 'FRISEUR ✂️'));
   const mirror = (x) => {
-    let m = R(0, 0, 200, 250, '#ffd166', 100) + R(12, 12, 176, 226, '#d8f3ff', 88) + P('M50 50 L90 36 L50 150Z', '#fff', 'opacity=".55"');
-    for (let i = 0; i < 6; i++) m += C(100 + Math.cos(Math.PI + (i * Math.PI) / 5) * 112, 120 + Math.sin(Math.PI + (i * Math.PI) / 5) * 136, 9, '#fff7c2');
+    let m = R(6, 8, 200, 250, '#000', 100, 'opacity=".1"') + R(0, 0, 200, 250, '#ffd166', 100) + R(0, 0, 200, 250, 'url(#g-volh)', 100) + R(12, 12, 176, 226, '#d8f3ff', 88) + R(12, 12, 176, 226, 'url(#g-glass)', 88) +
+      P('M50 50 L90 36 L50 150Z', '#fff', 'opacity=".5"') + P('M120 160 L140 150 L120 210Z', '#fff', 'opacity=".3"');
+    for (let i = 0; i < 6; i++) {
+      const bx = 100 + Math.cos(Math.PI + (i * Math.PI) / 5) * 112, by = 120 + Math.sin(Math.PI + (i * Math.PI) / 5) * 136;
+      m += C(bx, by, 22, 'url(#g-bulb)', 'opacity=".6"') + C(bx, by, 9, '#fff7c2') + C(bx - 3, by - 3, 3, '#fff');
+    }
     return G(x, 130, m);
   };
   s += mirror(140) + mirror(520);
-  const salonChair = (x) => G(x, 470, R(10, 0, 100, 110, '#e63946', 30) + R(0, 96, 120, 30, '#c1121f', 14) + R(52, 126, 16, 70, '#888') + E(60, 222, 56, 10, '#666'));
+  // Frisuren-Poster
+  const poster = (x, y, hc) => frame(x, y, 110, 140, '#fff', R(12, 12, 86, 116, '#ffe5ec') + C(55, 64, 24, '#f8c9a0') + P('M29 62 Q30 30 55 30 Q80 30 81 62 Q74 44 55 42 Q36 44 29 62Z', hc) + R(38, 86, 34, 30, '#fb6f92', 10) + C(47, 64, 2.5, '#333') + C(63, 64, 2.5, '#333') + P('M48 74 q7 5 14 0', 'none', 'stroke="#c9184a" stroke-width="2"'));
+  s += poster(370, 150, '#9b5de5') + poster(760, 150, '#2ec4b6');
+  const salonChair = (x) => SH(x + 60, 704, 70, 8) + G(x, 470, R(10, 0, 100, 110, '#e63946', 30) + R(10, 0, 100, 110, 'url(#g-vol)', 30) + R(26, 14, 68, 80, 'none', 20, 'stroke="#b5162b" stroke-width="2"') +
+    [40, 60, 80].map((xx) => C(xx, 50, 3, '#b5162b')).join('') + R(0, 96, 120, 30, '#c1121f', 14) + R(0, 96, 120, 30, 'url(#g-vol)', 14) + R(-6, 70, 16, 8, 'url(#g-metal)', 4) + R(110, 70, 16, 8, 'url(#g-metal)', 4) +
+    R(52, 126, 16, 70, 'url(#g-metal)') + E(60, 222, 56, 10, '#555') + E(60, 219, 50, 6, '#888') + R(40, 196, 40, 8, '#666', 3));
   s += salonChair(180) + salonChair(560);
-  s += G(860, 540, R(0, 0, 260, 160, '#fff', 12) + R(0, 0, 260, 18, '#fb6f92', 8) + R(16, 34, 108, 110, '#ffe5ec', 8) + R(136, 34, 108, 110, '#ffe5ec', 8));
-  s += G(860, 330, R(0, 0, 260, 12, '#fb6f92', 6));
-  s += G(1200, 470, R(10, 0, 100, 110, '#7b2cbf', 30) + R(0, 96, 120, 30, '#5a189a', 14) + R(52, 126, 16, 70, '#888') + E(60, 222, 56, 10, '#666'));
-  s += G(1420, 280, R(0, 0, 40, 160, '#fff', 20) + `<g opacity=".9">${[0, 1, 2, 3].map((i) => P(`M0 ${i * 40 + 10} L40 ${i * 40 - 10} L40 ${i * 40 + 10} L0 ${i * 40 + 30}Z`, i % 2 ? '#1982c4' : '#e63946')).join('')}</g>` + R(-6, -10, 52, 14, '#ccc', 6) + R(-6, 156, 52, 14, '#ccc', 6));
+  s += SH(990, 704, 140, 8) + G(860, 540, R(0, 0, 260, 160, '#fff', 12) + VOL(0, 0, 260, 160, 12) + R(0, 0, 260, 18, '#fb6f92', 8) + R(0, 0, 260, 5, '#ffc2d1', 4) +
+    R(16, 34, 108, 110, '#ffe5ec', 8) + R(136, 34, 108, 110, '#ffe5ec', 8) + VOL(16, 34, 108, 110, 8) + VOL(136, 34, 108, 110, 8) + R(108, 80, 7, 28, 'url(#g-metal)', 3) + R(145, 80, 7, 28, 'url(#g-metal)', 3));
+  s += G(860, 330, R(0, 0, 260, 12, '#fb6f92', 6) + R(0, 0, 260, 3, '#ffc2d1', 2) + P('M14 12 L30 12 L14 34Z M246 12 L230 12 L246 34Z', '#c9184a'));
+  s += SH(1260, 704, 70, 8) + G(1200, 470, R(10, 0, 100, 110, '#7b2cbf', 30) + R(10, 0, 100, 110, 'url(#g-vol)', 30) + R(0, 96, 120, 30, '#5a189a', 14) + R(0, 96, 120, 30, 'url(#g-vol)', 14) +
+    R(52, 126, 16, 70, 'url(#g-metal)') + E(60, 222, 56, 10, '#555') + E(60, 219, 50, 6, '#888'));
+  s += G(1420, 280, R(-6, -10, 52, 14, 'url(#g-metal)', 6) + R(0, 0, 40, 160, '#fff', 20) + `<g opacity=".9">${[0, 1, 2, 3].map((i) => P(`M0 ${i * 40 + 10} L40 ${i * 40 - 10} L40 ${i * 40 + 10} L0 ${i * 40 + 30}Z`, i % 2 ? '#1982c4' : '#e63946')).join('')}</g>` +
+    R(0, 0, 40, 160, 'url(#g-volh)', 20) + R(-6, 156, 52, 14, 'url(#g-metal)', 6));
   s += plant(60, 700, 1);
   return svgWrap(W, s);
 }
 
 const friseurProps = [
   { id: 'trockner', kind: 'dryer', x: 1170, y: 300, w: 180, h: 180, seat: 'friseur:s3', sound: 'dryer',
-    svg: svgWrap0(180, 180, R(150, 40, 14, 140, '#aaa', 6) + P('M156 60 L120 70', 'none', 'stroke="#aaa" stroke-width="10"') +
-      P('M10 120 Q10 40 90 40 Q170 40 170 120 L150 132 Q90 110 30 132Z', '#c77dff') + E(90, 124, 62, 12, '#9d4edd') +
+    svg: svgWrap0(180, 180, R(150, 40, 14, 140, 'url(#g-metal)', 6) + P('M156 60 L120 70', 'none', 'stroke="#aab4be" stroke-width="10" stroke-linecap="round"') +
+      P('M10 120 Q10 40 90 40 Q170 40 170 120 L150 132 Q90 110 30 132Z', '#c77dff') + P('M10 120 Q10 40 90 40 Q170 40 170 120 L150 132 Q90 110 30 132Z', 'url(#g-vol)') +
+      P('M36 70 Q60 48 96 46', 'none', 'stroke="#fff" stroke-width="5" opacity=".45" stroke-linecap="round"') + E(90, 124, 62, 12, '#9d4edd') + E(90, 122, 50, 6, '#7b2cbf') +
+      [50, 70, 90, 110, 130].map((x) => C(x, 96, 3, '#9d4edd')).join('') +
       `<g class="wind">${P('M40 140 Q50 150 40 162', 'none', 'stroke="#fff" stroke-width="4"')}${P('M90 144 Q100 154 90 166', 'none', 'stroke="#fff" stroke-width="4"')}${P('M140 140 Q150 150 140 162', 'none', 'stroke="#fff" stroke-width="4"')}</g>`) },
 ];
 
 // ======================= PARK =======================
 function parkBG() {
   const W = 2600;
-  let s = R(0, 0, W, H, '#9ee7ff', 0, 'class="sky"') + stars(0, 20, W, 300, 40) +
-    C(1600, 120, 54, '#ffe066', 'class="daysun"') + C(1600, 120, 44, '#fff8c4', 'class="moon"');
-  const cloud = (x, y, k) => G(x, y, `<g class="daysun" transform="scale(${k})">${E(0, 0, 60, 26, '#fff')}${E(40, -16, 44, 30, '#fff')}${E(80, 0, 54, 24, '#fff')}</g>`);
-  s += cloud(300, 120, 1) + cloud(900, 80, 0.8) + cloud(2100, 140, 1.1);
-  s += E(400, 640, 600, 200, '#95d5b2') + E(1400, 660, 700, 220, '#74c69d') + E(2300, 640, 600, 200, '#95d5b2');
-  s += R(0, 620, W, H - 620, '#52b788') + R(0, FLOOR, W, H - FLOOR, '#40916c') + P(`M0 760 Q${W / 2} 730 ${W} 770 L${W} 800 Q${W / 2} 760 0 790Z`, '#d4a373');
-  for (let x = 20; x < W; x += 60) s += R(x, 610, 10, 60, '#fff', 3) + R(x - 6, 620, 70, 8, '#fff', 3);
-  const flower = (x, c) => G(x, FLOOR + 30, R(-2, -30, 4, 30, '#2d6a4f') + C(-8, -32, 7, c) + C(8, -32, 7, c) + C(0, -40, 7, c) + C(0, -24, 7, c) + C(0, -32, 5, '#ffd60a'));
-  [60, 520, 940, 1420, 1800, 2150, 2560].forEach((x, i) => (s += flower(x, ['#ff595e', '#ff6fb5', '#ffca3a', '#9b5de5'][i % 4])));
+  let s = `<defs><linearGradient id="park-hill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b7e4c7"/><stop offset="1" stop-color="#74c69d"/></linearGradient>
+    <linearGradient id="park-grass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5fbf7f"/><stop offset="1" stop-color="#2d8a55"/></linearGradient>
+    <linearGradient id="park-path" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3b98a"/><stop offset="1" stop-color="#c99766"/></linearGradient></defs>`;
+  s += R(0, 0, W, H, 'url(#g-sky)', 0, 'class="sky"') + stars(0, 20, W, 300, 40) +
+    C(1600, 120, 80, '#ffe066', 'class="daysun" opacity=".25"') + C(1600, 120, 54, '#ffe066', 'class="daysun"') + C(1600, 120, 44, '#fff8c4', 'class="moon"');
+  const cloud = (x, y, k) => G(x, y, `<g class="daysun" transform="scale(${k})">${E(10, 10, 80, 18, '#dceefa')}${E(0, 0, 60, 26, '#fff')}${E(40, -16, 44, 30, '#fff')}${E(80, 0, 54, 24, '#fff')}${E(30, -24, 20, 10, '#fff', 'opacity=".8"')}</g>`);
+  s += cloud(300, 120, 1) + cloud(900, 80, 0.8) + cloud(2100, 140, 1.1) + cloud(1300, 220, 0.6);
+  // Hügel mit Bäumen in der Ferne
+  s += E(400, 650, 650, 220, '#a8dcc0') + E(1400, 670, 760, 240, 'url(#park-hill)') + E(2300, 650, 650, 220, '#a8dcc0');
+  for (const [x, y, r] of [[260, 470, 26], [330, 480, 20], [1160, 460, 30], [1240, 470, 22], [1980, 470, 28], [2060, 478, 20], [2440, 470, 24]]) s += R(x - 3, y, 6, 30, '#6b8f71') + C(x, y, r, '#7fbf93') + C(x - r * 0.3, y - r * 0.3, r * 0.5, '#9bd3ad');
+  s += R(0, 620, W, H - 620, 'url(#park-grass)') + R(0, FLOOR, W, H - FLOOR, '#3a9a5f') + R(0, FLOOR, W, H - FLOOR, 'url(#p-noise)') + R(0, FLOOR, W, 10, '#000', 0, 'opacity=".1"');
+  for (let x = 5; x < W; x += 23) s += P(`M${x} ${FLOOR + 14 + (x % 3) * 12} l3 -10 l3 10`, 'none', 'stroke="#2d7a4a" stroke-width="2" opacity=".6"');
+  s += P(`M0 760 Q${W / 2} 730 ${W} 770 L${W} 802 Q${W / 2} 764 0 794Z`, 'url(#park-path)') + P(`M0 760 Q${W / 2} 730 ${W} 770`, 'none', 'stroke="#f2d3ae" stroke-width="3"');
+  for (let x = 40; x < W; x += 90) s += E(x, 777 - Math.sin((x / W) * Math.PI) * 14, 8, 4, '#b98858', 'opacity=".6"');
+  // Zaun
+  for (let x = 20; x < W; x += 60) s += R(x, 606, 12, 66, '#fff', 3) + R(x, 606, 12, 66, 'url(#g-volh)', 3) + P(`M${x} 610 l6 -8 l6 8`, '#fff');
+  s += R(0, 622, W, 9, '#fff', 3) + R(0, 650, W, 9, '#fff', 3) + R(0, 629, W, 2, '#000', 0, 'opacity=".1"') + R(0, 657, W, 2, '#000', 0, 'opacity=".1"');
+  // Büsche
+  for (const x of [40, 760, 1860, 2340]) s += G(x, 690, E(0, 0, 60, 34, '#2d8a55') + C(-26, -14, 26, '#3aa36a') + C(14, -22, 30, '#40b073') + C(40, -6, 22, '#3aa36a') + C(8, -30, 10, '#ff6fb5') + C(-20, -20, 8, '#fff') + C(34, -14, 8, '#ff6fb5'));
+  const flower = (x, c) => G(x, FLOOR + 30, R(-2, -30, 4, 30, '#2d6a4f') + E(-8, -16, 8, 4, '#2d6a4f', 'transform="rotate(-30 -8 -16)"') + C(-8, -32, 7, c) + C(8, -32, 7, c) + C(0, -40, 7, c) + C(0, -24, 7, c) + C(0, -32, 5, '#ffd60a') + C(-1, -33, 2, '#fff', 'opacity=".6"'));
+  [60, 520, 940, 1420, 1800, 2150, 2560, 300, 1700, 2250].forEach((x, i) => (s += flower(x, ['#ff595e', '#ff6fb5', '#ffca3a', '#9b5de5'][i % 4])));
   // Sandkasten
-  s += G(1450, 640, R(0, 30, 310, 40, '#e9c46a', 10) + E(155, 34, 150, 16, '#f4d58d'));
+  s += G(1450, 640, R(0, 30, 310, 40, '#c9894a', 10) + R(0, 30, 310, 40, 'url(#p-grain)', 10) + R(0, 30, 310, 6, '#e3ad6e', 4) + E(155, 34, 150, 16, '#f4d58d') + E(155, 34, 150, 16, 'url(#p-noise)') + E(110, 30, 30, 6, '#ffe8b0'));
   // Bank
-  s += G(1830, 520, R(0, 0, 280, 22, '#bc6c25', 8) + R(0, 30, 280, 22, '#bc6c25', 8) + R(0, 88, 280, 18, '#dda15e', 8) + R(20, 100, 14, 80, '#555') + R(246, 100, 14, 80, '#555'));
+  s += SH(1970, 704, 150, 9) + G(1830, 520, [0, 30].map((y) => R(0, y, 280, 22, '#bc6c25', 8) + GRAIN(0, y, 280, 22, 8) + R(0, y, 280, 4, '#e09f5c', 3)).join('') +
+    R(0, 88, 280, 18, '#dda15e', 8) + GRAIN(0, 88, 280, 18, 8) + R(0, 88, 280, 4, '#f2c48a', 3) + R(20, 52, 14, 128, '#444', 4) + R(246, 52, 14, 128, '#444', 4) + R(22, 52, 4, 126, '#777'));
   // Hundehütte
-  s += G(2160, 560, P('M0 50 L90 0 L180 50Z', '#e63946') + R(14, 50, 152, 90, '#f4a261') + P('M60 140 L60 100 Q90 70 120 100 L120 140Z', '#6b3f1d') + T(90, 80, 18, '#fff', 'WAU'));
+  s += SH(2250, 704, 100, 8) + G(2160, 560, R(14, 50, 152, 90, '#f4a261') + R(14, 50, 152, 90, 'url(#p-grain)') + R(14, 50, 152, 90, 'url(#g-volh)') +
+    P('M-6 56 L90 -4 L186 56Z', '#e63946') + [0, 1, 2].map((r) => P(`M${10 + r * 26} ${46 - r * 15} L${170 - r * 26} ${46 - r * 15}`, 'none', 'stroke="#b5162b" stroke-width="2"')).join('') + P('M-6 56 L90 -4 L186 56', 'none', 'stroke="#ff8a8f" stroke-width="3"') +
+    P('M60 140 L60 100 Q90 70 120 100 L120 140Z', '#4a2a10') + R(70, 66, 40, 18, '#fff', 4) + T(90, 80, 14, '#e63946', 'WAU') + E(150, 134, 16, 6, '#1982c4') + E(150, 131, 12, 3, '#c68b59'));
   // Laternen
-  const lantern = (x) => G(x, 380, R(-5, 20, 10, 300, '#333') + R(-18, 0, 36, 36, '#333', 6) + R(-12, 6, 24, 24, '#fff7c2', 4));
+  const lantern = (x) => G(x, 380, C(0, 18, 40, 'url(#g-bulb)', 'opacity=".5"') + R(-5, 20, 10, 300, '#2b2b2b') + R(-3, 20, 3, 300, '#555') + R(-10, 300, 20, 20, '#2b2b2b', 3) +
+    P('M-20 0 L20 0 L14 36 L-14 36Z', '#2b2b2b') + R(-12, 6, 24, 24, '#fff7c2', 4) + R(-12, 6, 8, 24, '#fff', 3, 'opacity=".6"') + P('M-24 0 L0 -14 L24 0Z', '#2b2b2b'));
   s += lantern(950) + lantern(1800);
   return svgWrap(W, s);
 }
 
 const parkProps = [
   { id: 'baum', kind: 'tree', x: 80, y: 110, w: 400, h: 590, spawn: ['🍎', '🍎', '🍐', '🍎', '🐦'], sound: 'pop',
-    svg: svgWrap0(400, 590, R(170, 260, 60, 330, '#8d5524', 20) + P('M200 380 L120 300', 'none', 'stroke="#8d5524" stroke-width="22" stroke-linecap="round"') +
-      `<g class="canopy">${C(200, 170, 150, '#40916c')}${C(90, 220, 90, '#52b788')}${C(310, 220, 90, '#52b788')}${C(200, 80, 90, '#52b788')}
-      ${C(120, 150, 14, '#e63946')}${C(260, 120, 14, '#e63946')}${C(300, 260, 14, '#e63946')}${C(170, 260, 14, '#e63946')}${C(220, 200, 14, '#e63946')}${C(80, 260, 14, '#e63946')}</g>`) },
+    svg: svgWrap0(400, 590, E(200, 588, 150, 12, 'url(#g-sh)') +
+      R(170, 260, 60, 330, '#8d5524', 20) + R(170, 260, 60, 330, 'url(#g-volh)', 20) + P('M184 300 q6 40 0 80 q-6 40 4 90 M210 330 q-6 50 4 100 M196 470 q8 40 2 100', 'none', 'stroke="#5e3613" stroke-width="3" opacity=".6"') +
+      P('M200 380 L120 300', 'none', 'stroke="#8d5524" stroke-width="22" stroke-linecap="round"') + P('M200 340 L276 280', 'none', 'stroke="#8d5524" stroke-width="16" stroke-linecap="round"') + E(200, 470, 10, 14, '#4a2a10') +
+      `<g class="canopy">${C(200, 175, 155, '#2d8a55')}${C(200, 170, 150, '#40916c')}${C(90, 220, 90, '#4aa36f')}${C(310, 220, 90, '#4aa36f')}${C(200, 80, 90, '#52b788')}
+      ${C(150, 110, 50, '#74c69d', 'opacity=".55"')}${C(80, 200, 36, '#74c69d', 'opacity=".45"')}${C(270, 160, 40, '#74c69d', 'opacity=".45"')}
+      ${[[120, 150], [260, 120], [300, 260], [170, 260], [220, 200], [80, 260], [140, 210], [320, 190]].map(([x, y]) => C(x, y, 14, '#e63946') + C(x - 4, y - 4, 4, '#fff', 'opacity=".55"') + P(`M${x} ${y - 14} l3 -6`, 'none', 'stroke="#5e3613" stroke-width="2"')).join('')}</g>`) },
   { id: 'schaukel', kind: 'swing', x: 560, y: 300, w: 360, h: 400,
-    svg: svgWrap0(360, 400, P('M20 400 L60 20 M100 400 L60 20 M260 400 L300 20 M340 400 L300 20', 'none', 'stroke="#e76f51" stroke-width="16" stroke-linecap="round"') +
-      R(50, 14, 260, 18, '#bc6c25', 8) +
-      `<g class="sw sw0">${P('M68 30 L68 300 M112 30 L112 300', 'none', 'stroke="#555" stroke-width="4"')}${R(56, 296, 68, 14, '#ffca3a', 6)}</g>
-       <g class="sw sw1">${P('M228 30 L228 300 M272 30 L272 300', 'none', 'stroke="#555" stroke-width="4"')}${R(216, 296, 68, 14, '#ff6fb5', 6)}</g>`) },
+    svg: svgWrap0(360, 400, E(180, 400, 170, 10, 'url(#g-sh)') + P('M20 400 L60 20 M100 400 L60 20 M260 400 L300 20 M340 400 L300 20', 'none', 'stroke="#e76f51" stroke-width="16" stroke-linecap="round"') +
+      P('M20 400 L60 20 M260 400 L300 20', 'none', 'stroke="#f4a582" stroke-width="5" stroke-linecap="round"') +
+      R(50, 14, 260, 18, '#bc6c25', 8) + R(50, 14, 260, 18, 'url(#p-grain)', 8) + R(50, 14, 260, 5, '#e09f5c', 3) +
+      `<g class="sw sw0">${P('M68 30 L68 300 M112 30 L112 300', 'none', 'stroke="#777" stroke-width="4" stroke-dasharray="6 3"')}${R(56, 296, 68, 14, '#ffca3a', 6)}${R(56, 296, 68, 5, '#ffe08a', 3)}</g>
+       <g class="sw sw1">${P('M228 30 L228 300 M272 30 L272 300', 'none', 'stroke="#777" stroke-width="4" stroke-dasharray="6 3"')}${R(216, 296, 68, 14, '#ff6fb5', 6)}${R(216, 296, 68, 5, '#ffa8d2', 3)}</g>`) },
   { id: 'rutsche', kind: 'deco', x: 1000, y: 380, w: 400, h: 320,
-    svg: svgWrap0(400, 320, R(20, 40, 10, 280, '#1982c4', 4) + R(90, 40, 10, 280, '#1982c4', 4) +
-      [80, 130, 180, 230, 280].map((y) => R(26, y, 70, 8, '#1982c4', 4)).join('') + R(10, 36, 110, 14, '#1982c4', 6) +
-      P('M100 44 Q210 60 260 200 Q290 290 395 300 L395 320 Q270 312 240 210 Q200 80 100 64Z', '#ff595e')) },
+    svg: svgWrap0(400, 320, E(200, 320, 190, 9, 'url(#g-sh)') + R(20, 40, 10, 280, '#1982c4', 4) + R(90, 40, 10, 280, '#1982c4', 4) + R(22, 40, 3, 280, '#6fb6ec') + R(92, 40, 3, 280, '#6fb6ec') +
+      [80, 130, 180, 230, 280].map((y) => R(26, y, 70, 8, '#1982c4', 4) + R(26, y, 70, 3, '#6fb6ec', 2)).join('') + R(10, 36, 110, 14, '#1982c4', 6) +
+      P('M100 44 Q210 60 260 200 Q290 290 395 300 L395 320 Q270 312 240 210 Q200 80 100 64Z', '#ff595e') + P('M104 50 Q206 66 252 200 Q282 288 392 302', 'none', 'stroke="#ffb3b5" stroke-width="5"') +
+      P('M100 64 Q200 80 240 210 Q270 312 395 320', 'none', 'stroke="#c1121f" stroke-width="4"')) },
   { id: 'eiswagen', kind: 'spawn', x: 2380, y: 380, w: 200, h: 320, spawn: ['🍦', '🍨', '🍧', '🍭'], sound: 'ding', from: [2480, 470],
-    svg: svgWrap0(200, 320, R(96, 0, 8, 120, '#888') + P('M0 40 Q100 -20 200 40Z', '#ff6fb5') + P('M30 40 Q50 20 70 40 M130 40 Q150 20 170 40', 'none', 'stroke="#fff" stroke-width="6"') +
-      R(10, 180, 180, 110, '#fff', 14) + R(0, 172, 200, 16, '#00bbf9', 8) + T(100, 250, 30, '#ff6fb5', 'EIS 🍦') + C(50, 296, 22, '#333') + C(150, 296, 22, '#333') + C(50, 296, 8, '#ccc') + C(150, 296, 8, '#ccc')) },
+    svg: svgWrap0(200, 320, E(100, 320, 100, 8, 'url(#g-sh)') + R(96, 0, 8, 180, 'url(#g-metal)') + P('M0 40 Q100 -20 200 40Z', '#ff6fb5') + P('M0 40 Q100 -20 200 40Z', 'url(#g-vol)') +
+      P('M30 40 Q50 20 70 40 M130 40 Q150 20 170 40', 'none', 'stroke="#fff" stroke-width="6"') + Array.from({ length: 8 }, (_, i) => P(`M${i * 25} 40 q12.5 12 25 0`, '#ff6fb5')).join('') +
+      R(10, 180, 180, 110, '#fff', 14) + R(10, 180, 180, 110, 'url(#g-vol)', 14) + R(0, 172, 200, 16, '#00bbf9', 8) + R(0, 172, 200, 5, '#7fdcff', 3) +
+      T(100, 250, 30, '#ff6fb5', 'EIS 🍦') + R(20, 262, 160, 6, '#00bbf9', 3) +
+      C(50, 296, 22, '#2b2b2b') + C(150, 296, 22, '#2b2b2b') + C(50, 296, 9, 'url(#g-metal)') + C(150, 296, 9, 'url(#g-metal)')) },
 ];
 
 const parkFG = [
-  { x: 1450, y: 688, w: 310, h: 30, svg: svgWrap0(310, 30, R(0, 0, 310, 26, '#d4a373', 8)) },
+  { x: 1450, y: 688, w: 310, h: 30, svg: svgWrap0(310, 30, R(0, 0, 310, 26, '#c9894a', 8) + R(0, 0, 310, 26, 'url(#p-grain)', 8) + R(0, 0, 310, 5, '#e3ad6e', 3)) },
 ];
 
 // ======================= BADEZIMMER =======================
 function badBG() {
   const W = 2100;
   let s = patterns('bad');
-  s += R(0, 0, W, FLOOR, '#c9f2ee') + R(0, 0, W, FLOOR, 'url(#bad-tiles)') + R(0, 0, W, 40, '#2ec4b6') +
-    R(0, 380, W, FLOOR - 380, '#a8e6df') + R(0, 380, W, FLOOR - 380, 'url(#bad-tiles)') + R(0, 372, W, 10, '#fff') +
-    R(0, FLOOR, W, H - FLOOR, '#e8f7ff') + R(0, FLOOR, W, H - FLOOR, 'url(#bad-checker)') + R(0, FLOOR - 14, W, 16, '#7fd1c7');
-  // Regendusche: Duschwanne, Rückwand, Armatur, Ablage
-  s += G(70, 110, R(0, 0, 420, 580, '#e6fbff', 10) + R(0, 0, 420, 580, 'url(#bad-tiles)'));
-  s += G(60, 680, R(0, 0, 440, 22, '#ffffff', 8) + E(220, 6, 30, 4, '#bbb'));
-  s += G(90, 70, R(0, 0, 380, 10, '#bbb', 5));
-  s += G(370, 430, R(0, 0, 60, 90, '#ddd', 14) + C(30, 30, 14, '#999') + C(30, 30, 6, '#ff595e') + R(24, 56, 12, 24, '#999', 5));
-  s += G(100, 380, R(0, 0, 130, 12, '#fff', 6));
-  s += G(250, 190, R(0, 0, 160, 34, '#fff', 17) + T(80, 25, 20, '#2ec4b6', 'REGENDUSCHE'));
+  s += R(0, 0, W, FLOOR, '#c9f2ee') + R(0, 0, W, FLOOR, 'url(#p-tiles)') + R(0, 0, W, 40, '#2ec4b6') + R(0, 34, W, 6, '#1f9d92') +
+    R(0, 380, W, FLOOR - 380, '#a8e6df') + R(0, 380, W, FLOOR - 380, 'url(#p-tiles)') + R(0, 372, W, 10, '#fff') + R(0, 380, W, 3, '#000', 0, 'opacity=".06"') +
+    R(0, FLOOR, W, H - FLOOR, '#e8f7ff') + R(0, FLOOR, W, H - FLOOR, 'url(#bad-checker)') + R(0, FLOOR - 16, W, 18, '#7fd1c7') + R(0, FLOOR - 16, W, 3, '#c2ece6') + finish(W);
+  // Regendusche
+  s += G(70, 110, R(0, 0, 420, 580, '#e6fbff', 10) + R(0, 0, 420, 580, 'url(#p-tiles)') + R(0, 0, 420, 580, 'url(#g-volh)'));
+  s += G(60, 680, R(0, 0, 440, 22, '#ffffff', 8) + R(0, 0, 440, 22, 'url(#g-vol)', 8) + E(220, 6, 30, 4, '#9aa5b1') + E(220, 6, 18, 2, '#555'));
+  s += G(90, 64, R(0, 0, 380, 12, 'url(#g-metal)', 6));
+  s += G(370, 430, R(0, 0, 60, 90, '#e3e7eb', 14) + R(0, 0, 60, 90, 'url(#g-volh)', 14) + C(30, 30, 15, 'url(#g-metal)') + C(30, 30, 6, '#ff595e') + R(24, 56, 12, 24, 'url(#g-metal)', 5));
+  s += G(100, 380, R(0, 0, 130, 12, '#fff', 6) + R(0, 0, 130, 3, '#fff', 2) + R(0, 10, 130, 4, '#000', 0, 'opacity=".1"'));
+  s += G(250, 190, R(3, 4, 160, 34, '#000', 17, 'opacity=".08"') + R(0, 0, 160, 34, '#fff', 17) + T(80, 25, 20, '#2ec4b6', 'REGENDUSCHE'));
   // Fenster, Handtücher
   s += windowSVG(700, 130, 140, 140, null, true);
-  s += G(560, 150, R(0, 0, 70, 8, '#999', 4) + R(4, 8, 30, 110, '#ff99c8', 6) + R(36, 8, 30, 90, '#ffd166', 6));
+  const towel = (x, h, c) => R(x, 8, 30, h, c, 6) + VOLH(x, 8, 30, h, 6) + R(x, h - 10, 30, 4, '#fff', 0, 'opacity=".7"') + R(x, h - 2, 30, 3, '#fff', 0, 'opacity=".7"');
+  s += G(560, 150, R(0, 0, 70, 8, 'url(#g-metal)', 4) + towel(4, 110, '#ff99c8') + towel(36, 90, '#ffd166'));
   // Badewanne (Rückseite)
-  s += G(600, 560, R(0, 0, 400, 50, '#d9f2ff', 24) + E(200, 18, 180, 14, '#8fd3ff'));
+  s += G(600, 560, R(0, 0, 400, 50, '#d9f2ff', 24) + E(200, 18, 180, 14, '#8fd3ff') + E(200, 14, 160, 8, '#c4ecff'));
   // Waschbecken mit Spiegel
-  s += G(1110, 240, R(0, 0, 200, 210, '#ffffff', 100) + R(12, 12, 176, 186, '#d8f3ff', 88) + P('M50 50 L90 36 L50 140Z', '#fff', 'opacity=".55"'));
-  s += G(1090, 560, R(0, 0, 240, 22, '#ffffff', 10) + E(120, 8, 70, 8, '#d9f2ff') + R(10, 22, 220, 118, '#2ec4b6', 10) + R(26, 38, 90, 86, '#5fd3c7', 8) + R(124, 38, 90, 86, '#5fd3c7', 8) +
-    C(106, 80, 5, '#fff') + C(134, 80, 5, '#fff'));
-  s += E(1210, 780, 120, 22, '#ff99c8') + E(800, 780, 160, 24, '#ffd166');
+  s += G(1110, 240, R(5, 6, 200, 210, '#000', 100, 'opacity=".1"') + R(0, 0, 200, 210, '#ffffff', 100) + R(0, 0, 200, 210, 'url(#g-volh)', 100) + R(12, 12, 176, 186, '#d8f3ff', 88) + R(12, 12, 176, 186, 'url(#g-glass)', 88) + P('M50 50 L90 36 L50 140Z', '#fff', 'opacity=".5"'));
+  s += SH(1210, 704, 130, 8) + G(1090, 560, R(0, 0, 240, 22, '#ffffff', 10) + R(0, 0, 240, 22, 'url(#g-vol)', 10) + E(120, 8, 70, 8, '#d9f2ff') + E(120, 8, 8, 3, '#888') +
+    R(10, 22, 220, 118, '#2ec4b6', 10) + VOL(10, 22, 220, 118, 10) + R(26, 38, 90, 86, '#5fd3c7', 8) + R(124, 38, 90, 86, '#5fd3c7', 8) + VOL(26, 38, 90, 86, 8) + VOL(124, 38, 90, 86, 8) +
+    R(100, 66, 7, 28, 'url(#g-metal)', 3) + R(133, 66, 7, 28, 'url(#g-metal)', 3));
+  // Badvorleger
+  s += E(1210, 780, 120, 22, '#ff99c8') + E(1210, 780, 104, 16, 'none', 'stroke="#fff" stroke-width="3" stroke-dasharray="6 5"') + E(800, 780, 160, 24, '#ffd166') + E(800, 780, 144, 18, 'none', 'stroke="#fff" stroke-width="3" stroke-dasharray="6 5"');
   // Zwei Toiletten mit Trennwänden
-  s += G(1430, 120, R(0, 0, 560, 70, '#2ec4b6', 20) + T(140, 48, 34, '#fff', 'WC 1') + T(420, 48, 34, '#fff', 'WC 2'));
-  const wall = (x) => G(x, 250, R(0, 0, 20, 420, '#ff924c', 8) + R(4, 410, 12, 30, '#999', 3));
+  s += G(1430, 120, R(4, 6, 560, 70, '#000', 20, 'opacity=".1"') + R(0, 0, 560, 70, '#2ec4b6', 20) + R(0, 0, 560, 70, 'url(#g-vol)', 20) + T(140, 48, 34, '#fff', 'WC 1') + T(420, 48, 34, '#fff', 'WC 2') + T(280, 46, 30, '#fff', '🚻'));
+  const wall = (x) => G(x, 250, R(0, 0, 22, 420, '#ff924c', 8) + R(0, 0, 22, 420, 'url(#g-volh)', 8) + R(2, 0, 4, 420, '#ffc08a', 2) + R(5, 410, 12, 30, 'url(#g-metal)', 3));
   s += wall(1420) + wall(1690) + wall(1960);
-  const paper = (x) => G(x, 500, R(0, 0, 40, 8, '#999', 4) + C(20, 22, 16, '#fff') + C(20, 22, 5, '#ddd') + R(14, 36, 12, 34, '#fff', 3));
+  const paper = (x) => G(x, 500, R(0, 0, 40, 8, 'url(#g-metal)', 4) + C(20, 22, 16, '#fff') + C(20, 22, 16, 'url(#g-volh)') + C(20, 22, 5, '#ddd') + R(14, 36, 12, 34, '#fff', 3) + R(14, 36, 12, 34, 'url(#g-volh)', 3) + R(14, 52, 12, 1, '#ccc'));
   s += paper(1630) + paper(1900);
   s += plant(2050, 700, 1);
   s += hangLamp(800, 50, '#2ec4b6') + hangLamp(1600, 40, '#2ec4b6');
@@ -384,21 +653,21 @@ function badBG() {
 
 const badProps = [
   { id: 'regen', kind: 'toggle', x: 110, y: 70, w: 340, h: 70, sound: 'splash',
-    svg: svgWrap0(340, 70, R(160, 0, 20, 30, '#aaa', 4) + R(0, 26, 340, 34, '#cfcfcf', 14) + R(10, 52, 320, 8, '#9a9a9a', 4) +
-      [40, 80, 120, 160, 200, 240, 280, 300].map((x) => C(x, 56, 3, '#777')).join('') +
+    svg: svgWrap0(340, 70, R(160, 0, 20, 30, 'url(#g-metal)', 4) + R(0, 26, 340, 34, '#d7dce1', 14) + R(0, 26, 340, 34, 'url(#g-vol)', 14) + R(10, 52, 320, 8, '#9aa5b1', 4) + R(6, 28, 328, 4, '#fff', 2, 'opacity=".8"') +
+      Array.from({ length: 15 }, (_, i) => C(24 + i * 21, 56, 2.2, '#555')).join('') +
       `<g class="water">${Array.from({ length: 12 }, (_, i) => 22 + i * 27).map((x, i) => `<path d="M${x} 64 L${x - 4} 620" stroke="#4cc9f0" stroke-width="5" stroke-linecap="round" stroke-dasharray="${12 + (i % 3) * 4} 22" class="drops" opacity=".85"/>`).join('')}</g>`) },
   { id: 'wannenhahn', kind: 'toggle', x: 950, y: 470, w: 70, h: 90, sound: 'splash',
-    svg: svgWrap0(70, 90, R(46, 0, 14, 90, '#aaa', 6) + R(6, 10, 54, 14, '#aaa', 7) + C(52, 44, 10, '#ff595e') +
+    svg: svgWrap0(70, 90, R(46, 0, 14, 90, 'url(#g-metal)', 6) + R(6, 10, 54, 14, '#b9c0c7', 7) + R(6, 10, 54, 5, '#fff', 3, 'opacity=".6"') + C(52, 44, 10, 'url(#g-metal)') + C(52, 44, 5, '#ff595e') +
       `<g class="water"><path d="M12 24 L10 120" stroke="#4cc9f0" stroke-width="8" stroke-linecap="round" stroke-dasharray="14 10" class="drops"/></g>`) },
   { id: 'wasserhahn', kind: 'toggle', x: 1180, y: 500, w: 60, h: 60, sound: 'splash',
-    svg: svgWrap0(60, 60, R(24, 10, 12, 50, '#aaa', 6) + R(4, 10, 32, 12, '#aaa', 6) + C(30, 6, 8, '#4f8cff') +
+    svg: svgWrap0(60, 60, R(24, 10, 12, 50, 'url(#g-metal)', 6) + R(4, 10, 32, 12, '#b9c0c7', 6) + R(4, 10, 32, 4, '#fff', 2, 'opacity=".6"') + C(30, 6, 8, 'url(#g-metal)') + C(30, 6, 4, '#4f8cff') +
       `<g class="water"><path d="M8 22 L8 62" stroke="#4cc9f0" stroke-width="6" stroke-linecap="round" stroke-dasharray="10 8" class="drops"/></g>`) },
   { id: 'klo1', kind: 'flush', x: 1490, y: 520, w: 130, h: 180, sound: 'flush', svg: toiletSVG('#ffd6e7'), bowl: { x1: 1500, x2: 1610, y: 612 } },
   { id: 'klo2', kind: 'flush', x: 1760, y: 520, w: 130, h: 180, sound: 'flush', svg: toiletSVG('#d6f0ff'), bowl: { x1: 1770, x2: 1880, y: 612 } },
 ];
 
 const badFG = [
-  { x: 486, y: 110, w: 16, h: 580, svg: svgWrap0(16, 580, R(0, 0, 16, 580, '#bfefff', 6, 'opacity=".45"') + R(4, 20, 4, 200, '#fff', 2, 'opacity=".7"')) },
+  { x: 486, y: 110, w: 16, h: 580, svg: svgWrap0(16, 580, R(0, 0, 16, 580, '#bfefff', 6, 'opacity=".45"') + R(0, 0, 16, 580, 'url(#g-glass)', 6) + R(4, 20, 4, 200, '#fff', 2, 'opacity=".7"') + R(0, 0, 16, 8, 'url(#g-metal)', 3) + R(0, 572, 16, 8, 'url(#g-metal)', 3)) },
   { x: 600, y: 588, w: 400, h: 112, svg: tubFront() },
 ];
 
@@ -419,59 +688,71 @@ function schuleBG() {
   s += R(0, 0, 700, FLOOR, '#fde68a') + R(0, 0, 700, FLOOR, 'url(#schule-stripes)') + R(0, 470, 700, FLOOR - 470, '#f59e0b') + R(0, 462, 700, 10, '#fff');
   // Klassenzimmer
   s += R(700, 0, W - 700, FLOOR, '#e0f2fe') + R(700, 0, W - 700, FLOOR, 'url(#schule-dots)') + R(700, 470, W - 700, FLOOR - 470, '#bae6fd') + R(700, 462, W - 700, 10, '#fff');
-  s += R(0, 0, W, 40, '#dc2626') + R(0, 36, W, 6, '#991b1b');
-  s += R(0, FLOOR, 700, H - FLOOR, '#d6d3d1') + R(0, FLOOR, 700, H - FLOOR, 'url(#schule-tiles)') + R(700, FLOOR, W - 700, H - FLOOR, '#c68b59') + R(700, FLOOR, W - 700, H - FLOOR, 'url(#schule-wood)') + R(0, FLOOR - 14, W, 16, '#92400e');
+  s += roofBand(W, '#dc2626', '#991b1b');
+  s += R(0, 0, 700, FLOOR, 'url(#p-damask)') + R(0, 470, W, FLOOR - 470, 'url(#g-vol)') + R(0, 470, 700, FLOOR - 470, 'url(#p-tiles)');
+  s += R(0, FLOOR, 700, H - FLOOR, '#d6d3d1') + R(0, FLOOR, 700, H - FLOOR, 'url(#schule-tiles)') + R(700, FLOOR, W - 700, H - FLOOR, '#c68b59') + R(700, FLOOR, W - 700, H - FLOOR, 'url(#schule-wood)') + R(0, FLOOR - 16, W, 18, '#92400e') + R(0, FLOOR - 16, W, 3, '#c2410c') + finish(W);
   // Schild Heylinschule
-  s += G(60, 70, R(0, 0, 560, 110, '#dc2626', 22) + R(10, 10, 540, 90, '#fff', 16) + T(280, 76, 56, '#dc2626', 'Heylinschule'));
+  s += G(60, 70, R(5, 7, 560, 110, '#000', 22, 'opacity=".12"') + R(0, 0, 560, 110, '#dc2626', 22) + R(0, 0, 560, 110, 'url(#g-vol)', 22) + R(10, 10, 540, 90, '#fff', 16) + R(10, 10, 540, 90, 'url(#g-vol)', 16) + T(282, 79, 56, '#000', 'Heylinschule', 'opacity=".1"') + T(280, 76, 56, '#dc2626', 'Heylinschule') + C(26, 55, 6, 'url(#g-metal)') + C(534, 55, 6, 'url(#g-metal)'));
   s += G(60, 196, `<text x="0" y="40" font-size="40">🏫</text>` + T(300, 36, 26, '#92400e', 'Lernen · Spielen · Lachen'));
   // Garderobe mit Haken
-  s += G(50, 290, R(0, 0, 400, 16, '#92400e', 6) + [40, 120, 200, 280, 360].map((x) => C(x, 26, 9, '#555')).join(''));
+  s += G(50, 290, R(0, 0, 400, 16, '#92400e', 6) + GRAIN(0, 0, 400, 16, 6) + R(0, 0, 400, 4, '#c2410c', 3) + [40, 120, 200, 280, 360].map((x) => P(`M${x} 14 q0 18 10 18`, 'none', 'stroke="url(#g-metal)" stroke-width="5" stroke-linecap="round"') + P(`M${x} 14 q0 18 10 18`, 'none', 'stroke="#9aa5b1" stroke-width="5" stroke-linecap="round"')).join('') +
+    P('M106 30 q-26 10 -22 90 h52 q4 -80 -22 -90z', '#1982c4') + P('M106 30 q-26 10 -22 90 h52 q4 -80 -22 -90z', 'url(#g-volh)') + R(96, 60, 20, 30, '#ffca3a', 3) +
+    P('M346 30 q-24 10 -20 70 h48 q4 -60 -20 -70z', '#e63946') + P('M346 30 q-24 10 -20 70 h48 q4 -60 -20 -70z', 'url(#g-volh)') + R(330, 70, 40, 6, '#fff', 2, 'opacity=".6"'));
   // Pinnwand mit Bildern
-  s += G(470, 260, R(0, 0, 200, 170, '#b45309', 10) + R(10, 10, 180, 150, '#fcd34d', 6) +
+  s += G(470, 260, R(5, 7, 200, 170, '#000', 10, 'opacity=".12"') + R(0, 0, 200, 170, '#b45309', 10) + GRAIN(0, 0, 200, 170, 10) + R(10, 10, 180, 150, '#e9b872', 6) + R(10, 10, 180, 150, 'url(#p-noise)', 6) +
+    C(54, 24, 4, '#e63946') + C(140, 28, 4, '#1982c4') + C(95, 94, 4, '#22c55e') +
     R(24, 22, 60, 50, '#fff', 3, 'transform="rotate(-6 54 47)"') + `<text x="36" y="62" font-size="32">🌈</text>` +
     R(110, 26, 60, 50, '#fff', 3, 'transform="rotate(5 140 51)"') + `<text x="122" y="66" font-size="32">🐱</text>` +
     R(60, 92, 70, 54, '#fff', 3, 'transform="rotate(3 95 119)"') + `<text x="76" y="136" font-size="32">🚀</text>`);
   // Tür zur 4A
-  s += G(560, 470, R(0, -10, 130, 240, '#92400e', 10) + R(10, 0, 110, 230, '#d97706', 6) + C(100, 120, 7, '#fde68a') + R(20, 20, 90, 60, '#bae6fd', 6) + R(25, -60, 80, 40, '#fff', 10) + T(65, -30, 28, '#dc2626', '4A'));
+  s += G(560, 470, R(0, -10, 130, 240, '#92400e', 10) + R(10, 0, 110, 230, '#d97706', 6) + GRAIN(10, 0, 110, 230, 6) + VOL(10, 0, 110, 230, 6) + R(24, 96, 82, 110, 'none', 6, 'stroke="#b45309" stroke-width="3"') +
+    R(88, 116, 22, 8, 'url(#g-metal)', 4) + C(92, 120, 6, 'url(#g-metal)') + R(20, 20, 90, 60, '#bae6fd', 6) + R(20, 20, 90, 60, 'url(#g-glass)', 6) + R(25, -60, 80, 40, '#fff', 10) + R(25, -60, 80, 40, 'url(#g-vol)', 10) + T(65, -30, 28, '#dc2626', '4A'));
   // Glaswand-Pfosten
   s += R(692, 42, 16, FLOOR - 42, '#991b1b');
   // ABC-Leiste
   const abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   [...abc].forEach((ch, i) => {
     const cols = ['#ef4444', '#f59e0b', '#22c55e', '#3b82f6', '#a855f7', '#ec4899'];
-    s += G(740 + i * 62, 52, R(0, 0, 54, 54, cols[i % cols.length], 10) + T(27, 40, 34, '#fff', ch));
+    s += G(740 + i * 62, 52, R(2, 3, 54, 54, '#000', 10, 'opacity=".12"') + R(0, 0, 54, 54, cols[i % cols.length], 10) + R(0, 0, 54, 54, 'url(#g-vol)', 10) + T(27, 40, 34, '#fff', ch) + T(40, 50, 13, '#fff', ch.toLowerCase(), 'opacity=".8"'));
   });
   // Klassenschild + Uhr
-  s += G(760, 130, R(0, 0, 230, 80, '#22c55e', 16) + T(115, 54, 40, '#fff', 'Klasse 4A'));
-  s += G(2240, 210, C(0, 0, 58, '#fff') + C(0, 0, 58, 'none', 'stroke="#dc2626" stroke-width="8"') +
+  s += G(760, 130, R(4, 6, 230, 80, '#000', 16, 'opacity=".12"') + R(0, 0, 230, 80, '#22c55e', 16) + R(0, 0, 230, 80, 'url(#g-vol)', 16) + T(115, 54, 40, '#fff', 'Klasse 4A'));
+  s += G(2240, 210, C(3, 5, 58, '#000', 'opacity=".12"') + C(0, 0, 58, '#fff') + C(0, 0, 58, 'url(#g-vol)') + C(0, 0, 58, 'none', 'stroke="#dc2626" stroke-width="8"') +
     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => R(-3, -50, 6, 10, '#333', 2, `transform="rotate(${i * 30})"`)).join('') +
     '');
   s += `<g class="clockh" style="transform-origin:2240px 210px">${R(2236, 180, 8, 32, '#333', 4)}</g><g class="clockm" style="transform-origin:2240px 210px">${R(2237, 164, 6, 48, '#555', 3)}</g>` + C(2240, 210, 6, '#dc2626');
   // Fenster
   s += windowSVG(2120, 330, 220, 120, '#22c55e');
   // Weltkarte-Poster, Regal
-  s += G(1880, 150, R(0, 0, 200, 140, '#fff', 8) + R(8, 8, 184, 124, '#7dd3fc', 4) + E(60, 60, 34, 26, '#22c55e') + E(130, 80, 40, 30, '#16a34a') + E(150, 40, 20, 14, '#84cc16') + T(100, 128, 16, '#1e3a8a', 'WELT'));
+  s += G(1880, 150, R(4, 6, 200, 140, '#000', 8, 'opacity=".12"') + R(0, 0, 200, 140, '#fff', 8) + R(8, 8, 184, 124, '#7dd3fc', 4) + P('M8 40 h184 M8 76 h184 M60 8 v124 M130 8 v124', 'none', 'stroke="#fff" stroke-width="1" opacity=".6"') +
+    E(60, 60, 34, 26, '#22c55e') + E(130, 80, 40, 30, '#16a34a') + E(150, 40, 20, 14, '#84cc16') + E(40, 100, 14, 10, '#a3e635') + T(100, 128, 16, '#1e3a8a', 'WELT') + C(8, 8, 4, '#e63946') + C(192, 8, 4, '#e63946'));
+  // Bücherregal
+  s += SH(2330, 704, 90, 7) + G(2245, 530, R(0, 0, 180, 170, '#b45309', 8) + GRAIN(0, 0, 180, 170, 8) + VOL(0, 0, 180, 170, 8) + R(8, 8, 164, 154, '#92400e', 4) + R(8, 80, 164, 8, '#b45309') +
+    [['#e63946', 60], ['#1982c4', 64], ['#ffca3a', 52], ['#22c55e', 60], ['#a855f7', 56], ['#f97316', 62], ['#0ea5e9', 50]].map(([c, h], i) => book(14 + i * 22, 80, 20, h, c)).join('') +
+    [['#ec4899', 58], ['#84cc16', 62], ['#3b82f6', 54], ['#eab308', 60]].map(([c, h], i) => book(14 + i * 22, 162, 20, h, c)).join('') + `<text x="112" y="154" font-size="44">🧩</text>`);
   // Lehrerpult (hinten) und Tafelleiste
-  s += G(1060, 404, R(0, 0, 500, 12, '#6b7280', 4));
-  s += plant(30, 700, 1) + plant(2370, 700, 1.1);
+  s += G(1060, 404, R(0, 0, 500, 12, '#6b7280', 4) + R(0, 0, 500, 3, '#9ca3af', 2) + R(60, -6, 30, 8, '#fff', 3) + R(100, -6, 22, 8, '#fde68a', 3) + R(380, -12, 60, 14, '#3b82f6', 4) + R(380, -12, 60, 6, '#e5e7eb', 3));
+  s += plant(30, 700, 1);
   s += hangLamp(350, 40, '#dc2626');
   return svgWrap(W, s);
 }
 
-const deskFront = (w) => svgWrap0(w, 144, R(0, 0, w, 16, '#fbbf24', 6) + R(8, 16, w - 16, 70, '#3b82f6', 6) + R(16, 86, 10, 58, '#6b7280', 3) + R(w - 26, 86, 10, 58, '#6b7280', 3) +
-  R(w / 2 - 50, 30, 100, 40, '#60a5fa', 6));
+const deskFront = (w) => svgWrap0(w, 144, E(w / 2, 144, w * 0.48, 7, 'url(#g-sh)') + R(16, 86, 10, 58, 'url(#g-metal)', 3) + R(w - 26, 86, 10, 58, 'url(#g-metal)', 3) + R(10, 138, 22, 6, '#444', 3) + R(w - 32, 138, 22, 6, '#444', 3) +
+  R(0, 0, w, 16, '#fbbf24', 6) + R(0, 0, w, 16, 'url(#p-grain)', 6) + R(0, 0, w, 4, '#fde68a', 3) + R(8, 16, w - 16, 70, '#3b82f6', 6) + VOL(8, 16, w - 16, 70, 6) +
+  R(w / 2 - 50, 30, 100, 40, '#60a5fa', 6) + VOL(w / 2 - 50, 30, 100, 40, 6) + R(w / 2 - 14, 46, 28, 6, 'url(#g-metal)', 3) + R(20, 26, 50, 30, '#fff', 3, 'opacity=".9" transform="rotate(-4 45 41)"') + P('M26 34 h36 M26 42 h30 M26 50 h34', 'none', 'stroke="#93c5fd" stroke-width="2" transform="rotate(-4 45 41)"'));
 
 const schuleProps = [
   { id: 'tafel', kind: 'board', x: 1060, y: 130, w: 500, h: 280, sound: 'click',
-    svg: svgWrap0(500, 280, R(0, 0, 500, 280, '#92400e', 12) + R(14, 14, 472, 252, '#14532d', 6) +
+    svg: svgWrap0(500, 280, R(6, 8, 500, 280, '#000', 12, 'opacity=".14"') + R(0, 0, 500, 280, '#92400e', 12) + GRAIN(0, 0, 500, 280, 12) + VOL(0, 0, 500, 280, 12) + R(14, 14, 472, 252, '#14532d', 6) + R(14, 14, 472, 252, 'url(#p-noise)', 6) +
+      P('M40 240 q80 -20 160 6 M300 40 q60 10 150 -4', 'none', 'stroke="#fff" stroke-width="10" opacity=".05" stroke-linecap="round"') +
       BOARD_PAGES.map((pg, i) => `<g class="pg pg${i}" transform="translate(20 0)">${pg}</g>`).join('') +
       R(380, 266, 60, 10, '#fff', 3) + R(100, 266, 40, 10, '#fde68a', 3)) },
   { id: 'schulglocke', kind: 'bell', x: 250, y: 330, w: 110, h: 110,
-    svg: svgWrap0(110, 110, R(45, 0, 20, 20, '#999', 4) + P('M20 90 Q20 30 55 22 Q90 30 90 90Z', '#fbbf24', 'class="bellb"') + R(10, 86, 90, 14, '#f59e0b', 7) + C(55, 104, 9, '#92400e')) },
+    svg: svgWrap0(110, 110, R(45, 0, 20, 20, 'url(#g-metal)', 4) + `<g class="bellb">${P('M20 90 Q20 30 55 22 Q90 30 90 90Z', '#fbbf24')}${P('M20 90 Q20 30 55 22 Q90 30 90 90Z', 'url(#g-volh)')}${P('M34 80 Q34 44 52 34', 'none', 'stroke="#fff" stroke-width="5" opacity=".55" stroke-linecap="round"')}</g>` + R(10, 86, 90, 14, '#f59e0b', 7) + R(10, 86, 90, 14, 'url(#g-vol)', 7) + C(55, 104, 9, '#92400e')) },
 ];
 
 const schuleFG = [
-  { x: 760, y: 560, w: 260, h: 144, svg: svgWrap0(260, 144, R(0, 0, 260, 18, '#92400e', 8) + R(10, 18, 240, 126, '#b45309', 6) + R(30, 40, 200, 70, '#d97706', 6) + T(130, 88, 26, '#fff', 'Lehrerin')) },
+  { x: 760, y: 560, w: 260, h: 144, svg: svgWrap0(260, 144, E(130, 144, 125, 7, 'url(#g-sh)') + R(10, 18, 240, 126, '#b45309', 6) + GRAIN(10, 18, 240, 126, 6) + VOL(10, 18, 240, 126, 6) + R(0, 0, 260, 18, '#92400e', 8) + R(0, 0, 260, 4, '#c2410c', 3) + R(30, 40, 200, 70, '#d97706', 6) + VOL(30, 40, 200, 70, 6) + T(130, 88, 26, '#fff', 'Lehrerin')) },
   ...SDESKS.map((x) => ({ x, y: 560, w: 240, h: 144, svg: deskFront(240) })),
 ];
 
@@ -492,28 +773,37 @@ function slantTag(x, y, w, text) {
 
 function officeChair(x, color = GREY) {
   // x = Sitzmitte, Sitzfläche bei y=592
-  return G(x - 50, 470, R(18, 0, 64, 100, color, 22) + R(0, 112, 100, 22, shadeHex(color), 11) + R(44, 134, 12, 70, '#888') +
-    P('M10 222 L50 200 L90 222', 'none', 'stroke="#666" stroke-width="8" stroke-linecap="round"') + C(10, 224, 6, '#333') + C(90, 224, 6, '#333') + C(50, 222, 6, '#333'));
+  return SH(x, 704, 56, 7) + G(x - 50, 470, R(18, 0, 64, 100, color, 22) + R(18, 0, 64, 100, 'url(#g-vol)', 22) + R(30, 14, 40, 60, 'none', 14, 'stroke="#000" stroke-opacity=".12" stroke-width="2"') + R(46, 100, 8, 14, '#555') +
+    R(0, 112, 100, 22, shadeHex(color), 11) + R(0, 112, 100, 22, 'url(#g-vol)', 11) + R(-4, 104, 14, 8, '#444', 3) + R(90, 104, 14, 8, '#444', 3) + R(44, 134, 12, 70, 'url(#g-metal)') +
+    P('M10 222 L50 200 L90 222', 'none', 'stroke="#555" stroke-width="8" stroke-linecap="round"') + C(10, 224, 6, '#222') + C(90, 224, 6, '#222') + C(50, 222, 6, '#222'));
 }
 
 function desk(x) {
   // Tischplatte bei y=540, Breite 240
-  return G(x, 540, R(0, 0, 240, 16, '#ffffff', 6) + R(0, 14, 240, 4, '#ddd') + R(10, 16, 12, 144, GREY, 4) + R(218, 16, 12, 144, GREY, 4) +
-    R(150, 18, 70, 90, '#e9ecea', 6) + R(162, 40, 46, 6, '#bbb', 3) + R(162, 70, 46, 6, '#bbb', 3) +
-    R(70, -8, 70, 8, '#333', 3) + E(160, -4, 10, 5, '#333'));
+  return SH(x + 120, 704, 120, 8) + G(x, 540, R(10, 16, 12, 144, GREY, 4) + R(218, 16, 12, 144, GREY, 4) + R(12, 16, 3, 144, '#888') + R(220, 16, 3, 144, '#888') +
+    R(150, 18, 70, 90, '#e9ecea', 6) + VOL(150, 18, 70, 90, 6) + R(162, 36, 46, 6, 'url(#g-metal)', 3) + R(162, 70, 46, 6, 'url(#g-metal)', 3) + R(150, 54, 70, 2, '#ccc') +
+    R(0, 0, 240, 16, '#ffffff', 6) + R(0, 0, 240, 16, 'url(#g-vol)', 6) + R(0, 14, 240, 4, '#ccd') +
+    R(66, -9, 76, 9, '#2b2b2b', 3) + Array.from({ length: 10 }, (_, i) => R(70 + i * 7, -7, 5, 3, '#555', 1)).join('') + E(160, -4, 9, 5, '#2b2b2b') + E(158, -6, 3, 2, '#666') +
+    R(10, -24, 30, 24, '#fff', 3, 'transform="rotate(-6 25 -12)"') + R(12, -20, 26, 3, '#ffd166', 1, 'transform="rotate(-6 25 -12)"'));
 }
 
 function bueroBG() {
   const W = 3100;
   let s = patterns('buero');
-  s += R(0, 0, W, FLOOR, '#f4f6f4') + R(0, 0, W, 40, GREY) + R(0, 36, W, 6, ITMX) +
-    R(0, FLOOR, W, H - FLOOR, '#a3a9a3') + R(0, FLOOR, W, H - FLOOR, 'url(#buero-tiles)') + R(0, FLOOR - 14, W, 16, '#c9cec9');
+  s += R(0, 0, W, FLOOR, '#f4f6f4') + R(0, 0, W, FLOOR, 'url(#p-noise)') + R(0, 0, W, 40, GREY) + R(0, 36, W, 6, ITMX) + R(0, 42, W, 4, '#000', 0, 'opacity=".1"') +
+    R(0, FLOOR, W, H - FLOOR, '#a3a9a3') + R(0, FLOOR, W, H - FLOOR, 'url(#buero-tiles)') + R(0, FLOOR, W, H - FLOOR, 'url(#p-noise)') + R(0, FLOOR - 16, W, 18, '#c9cec9') + R(0, FLOOR - 16, W, 3, '#e3e7e3') + finish(W);
+  // Deckenleuchten-Panels
+  for (let x = 150; x < W; x += 600) s += R(x, 46, 300, 8, '#fff', 3) + R(x, 54, 300, 3, '#d0d4d0');
   // Grüne Schräge als Wandakzent (wie im Logo)
   for (let x = 0; x < W; x += 600) s += P(`M${x} 640 L${x + 600} 610 L${x + 600} 686 L${x} 686Z`, ITMX, 'opacity=".18"');
   // Empfang: Logo-Wand
-  s += P('M50 160 L660 104 L660 440 L50 440Z', ITMX) + R(90, 196, 530, 214, '#fff', 18) + img('icons/itmx-logo.png', 110, 206, 490, 191);
-  s += G(470, 400, R(0, 140, 220, 16, '#fff', 6) + R(6, 156, 208, 144, '#e3e7e3', 6) + R(16, 170, 90, 116, '#d3d8d3', 6) + R(114, 170, 90, 116, '#d3d8d3', 6));
-  s += G(80, 520, R(0, 0, 350, 20, '#fff', 8) + P('M10 20 L340 20 L340 180 L10 180Z', ITMX) + P('M10 20 L340 20 L340 46 L10 60Z', ITMX_D) + img('icons/itmx-x.png', 140, 76, 70, 76));
+  s += P('M56 168 L666 112 L666 448 L56 448Z', '#000', 'opacity=".12"') + P('M50 160 L660 104 L660 440 L50 440Z', ITMX) + P('M50 160 L660 104 L660 440 L50 440Z', 'url(#g-volh)') + P('M50 160 L660 104 L660 118 L50 174Z', '#fff', 'opacity=".25"') +
+    R(90, 196, 530, 214, '#fff', 18) + R(90, 196, 530, 214, 'url(#g-vol)', 18) + img('icons/itmx-logo.png', 110, 206, 490, 191) + [70, 640].map((x) => C(x, 300, 18, 'url(#g-bulb)', 'opacity=".7"') + C(x, 300, 5, 'url(#g-metal)')).join('');
+  s += SH(580, 704, 110, 8) + G(470, 400, R(6, 156, 208, 144, '#e3e7e3', 6) + VOL(6, 156, 208, 144, 6) + R(16, 170, 90, 116, '#d3d8d3', 6) + R(114, 170, 90, 116, '#d3d8d3', 6) + VOL(16, 170, 90, 116, 6) + VOL(114, 170, 90, 116, 6) +
+    R(96, 216, 6, 26, 'url(#g-metal)', 3) + R(118, 216, 6, 26, 'url(#g-metal)', 3) + R(0, 140, 220, 16, '#fff', 6) + R(0, 140, 220, 4, '#fff', 3) + R(0, 152, 220, 4, '#000', 0, 'opacity=".1"') +
+    [150, 180].map((x) => P(`M${x} 140 v-14 h18 v14z`, '#fff') + P(`M${x + 18} 128 q8 0 6 8 q-2 4 -6 4`, 'none', 'stroke="#ddd" stroke-width="3"')).join(''));
+  s += SH(255, 704, 190, 10) + G(80, 520, P('M10 20 L340 20 L340 180 L10 180Z', ITMX) + P('M10 20 L340 20 L340 180 L10 180Z', 'url(#g-volh)') + P('M10 20 L340 20 L340 46 L10 60Z', ITMX_D) + img('icons/itmx-x.png', 140, 76, 70, 76) +
+    R(0, 0, 350, 20, '#fff', 8) + R(0, 0, 350, 5, '#fff', 4) + R(0, 16, 350, 4, '#000', 0, 'opacity=".12"') + R(20, 170, 310, 10, '#333', 3));
   s += plant(30, 700, 1.1);
   // Büros mit Fenstern, Schreibtischen, Stühlen
   OFFICES.forEach((d, i) => {
@@ -522,43 +812,45 @@ function bueroBG() {
     s += img('icons/itmx-x.png', d + 520, 50, 50, 54);
     s += officeChair(d + 90, i === 1 ? ITMX : GREY) + officeChair(d + 380, i === 1 ? GREY : ITMX);
     s += desk(d + 30) + desk(d + 320);
-    s += E(d + 300, 760, 240, 26, '#8d948d');
+    s += E(d + 300, 760, 240, 26, '#8d948d') + E(d + 300, 760, 226, 20, 'url(#p-noise)') + E(d + 300, 760, 200, 16, 'none', 'stroke="#b6bcb6" stroke-width="2"');
+    s += plant(d + 560, 700, 0.8);
   });
   // Meetingraum
   s += slantTag(2520, 54, 190, 'Meeting');
   [2620, 2740, 2860].forEach((x) => (s += officeChair(x, ITMX)));
   s += plant(3060, 700, 1);
   // Glaswände zwischen den Räumen
-  for (const x of [690, 1290, 1890, 2490]) s += R(x, 42, 16, FLOOR - 42, '#bfe3f2', 0, 'opacity=".6"') + R(x, 42, 16, 10, GREY) + R(x + 4, 120, 3, 300, '#fff', 1, 'opacity=".8"');
+  for (const x of [690, 1290, 1890, 2490]) s += R(x, 42, 16, FLOOR - 42, '#bfe3f2', 0, 'opacity=".6"') + R(x, 42, 16, FLOOR - 42, 'url(#g-glass)') + R(x, 42, 16, 10, GREY) + R(x, FLOOR - 12, 16, 12, GREY) + R(x + 4, 120, 3, 300, '#fff', 1, 'opacity=".8"');
   OFFICES.concat([2500]).forEach((x) => (s += hangLamp(x + 300, 50, ITMX)));
   return svgWrap(W, s);
 }
 
 function monitorSVG() {
-  return svgWrap0(120, 120, R(0, 0, 120, 84, '#2b2b2b', 8) + R(6, 6, 108, 72, '#111', 4) + R(52, 84, 16, 22, '#555') + R(30, 104, 60, 14, '#555', 5) +
+  return svgWrap0(120, 120, R(52, 84, 16, 22, 'url(#g-metal)') + R(30, 104, 60, 14, '#555', 5) + R(30, 104, 60, 4, '#888', 2) + R(0, 0, 120, 84, '#2b2b2b', 8) + R(0, 0, 120, 3, '#555', 2) + R(6, 6, 108, 72, '#0e1116', 4) + R(6, 6, 108, 72, 'url(#g-glass)', 4) + C(60, 81, 1.5, '#50af30') +
     `<g class="tvon">${R(6, 6, 108, 72, '#f4f6f4', 4)}${R(6, 6, 108, 12, ITMX, 4)}${R(14, 26, 60, 6, GREY, 3)}${R(14, 38, 80, 6, ITMX, 3)}${R(14, 50, 46, 6, GREY, 3)}${R(64, 50, 6, 18, '#111', 1, 'class="led"')}
-      ${R(84, 46, 8, 22, ITMX)}${R(96, 36, 8, 32, ITMX_D)}</g>`);
+      ${R(84, 46, 8, 22, ITMX)}${R(96, 36, 8, 32, ITMX_D)}${R(6, 6, 108, 72, 'url(#g-glass)', 4)}</g>`);
 }
 
 const bueroProps = [
   { id: 'itmxkaffee', kind: 'spawn', x: 510, y: 400, w: 110, h: 140, spawn: ['☕', '☕', '🥛', '🍪'], sound: 'pop', from: [640, 380],
-    svg: svgWrap0(110, 140, R(0, 0, 110, 140, GREY, 14) + R(8, 8, 94, 36, '#333', 8) + C(30, 26, 7, ITMX) + C(55, 26, 7, '#fff') + C(80, 26, 7, '#ffca3a') +
+    svg: svgWrap0(110, 140, R(0, 0, 110, 140, GREY, 14) + R(0, 0, 110, 140, 'url(#g-volh)', 14) + R(8, 8, 94, 36, '#333', 8) + R(10, 10, 90, 5, '#fff', 3, 'opacity=".15"') + C(30, 26, 7, ITMX) + C(55, 26, 7, '#fff') + C(80, 26, 7, '#ffca3a') +
       R(38, 52, 34, 16, '#777', 5) + R(22, 122, 66, 9, '#777', 4) + R(50, 68, 10, 20, '#7f5539', 3)) },
   ...OFFICES.flatMap((d, i) => [
     { id: `mon${i}a`, kind: 'toggle', x: d + 120, y: 420, w: 120, h: 120, sound: 'click', svg: monitorSVG() },
     { id: `mon${i}b`, kind: 'toggle', x: d + 410, y: 420, w: 120, h: 120, sound: 'click', svg: monitorSVG() },
   ]),
   { id: 'beamer', kind: 'toggle', x: 2590, y: 160, w: 320, h: 190, sound: 'tv',
-    svg: svgWrap0(320, 190, R(0, 0, 320, 180, '#2b2b2b', 10) + R(8, 8, 304, 164, '#111', 6) +
+    svg: svgWrap0(320, 190, R(6, 8, 320, 180, '#000', 10, 'opacity=".12"') + R(0, 0, 320, 180, '#2b2b2b', 10) + R(8, 8, 304, 164, '#0e1116', 6) + R(8, 8, 304, 164, 'url(#g-glass)', 6) +
       `<g class="tvon">${R(8, 8, 304, 164, '#fff', 6)}${img('icons/itmx-logo.png', 20, 18, 130, 51)}
       ${R(180, 110, 22, 50, ITMX)}${R(210, 90, 22, 70, ITMX_D)}${R(240, 60, 22, 100, ITMX)}${R(270, 30, 22, 130, ITMX_D)}
       ${R(20, 90, 140, 8, GREY, 4)}${R(20, 110, 110, 8, '#bbb', 4)}${R(20, 130, 130, 8, '#bbb', 4)}</g>`) },
   { id: 'drucker', kind: 'spawn', x: 2955, y: 590, w: 120, h: 110, spawn: ['📄', '📄', '📄', '📊'], sound: 'click', from: [3015, 560],
-    svg: svgWrap0(120, 110, R(0, 20, 120, 90, '#e3e7e3', 12) + R(10, 0, 100, 28, '#c9cec9', 8) + R(20, 50, 80, 8, '#333', 4) + C(100, 80, 6, ITMX) + R(16, 92, 88, 6, '#bbb', 3)) },
+    svg: svgWrap0(120, 110, E(60, 110, 60, 6, 'url(#g-sh)') + R(0, 20, 120, 90, '#e3e7e3', 12) + R(0, 20, 120, 90, 'url(#g-vol)', 12) + R(10, 0, 100, 28, '#c9cec9', 8) + R(10, 0, 100, 28, 'url(#g-vol)', 8) + R(24, -6, 72, 10, '#fff', 2) +
+      R(20, 50, 80, 8, '#333', 4) + R(14, 30, 30, 12, '#2b2b2b', 3) + R(18, 33, 22, 6, '#50af30', 2, 'opacity=".7"') + C(100, 80, 6, ITMX) + C(84, 80, 4, '#bbb') + R(16, 92, 88, 6, '#bbb', 3)) },
 ];
 
 const bueroFG = [
-  { x: 2550, y: 556, w: 380, h: 144, svg: svgWrap0(380, 144, R(0, 0, 380, 18, '#ffffff', 8) + P('M14 18 L366 18 L366 144 L14 144Z', GREY) + P('M14 18 L366 18 L366 40 L14 54Z', ITMX) + img('icons/itmx-x.png', 166, 66, 48, 52)) },
+  { x: 2550, y: 556, w: 380, h: 144, svg: svgWrap0(380, 144, E(190, 144, 180, 8, 'url(#g-sh)') + R(0, 0, 380, 18, '#ffffff', 8) + R(0, 0, 380, 18, 'url(#g-vol)', 8) + P('M14 18 L366 18 L366 144 L14 144Z', GREY) + P('M14 18 L366 18 L366 40 L14 54Z', ITMX) + img('icons/itmx-x.png', 166, 66, 48, 52)) },
 ];
 
 // ======================= Szenen =======================

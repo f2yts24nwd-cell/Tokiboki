@@ -608,3 +608,20 @@ body.map-open #nav, body.map-open #drawer { display: none; }
 .flag { transform-box: fill-box; transform-origin: 0 50%; animation: flag 0.8s ease-in-out infinite alternate; }
 .mbell { transform-box: fill-box; transform-origin: 50% 0; animation: ring 1.2s ease-in-out infinite alternate; }
 @keyframes flag { from { transform: scaleX(1) skewY(0); } to { transform: scaleX(0.8) skewY(6deg); } }
+
+/* Weiche Schatten unter Dingen und Figuren */
+.o.i::after, .o.c::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  width: 78%;
+  height: 12px;
+  transform: translateX(-50%);
+  background: radial-gradient(closest-side, rgba(0, 0, 0, 0.32), rgba(0, 0, 0, 0));
+  z-index: -1;
+  pointer-events: none;
+}
+.o.c::after { width: 70%; bottom: -6px; height: 14px; }
+.o.c.seated::after, .o.dragging::after, .hand .o::after, .o.floaty::after { display: none; }
+#map.night .owin { animation: none; fill: #ffe066; }
