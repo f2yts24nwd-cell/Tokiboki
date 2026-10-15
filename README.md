@@ -6,7 +6,8 @@ Eine bunte Spielwelt für das iPad (Querformat), läuft als installierbare Web-A
 Auf dem iPad in Safari öffnen → Teilen ⬆️ → „Zum Home-Bildschirm“.
 
 ## Inhalt
-- 5 Orte: Haus (Wohnzimmer, Küche, Bad, Schlafzimmer), Café, Supermarkt, Friseur, Park
+- 6 Orte: Haus (Wohnzimmer, Küche, Bad, Schlafzimmer), Café, Supermarkt, Friseur, Badezimmer (Regendusche, Badewanne, Waschbecken, 2 WCs), Park
+- Auf dem Klo machen die Figuren ein 💩 – Spülung antippen und weg ist es
 - Figuren herumziehen, hinsetzen (Sofa, Stühle, Bett, Badewanne, Schaukel, Rutsche), anziehen und umstylen
 - Über 100 Gegenstände: essen, halten, kochen (🥚→🍳), Kühlschrank (💧→🧊), Geschenke auspacken …
 - Tag/Nacht, Geräusche (WebAudio), automatisches Speichern im Browser

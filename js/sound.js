@@ -110,6 +110,10 @@ export const sfx = {
   flush: () => noise({ t: 1.5, v: 0.35, f: 300, f2: 2400, q: 0.6 }),
   whoosh: () => noise({ t: 0.4, v: 0.2, f: 300, f2: 2200, q: 1 }),
   poof: () => noise({ t: 0.3, v: 0.3, f: 2500, f2: 300, q: 0.8 }),
+  plop: () => {
+    tone({ f: 420, f2: 110, t: 0.18, v: 0.3 });
+    noise({ t: 0.25, v: 0.15, f: 900, q: 1, delay: 0.12 });
+  },
   splash: () => noise({ t: 0.5, v: 0.25, f: 1800, f2: 600, q: 0.5 }),
   door: () => {
     tone({ type: 'triangle', f: 180, f2: 120, t: 0.12, v: 0.2 });

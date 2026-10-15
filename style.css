@@ -125,6 +125,7 @@ button {
 .prop.on .ovenglow { opacity: 0.6; }
 .prop .water { display: none; }
 .prop.on .water { display: inline; }
+.prop .water { pointer-events: none; }
 .drops { animation: drip 0.35s linear infinite; }
 .prop .led { opacity: 0.3; }
 .prop.on .led { opacity: 1; animation: pulse 0.5s infinite alternate; }

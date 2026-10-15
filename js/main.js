@@ -51,7 +51,7 @@ function defaultState() {
   for (const p of Object.values(PROPS)) props[p.id] = { on: !!p.init, open: false };
   const scroll = {};
   SCENES.forEach((s) => (scroll[s.id] = 0));
-  return { v: 1, scene: 'haus', scroll, night: false, muted: false, next: n, ztop: n, objs, props };
+  return { v: 1, scene: 'haus', scroll, night: false, muted: false, next: n, ztop: n, objs, props, seen: SCENES.map((s) => s.id) };
 }
 
 function load() {
@@ -61,6 +61,16 @@ function load() {
       for (const p of Object.values(PROPS)) if (!s.props[p.id]) s.props[p.id] = { on: !!p.init, open: false };
       SCENES.forEach((sc) => { if (s.scroll[sc.id] == null) s.scroll[sc.id] = 0; });
       if (!SC[s.scene]) s.scene = 'haus';
+      if (!s.seen) s.seen = ['haus', 'cafe', 'markt', 'friseur', 'park'];
+      for (const sc of SCENES) {
+        if (s.seen.includes(sc.id)) continue;
+        for (const o of initialObjects().filter((x) => x.sc === sc.id)) {
+          o.id = 'o' + s.next++;
+          o.z = ++s.ztop;
+          s.objs[o.id] = o;
+        }
+        s.seen.push(sc.id);
+      }
       for (const id in s.objs) if (!SC[s.objs[id].sc]) delete s.objs[id];
       return s;
     }
@@ -353,12 +363,18 @@ function leaveSeat(c) {
   const seat = SEATS[c.seat];
   c.seat = null;
   c._slide = null;
+  if (seat && seat.toilet && c._pooped) {
+    c._pooped = false;
+    spawnItem(c.sc, '💩', seat.x, seat.y - 30);
+  }
   if (seat && seat.pose === 'swing') swingClass(seat, false, c);
   setMood(c, null);
 }
 
 function sitDown(c, seat) {
   c.seat = seat.id;
+  c._sitT = performance.now();
+  c._pooped = false;
   c.x = seat.x;
   c.y = seat.y;
   falling.delete(c);
@@ -582,6 +598,14 @@ function useTool(c, it, tool) {
 
 function applyToChar(it, c) {
   const inf = info(it);
+  if (it.k === '💩') {
+    bubble(c, pick(['Iiih! 🤢', 'Bäh!', 'Igitt! 🤢']));
+    setMood(c, 'o', 1200);
+    sfx.boing();
+    it.x = clamp(c.x + 90, 30, SC[c.sc].W - 30);
+    startFall(it, 160, -400);
+    return true;
+  }
   if (inf.food || inf.drink) { eat(c, it); return true; }
   if (inf.hat) { wear(c, it, 'hat', inf.hat, HAT_EMOJI); return true; }
   if (inf.glasses) { wear(c, it, 'glasses', inf.glasses, GLASS_EMOJI); return true; }
@@ -677,9 +701,9 @@ function tapProp(id) {
     case 'flush': {
       sfx.flush();
       propBump(e, 'flushing');
-      const sink = SC[p.sc].surfaces.find((s) => s.y === 612 && s.x1 === 2310);
+      const bowl = p.bowl;
       for (const o of Object.values(state.objs)) {
-        if (o.t === 'i' && o.sc === p.sc && !o.hold && !falling.has(o) && sink && o.y === sink.y && o.x >= sink.x1 && o.x <= sink.x2) {
+        if (o.t === 'i' && o.sc === p.sc && !o.hold && !falling.has(o) && Math.abs(o.y - bowl.y) < 1 && o.x >= bowl.x1 && o.x <= bowl.x2) {
           const el = els.get(o.id);
           el.classList.add('flushed');
           delete state.objs[o.id];
@@ -784,11 +808,32 @@ function tick() {
           }
         }
       }
+      if (z.kind === 'rain' && on && s.id === state.scene) {
+        for (const o of objs) {
+          if (o.t === 'c' && o.sc === s.id && !o.seat && !o._dragging && !o._stored && o.x >= z.x1 && o.x <= z.x2) {
+            if (Math.random() < 0.6) burst(s.id, o.x + rand(-50, 50), o.y - 190, pick(['💧', '💦', '🫧']), 1, 'up');
+            if (tickN % 6 === 0) setMood(o, 'happy', 1500);
+          }
+        }
+      }
       if (z.kind === 'bath') {
         for (const id of z.seats) {
           const c = occupant(id);
           if (c && s.id === state.scene && Math.random() < (on ? 0.7 : 0.25)) burst(s.id, c.x + rand(-60, 60), c.y - 70, '🫧', 1, 'up');
         }
+      }
+    }
+  }
+  const now = performance.now();
+  for (const c of objs) {
+    if (c.t !== 'c' || !c.seat || c._pooped || !SEATS[c.seat] || !SEATS[c.seat].toilet) continue;
+    if (c._sitT == null) c._sitT = now;
+    if (now - c._sitT > 3000) {
+      c._pooped = true;
+      if (c.sc === state.scene) {
+        sfx.plop();
+        bubble(c, pick(['Plumps! 💩', 'Puh! 💩', 'Fertig! 💩']));
+        setMood(c, 'happy', 1500);
       }
     }
   }

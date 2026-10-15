@@ -1,6 +1,6 @@
 'use strict';
 // Offline-Cache für die Spielwelt. Bei Änderungen VERSION erhöhen.
-const VERSION = 'kunterbunt-v1';
+const VERSION = 'kunterbunt-v2';
 const FILES = [
   './',
   './index.html',
@@ -17,7 +17,7 @@ const FILES = [
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(VERSION).then((c) => c.addAll(FILES)));
+  event.waitUntil(caches.open(VERSION).then((c) => c.addAll(FILES.map((f) => new Request(f, { cache: 'reload' })))));
   self.skipWaiting();
 });
 

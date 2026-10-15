@@ -160,6 +160,18 @@ function wardrobeSVG() {
      <g class="dopen">${P(`M0 0 L-56 20 L-56 ${h - 20} L0 ${h}Z`, '#c77dff')}${P(`M${w} 0 L${w + 56} 20 L${w + 56} ${h - 20} L${w} ${h}Z`, '#b565f0')}</g>`);
 }
 
+function toiletSVG(seat = '#f4f4f4') {
+  return svgWrap0(130, 180, R(20, 0, 90, 80, '#fff', 12) + R(84, 12, 16, 8, '#aaa', 4) + E(65, 96, 58, 14, seat) + E(65, 92, 50, 10, '#e0e0e0') +
+    P('M14 100 Q20 150 44 160 L86 160 Q110 150 116 100Z', '#fff') + R(40, 158, 50, 22, '#f4f4f4', 6) +
+    `<g class="swirl">${E(65, 92, 34, 6, '#4cc9f0')}</g>`);
+}
+
+function tubFront() {
+  return svgWrap0(400, 112,
+    R(0, 0, 400, 92, '#ffffff', 40) + R(16, 12, 368, 10, '#e9f6ff', 5) + R(40, 88, 30, 24, '#ffd166', 8) + R(330, 88, 30, 24, '#ffd166', 8) +
+    C(60, 2, 16, '#fff') + C(90, -4, 20, '#fff') + C(126, 0, 14, '#fff') + C(300, 0, 16, '#fff') + C(330, -6, 20, '#fff') + C(355, 2, 13, '#fff'));
+}
+
 function svgWrap0(w, h, inner) {
   return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" overflow="visible">${inner}</svg>`;
 }
@@ -181,10 +193,7 @@ const hausProps = [
   { id: 'shower', kind: 'toggle', x: 2150, y: 190, w: 110, h: 140, sound: 'splash',
     svg: svgWrap0(110, 140, R(80, 0, 12, 110, '#aaa', 6) + R(40, 98, 52, 12, '#aaa', 6) + P('M20 112 L70 112 L60 130 L30 130Z', '#bbb') +
       `<g class="water">${[28, 38, 48, 58].map((x) => `<path d="M${x + 2} 132 L${x - 6} 400" stroke="#4cc9f0" stroke-width="5" stroke-linecap="round" stroke-dasharray="14 18" class="drops"/>`).join('')}</g>`) },
-  { id: 'toilet', kind: 'flush', x: 2300, y: 520, w: 130, h: 180, sound: 'flush',
-    svg: svgWrap0(130, 180, R(20, 0, 90, 80, '#fff', 12) + R(84, 12, 16, 8, '#aaa', 4) + E(65, 96, 58, 14, '#f4f4f4') + E(65, 92, 50, 10, '#e0e0e0') +
-      P('M14 100 Q20 150 44 160 L86 160 Q110 150 116 100Z', '#fff') + R(40, 158, 50, 22, '#f4f4f4', 6) +
-      `<g class="swirl">${E(65, 92, 34, 6, '#4cc9f0')}</g>`) },
+  { id: 'toilet', kind: 'flush', x: 2300, y: 520, w: 130, h: 180, sound: 'flush', svg: toiletSVG(), bowl: { x1: 2310, x2: 2420, y: 612 } },
   { id: 'lamp', kind: 'toggle', x: 3225, y: 470, w: 70, h: 130, init: true,
     svg: svgWrap0(70, 130, R(32, 50, 6, 70, '#666') + E(35, 124, 24, 6, '#666') + P('M6 56 L64 56 L52 4 L18 4Z', '#ffd166', 'class="shade"')) },
   { id: 'wardrobe', kind: 'container', x: 3330, y: 250, w: 240, h: 450, sound: 'door', svg: wardrobeSVG(),
@@ -192,9 +201,7 @@ const hausProps = [
 ];
 
 const hausFG = [
-  { x: 1850, y: 588, w: 400, h: 112, svg: svgWrap0(400, 112,
-    R(0, 0, 400, 92, '#ffffff', 40) + R(16, 12, 368, 10, '#e9f6ff', 5) + R(40, 88, 30, 24, '#ffd166', 8) + R(330, 88, 30, 24, '#ffd166', 8) +
-    C(60, 2, 16, '#fff') + C(90, -4, 20, '#fff') + C(126, 0, 14, '#fff') + C(300, 0, 16, '#fff') + C(330, -6, 20, '#fff') + C(355, 2, 13, '#fff')) },
+  { x: 1850, y: 588, w: 400, h: 112, svg: tubFront() },
   { x: 2930, y: 548, w: 260, h: 110, svg: svgWrap0(260, 110,
     R(0, 0, 260, 96, '#ff99c8', 26) + R(0, 0, 40, 96, '#ffc8dd', 20) + C(90, 40, 8, '#fff', 'opacity=".6"') + C(150, 60, 8, '#fff', 'opacity=".6"') + C(210, 34, 8, '#fff', 'opacity=".6"')) },
 ];
@@ -340,6 +347,61 @@ const parkFG = [
   { x: 1450, y: 688, w: 310, h: 30, svg: svgWrap0(310, 30, R(0, 0, 310, 26, '#d4a373', 8)) },
 ];
 
+// ======================= BADEZIMMER =======================
+function badBG() {
+  const W = 2100;
+  let s = patterns('bad');
+  s += R(0, 0, W, FLOOR, '#c9f2ee') + R(0, 0, W, FLOOR, 'url(#bad-tiles)') + R(0, 0, W, 40, '#2ec4b6') +
+    R(0, 380, W, FLOOR - 380, '#a8e6df') + R(0, 380, W, FLOOR - 380, 'url(#bad-tiles)') + R(0, 372, W, 10, '#fff') +
+    R(0, FLOOR, W, H - FLOOR, '#e8f7ff') + R(0, FLOOR, W, H - FLOOR, 'url(#bad-checker)') + R(0, FLOOR - 14, W, 16, '#7fd1c7');
+  // Regendusche: Duschwanne, Rückwand, Armatur, Ablage
+  s += G(70, 110, R(0, 0, 420, 580, '#e6fbff', 10) + R(0, 0, 420, 580, 'url(#bad-tiles)'));
+  s += G(60, 680, R(0, 0, 440, 22, '#ffffff', 8) + E(220, 6, 30, 4, '#bbb'));
+  s += G(90, 70, R(0, 0, 380, 10, '#bbb', 5));
+  s += G(370, 430, R(0, 0, 60, 90, '#ddd', 14) + C(30, 30, 14, '#999') + C(30, 30, 6, '#ff595e') + R(24, 56, 12, 24, '#999', 5));
+  s += G(100, 380, R(0, 0, 130, 12, '#fff', 6));
+  s += G(250, 190, R(0, 0, 160, 34, '#fff', 17) + T(80, 25, 20, '#2ec4b6', 'REGENDUSCHE'));
+  // Fenster, Handtücher
+  s += windowSVG(700, 130, 140, 140, null, true);
+  s += G(560, 150, R(0, 0, 70, 8, '#999', 4) + R(4, 8, 30, 110, '#ff99c8', 6) + R(36, 8, 30, 90, '#ffd166', 6));
+  // Badewanne (Rückseite)
+  s += G(600, 560, R(0, 0, 400, 50, '#d9f2ff', 24) + E(200, 18, 180, 14, '#8fd3ff'));
+  // Waschbecken mit Spiegel
+  s += G(1110, 240, R(0, 0, 200, 210, '#ffffff', 100) + R(12, 12, 176, 186, '#d8f3ff', 88) + P('M50 50 L90 36 L50 140Z', '#fff', 'opacity=".55"'));
+  s += G(1090, 560, R(0, 0, 240, 22, '#ffffff', 10) + E(120, 8, 70, 8, '#d9f2ff') + R(10, 22, 220, 118, '#2ec4b6', 10) + R(26, 38, 90, 86, '#5fd3c7', 8) + R(124, 38, 90, 86, '#5fd3c7', 8) +
+    C(106, 80, 5, '#fff') + C(134, 80, 5, '#fff'));
+  s += E(1210, 780, 120, 22, '#ff99c8') + E(800, 780, 160, 24, '#ffd166');
+  // Zwei Toiletten mit Trennwänden
+  s += G(1430, 120, R(0, 0, 560, 70, '#2ec4b6', 20) + T(140, 48, 34, '#fff', 'WC 1') + T(420, 48, 34, '#fff', 'WC 2'));
+  const wall = (x) => G(x, 250, R(0, 0, 20, 420, '#ff924c', 8) + R(4, 410, 12, 30, '#999', 3));
+  s += wall(1420) + wall(1690) + wall(1960);
+  const paper = (x) => G(x, 500, R(0, 0, 40, 8, '#999', 4) + C(20, 22, 16, '#fff') + C(20, 22, 5, '#ddd') + R(14, 36, 12, 34, '#fff', 3));
+  s += paper(1630) + paper(1900);
+  s += plant(2050, 700, 1);
+  s += hangLamp(800, 50, '#2ec4b6') + hangLamp(1600, 40, '#2ec4b6');
+  return svgWrap(W, s);
+}
+
+const badProps = [
+  { id: 'regen', kind: 'toggle', x: 110, y: 70, w: 340, h: 70, sound: 'splash',
+    svg: svgWrap0(340, 70, R(160, 0, 20, 30, '#aaa', 4) + R(0, 26, 340, 34, '#cfcfcf', 14) + R(10, 52, 320, 8, '#9a9a9a', 4) +
+      [40, 80, 120, 160, 200, 240, 280, 300].map((x) => C(x, 56, 3, '#777')).join('') +
+      `<g class="water">${Array.from({ length: 12 }, (_, i) => 22 + i * 27).map((x, i) => `<path d="M${x} 64 L${x - 4} 620" stroke="#4cc9f0" stroke-width="5" stroke-linecap="round" stroke-dasharray="${12 + (i % 3) * 4} 22" class="drops" opacity=".85"/>`).join('')}</g>`) },
+  { id: 'wannenhahn', kind: 'toggle', x: 950, y: 470, w: 70, h: 90, sound: 'splash',
+    svg: svgWrap0(70, 90, R(46, 0, 14, 90, '#aaa', 6) + R(6, 10, 54, 14, '#aaa', 7) + C(52, 44, 10, '#ff595e') +
+      `<g class="water"><path d="M12 24 L10 120" stroke="#4cc9f0" stroke-width="8" stroke-linecap="round" stroke-dasharray="14 10" class="drops"/></g>`) },
+  { id: 'wasserhahn', kind: 'toggle', x: 1180, y: 500, w: 60, h: 60, sound: 'splash',
+    svg: svgWrap0(60, 60, R(24, 10, 12, 50, '#aaa', 6) + R(4, 10, 32, 12, '#aaa', 6) + C(30, 6, 8, '#4f8cff') +
+      `<g class="water"><path d="M8 22 L8 62" stroke="#4cc9f0" stroke-width="6" stroke-linecap="round" stroke-dasharray="10 8" class="drops"/></g>`) },
+  { id: 'klo1', kind: 'flush', x: 1490, y: 520, w: 130, h: 180, sound: 'flush', svg: toiletSVG('#ffd6e7'), bowl: { x1: 1500, x2: 1610, y: 612 } },
+  { id: 'klo2', kind: 'flush', x: 1760, y: 520, w: 130, h: 180, sound: 'flush', svg: toiletSVG('#d6f0ff'), bowl: { x1: 1770, x2: 1880, y: 612 } },
+];
+
+const badFG = [
+  { x: 486, y: 110, w: 16, h: 580, svg: svgWrap0(16, 580, R(0, 0, 16, 580, '#bfefff', 6, 'opacity=".45"') + R(4, 20, 4, 200, '#fff', 2, 'opacity=".7"')) },
+  { x: 600, y: 588, w: 400, h: 112, svg: tubFront() },
+];
+
 // ======================= Szenen =======================
 export const SCENES = [
   {
@@ -357,7 +419,7 @@ export const SCENES = [
     seats: [
       { id: 'haus:sofa1', x: 190, y: 596, pose: 'sit' }, { id: 'haus:sofa2', x: 280, y: 596, pose: 'sit' }, { id: 'haus:sofa3', x: 370, y: 596, pose: 'sit' },
       { id: 'haus:wanne1', x: 1990, y: 640, pose: 'tub' }, { id: 'haus:wanne2', x: 2120, y: 640, pose: 'tub' },
-      { id: 'haus:klo', x: 2365, y: 616, pose: 'sit' },
+      { id: 'haus:klo', x: 2365, y: 616, pose: 'sit', toilet: 'toilet' },
       { id: 'haus:bett', x: 2945, y: 550, pose: 'lie' },
     ],
     zones: [
@@ -398,6 +460,23 @@ export const SCENES = [
       { id: 'friseur:s1', x: 240, y: 572, pose: 'sit' }, { id: 'friseur:s2', x: 620, y: 572, pose: 'sit' }, { id: 'friseur:s3', x: 1260, y: 572, pose: 'sit' },
     ],
     zones: [],
+  },
+  {
+    id: 'bad', name: 'Badezimmer', icon: '🛁', W: 2100, ceil: 70, bg: badBG(), props: badProps, fg: badFG,
+    glows: [{ x: 800, y: 130, r: 280 }, { x: 1600, y: 120, r: 300 }],
+    surfaces: [
+      { x1: 100, x2: 230, y: 380 }, { x1: 610, x2: 990, y: 640 }, { x1: 1090, x2: 1330, y: 560 },
+      { x1: 1500, x2: 1610, y: 612 }, { x1: 1770, x2: 1880, y: 612 },
+      { x1: 1512, x2: 1598, y: 520 }, { x1: 1782, x2: 1868, y: 520 },
+    ],
+    seats: [
+      { id: 'bad:wanne1', x: 730, y: 640, pose: 'tub' }, { id: 'bad:wanne2', x: 870, y: 640, pose: 'tub' },
+      { id: 'bad:klo1', x: 1555, y: 616, pose: 'sit', toilet: 'klo1' }, { id: 'bad:klo2', x: 1825, y: 616, pose: 'sit', toilet: 'klo2' },
+    ],
+    zones: [
+      { kind: 'bath', prop: 'wannenhahn', seats: ['bad:wanne1', 'bad:wanne2'] },
+      { kind: 'rain', prop: 'regen', x1: 110, x2: 460 },
+    ],
   },
   {
     id: 'park', name: 'Park', icon: '🌳', W: 2600, ceil: 110, bg: parkBG(), props: parkProps, fg: parkFG,
@@ -451,12 +530,16 @@ export function initialObjects() {
   o.push(it('friseur', '🎩', 890, 330), it('friseur', '👑', 960, 330), it('friseur', '🧢', 1030, 330), it('friseur', '👒', 1090, 330));
   // Park
   o.push(it('park', '🐶', 2120, 700), it('park', '⚽', 1200, 700), it('park', '🪣', 1520, 688), it('park', '🎈', 1650, 110), it('park', '🦋', 300, 110), it('park', '🐰', 1700, 700), it('park', '🦆', 2300, 700));
+  // Badezimmer
+  o.push(it('bad', '🧴', 130, 380), it('bad', '🧼', 190, 380), it('bad', '🦆', 700, 640), it('bad', '🦆', 900, 640), it('bad', '🪥', 1130, 560), it('bad', '🧼', 1290, 560));
+  o.push(it('bad', '💩', 1555, 612), it('bad', '💩', 1825, 612), it('bad', '🧻', 1540, 520), it('bad', '🧻', 1825, 520), it('bad', '💩', 2000, 700), it('bad', '🧻', 1460, 700));
   // Figuren
   o.push(ch('haus', 280, 596, { skin: '#f8c9a0', hair: 'zoepfe', hc: '#c8501e', style: 'kleid', shirt: '#ff6fb5', pants: '#1982c4', shoes: '#ff595e', hat: '', glasses: '' }, 'haus:sofa2'));
   o.push(ch('haus', 1060, 700, { skin: '#8a5530', hair: 'afro', hc: '#111111', style: 'tshirt', shirt: '#ffca3a', pants: '#1982c4', shoes: '#333333', hat: '', glasses: 'rund' }));
   o.push(ch('cafe', 415, 602, { skin: '#ffe3cf', hair: 'kurz', hc: '#f2c94c', style: 'streifen', shirt: '#8ac926', pants: '#6a4c93', shoes: '#ffffff', hat: 'cap', glasses: '' }, 'cafe:s2'));
   o.push(ch('friseur', 240, 572, { skin: '#b97a4a', hair: 'lang', hc: '#3b2416', style: 'tshirt', shirt: '#ff924c', pants: '#00bbf9', shoes: '#ff6fb5', hat: '', glasses: '' }, 'friseur:s1'));
   o.push(ch('park', 1905, 612, { skin: '#e0a46e', hair: 'irokese', hc: '#9b5de5', style: 'pulli', shirt: '#00bbf9', pants: '#333333', shoes: '#ffca3a', hat: '', glasses: 'sonne' }, 'park:bank1'));
+  o.push(ch('bad', 300, 700, { skin: '#ffe3cf', hair: 'pony', hc: '#4f8cff', style: 'streifen', shirt: '#2ec4b6', pants: '#ffca3a', shoes: '#ff595e', hat: '', glasses: '' }));
   o.push(ch('park', 700, 700, { skin: '#ffc4d6', hair: 'dutt', hc: '#ff7eb6', style: 'kleid', shirt: '#ffca3a', pants: '#ffffff', shoes: '#9b5de5', hat: 'schleife', glasses: '' }));
   return o;
 }
