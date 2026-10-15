@@ -402,6 +402,92 @@ const badFG = [
   { x: 600, y: 588, w: 400, h: 112, svg: tubFront() },
 ];
 
+// ======================= itmX BÜRO =======================
+const ITMX = '#50af30';
+const ITMX_D = '#3d8a24';
+const GREY = '#575757';
+const OFFICES = [700, 1300, 1900];
+const OFFICE_NAMES = ['Beratung', 'Entwicklung', 'Projekte'];
+
+function img(href, x, y, w, h) {
+  return `<image href="${href}" x="${x}" y="${y}" width="${w}" height="${h}" preserveAspectRatio="xMidYMid meet"/>`;
+}
+
+function slantTag(x, y, w, text) {
+  return G(x, y, P(`M0 10 L${w} 0 L${w} 44 L0 44Z`, ITMX) + T(w / 2, 32, 22, '#fff', text));
+}
+
+function officeChair(x, color = GREY) {
+  // x = Sitzmitte, Sitzfläche bei y=592
+  return G(x - 50, 470, R(18, 0, 64, 100, color, 22) + R(0, 112, 100, 22, shadeHex(color), 11) + R(44, 134, 12, 70, '#888') +
+    P('M10 222 L50 200 L90 222', 'none', 'stroke="#666" stroke-width="8" stroke-linecap="round"') + C(10, 224, 6, '#333') + C(90, 224, 6, '#333') + C(50, 222, 6, '#333'));
+}
+
+function desk(x) {
+  // Tischplatte bei y=540, Breite 240
+  return G(x, 540, R(0, 0, 240, 16, '#ffffff', 6) + R(0, 14, 240, 4, '#ddd') + R(10, 16, 12, 144, GREY, 4) + R(218, 16, 12, 144, GREY, 4) +
+    R(150, 18, 70, 90, '#e9ecea', 6) + R(162, 40, 46, 6, '#bbb', 3) + R(162, 70, 46, 6, '#bbb', 3) +
+    R(70, -8, 70, 8, '#333', 3) + E(160, -4, 10, 5, '#333'));
+}
+
+function bueroBG() {
+  const W = 3100;
+  let s = patterns('buero');
+  s += R(0, 0, W, FLOOR, '#f4f6f4') + R(0, 0, W, 40, GREY) + R(0, 36, W, 6, ITMX) +
+    R(0, FLOOR, W, H - FLOOR, '#a3a9a3') + R(0, FLOOR, W, H - FLOOR, 'url(#buero-tiles)') + R(0, FLOOR - 14, W, 16, '#c9cec9');
+  // Grüne Schräge als Wandakzent (wie im Logo)
+  for (let x = 0; x < W; x += 600) s += P(`M${x} 640 L${x + 600} 610 L${x + 600} 686 L${x} 686Z`, ITMX, 'opacity=".18"');
+  // Empfang: Logo-Wand
+  s += P('M50 160 L660 104 L660 440 L50 440Z', ITMX) + R(90, 196, 530, 214, '#fff', 18) + img('icons/itmx-logo.png', 110, 206, 490, 191);
+  s += G(470, 400, R(0, 140, 220, 16, '#fff', 6) + R(6, 156, 208, 144, '#e3e7e3', 6) + R(16, 170, 90, 116, '#d3d8d3', 6) + R(114, 170, 90, 116, '#d3d8d3', 6));
+  s += G(80, 520, R(0, 0, 350, 20, '#fff', 8) + P('M10 20 L340 20 L340 180 L10 180Z', ITMX) + P('M10 20 L340 20 L340 46 L10 60Z', ITMX_D) + img('icons/itmx-x.png', 140, 76, 70, 76));
+  s += plant(30, 700, 1.1);
+  // Büros mit Fenstern, Schreibtischen, Stühlen
+  OFFICES.forEach((d, i) => {
+    s += windowSVG(d + 150, 110, 300, 200, '#c9cec9');
+    s += slantTag(d + 20, 54, 190, OFFICE_NAMES[i]);
+    s += img('icons/itmx-x.png', d + 520, 50, 50, 54);
+    s += officeChair(d + 90, i === 1 ? ITMX : GREY) + officeChair(d + 380, i === 1 ? GREY : ITMX);
+    s += desk(d + 30) + desk(d + 320);
+    s += E(d + 300, 760, 240, 26, '#8d948d');
+  });
+  // Meetingraum
+  s += slantTag(2520, 54, 190, 'Meeting');
+  [2620, 2740, 2860].forEach((x) => (s += officeChair(x, ITMX)));
+  s += plant(3060, 700, 1);
+  // Glaswände zwischen den Räumen
+  for (const x of [690, 1290, 1890, 2490]) s += R(x, 42, 16, FLOOR - 42, '#bfe3f2', 0, 'opacity=".6"') + R(x, 42, 16, 10, GREY) + R(x + 4, 120, 3, 300, '#fff', 1, 'opacity=".8"');
+  OFFICES.concat([2500]).forEach((x) => (s += hangLamp(x + 300, 50, ITMX)));
+  return svgWrap(W, s);
+}
+
+function monitorSVG() {
+  return svgWrap0(120, 120, R(0, 0, 120, 84, '#2b2b2b', 8) + R(6, 6, 108, 72, '#111', 4) + R(52, 84, 16, 22, '#555') + R(30, 104, 60, 14, '#555', 5) +
+    `<g class="tvon">${R(6, 6, 108, 72, '#f4f6f4', 4)}${R(6, 6, 108, 12, ITMX, 4)}${R(14, 26, 60, 6, GREY, 3)}${R(14, 38, 80, 6, ITMX, 3)}${R(14, 50, 46, 6, GREY, 3)}${R(64, 50, 6, 18, '#111', 1, 'class="led"')}
+      ${R(84, 46, 8, 22, ITMX)}${R(96, 36, 8, 32, ITMX_D)}</g>`);
+}
+
+const bueroProps = [
+  { id: 'itmxkaffee', kind: 'spawn', x: 510, y: 400, w: 110, h: 140, spawn: ['☕', '☕', '🥛', '🍪'], sound: 'pop', from: [640, 380],
+    svg: svgWrap0(110, 140, R(0, 0, 110, 140, GREY, 14) + R(8, 8, 94, 36, '#333', 8) + C(30, 26, 7, ITMX) + C(55, 26, 7, '#fff') + C(80, 26, 7, '#ffca3a') +
+      R(38, 52, 34, 16, '#777', 5) + R(22, 122, 66, 9, '#777', 4) + R(50, 68, 10, 20, '#7f5539', 3)) },
+  ...OFFICES.flatMap((d, i) => [
+    { id: `mon${i}a`, kind: 'toggle', x: d + 120, y: 420, w: 120, h: 120, sound: 'click', svg: monitorSVG() },
+    { id: `mon${i}b`, kind: 'toggle', x: d + 410, y: 420, w: 120, h: 120, sound: 'click', svg: monitorSVG() },
+  ]),
+  { id: 'beamer', kind: 'toggle', x: 2590, y: 160, w: 320, h: 190, sound: 'tv',
+    svg: svgWrap0(320, 190, R(0, 0, 320, 180, '#2b2b2b', 10) + R(8, 8, 304, 164, '#111', 6) +
+      `<g class="tvon">${R(8, 8, 304, 164, '#fff', 6)}${img('icons/itmx-logo.png', 20, 18, 130, 51)}
+      ${R(180, 110, 22, 50, ITMX)}${R(210, 90, 22, 70, ITMX_D)}${R(240, 60, 22, 100, ITMX)}${R(270, 30, 22, 130, ITMX_D)}
+      ${R(20, 90, 140, 8, GREY, 4)}${R(20, 110, 110, 8, '#bbb', 4)}${R(20, 130, 130, 8, '#bbb', 4)}</g>`) },
+  { id: 'drucker', kind: 'spawn', x: 2955, y: 590, w: 120, h: 110, spawn: ['📄', '📄', '📄', '📊'], sound: 'click', from: [3015, 560],
+    svg: svgWrap0(120, 110, R(0, 20, 120, 90, '#e3e7e3', 12) + R(10, 0, 100, 28, '#c9cec9', 8) + R(20, 50, 80, 8, '#333', 4) + C(100, 80, 6, ITMX) + R(16, 92, 88, 6, '#bbb', 3)) },
+];
+
+const bueroFG = [
+  { x: 2550, y: 556, w: 380, h: 144, svg: svgWrap0(380, 144, R(0, 0, 380, 18, '#ffffff', 8) + P('M14 18 L366 18 L366 144 L14 144Z', GREY) + P('M14 18 L366 18 L366 40 L14 54Z', ITMX) + img('icons/itmx-x.png', 166, 66, 48, 52)) },
+];
+
 // ======================= Szenen =======================
 export const SCENES = [
   {
@@ -479,6 +565,22 @@ export const SCENES = [
     ],
   },
   {
+    id: 'buero', name: 'itmX Büro', icon: '🏢', iconHTML: '<img src="icons/itmx-x.png" alt="">', W: 3100, ceil: 70, bg: bueroBG(), props: bueroProps, fg: bueroFG,
+    glows: [{ x: 1000, y: 120, r: 300 }, { x: 1600, y: 120, r: 300 }, { x: 2200, y: 120, r: 300 }, { x: 2800, y: 120, r: 300 }, { x: 2750, y: 260, r: 220, prop: 'beamer' }],
+    surfaces: [
+      { x1: 80, x2: 430, y: 520 }, { x1: 470, x2: 690, y: 540 },
+      ...OFFICES.flatMap((d) => [{ x1: d + 30, x2: d + 270, y: 540 }, { x1: d + 320, x2: d + 560, y: 540 }]),
+      { x1: 2556, x2: 2924, y: 556 }, { x1: 2960, x2: 3070, y: 590 },
+    ],
+    seats: [
+      ...OFFICES.flatMap((d, i) => [
+        { id: `buero:${i}a`, x: d + 90, y: 592, pose: 'sit' }, { id: `buero:${i}b`, x: d + 380, y: 592, pose: 'sit' },
+      ]),
+      { id: 'buero:m1', x: 2620, y: 600, pose: 'sit' }, { id: 'buero:m2', x: 2740, y: 600, pose: 'sit' }, { id: 'buero:m3', x: 2860, y: 600, pose: 'sit' },
+    ],
+    zones: OFFICES.flatMap((d, i) => [{ kind: 'desk', seat: `buero:${i}a`, prop: `mon${i}a` }, { kind: 'desk', seat: `buero:${i}b`, prop: `mon${i}b` }]),
+  },
+  {
     id: 'park', name: 'Park', icon: '🌳', W: 2600, ceil: 110, bg: parkBG(), props: parkProps, fg: parkFG,
     glows: [{ x: 950, y: 400, r: 260 }, { x: 1800, y: 400, r: 260 }],
     surfaces: [
@@ -533,6 +635,12 @@ export function initialObjects() {
   // Badezimmer
   o.push(it('bad', '🧴', 130, 380), it('bad', '🧼', 190, 380), it('bad', '🦆', 700, 640), it('bad', '🦆', 900, 640), it('bad', '🪥', 1130, 560), it('bad', '🧼', 1290, 560));
   o.push(it('bad', '💩', 1555, 612), it('bad', '💩', 1825, 612), it('bad', '🧻', 1540, 520), it('bad', '🧻', 1825, 520), it('bad', '💩', 2000, 700), it('bad', '🧻', 1460, 700));
+  // itmX Büro
+  o.push(it('buero', '🔔', 140, 520), it('buero', '📄', 220, 520), it('buero', '🖊️', 300, 520), it('buero', '🪴', 390, 520), it('buero', '☕', 560, 540), it('buero', '☕', 670, 540));
+  OFFICES.forEach((d, i) => {
+    o.push(it('buero', ['📁', '🎧', '📎'][i], d + 60, 540), it('buero', ['☕', '📱', '📄'][i], d + 345, 540), it('buero', ['📎', '☕', '🖊️'][i], d + 520, 540));
+  });
+  o.push(it('buero', '💻', 2650, 556), it('buero', '📊', 2760, 556), it('buero', '☕', 2850, 556), it('buero', '🪴', 2470, 700));
   // Figuren
   o.push(ch('haus', 280, 596, { skin: '#f8c9a0', hair: 'zoepfe', hc: '#c8501e', style: 'kleid', shirt: '#ff6fb5', pants: '#1982c4', shoes: '#ff595e', hat: '', glasses: '' }, 'haus:sofa2'));
   o.push(ch('haus', 1060, 700, { skin: '#8a5530', hair: 'afro', hc: '#111111', style: 'tshirt', shirt: '#ffca3a', pants: '#1982c4', shoes: '#333333', hat: '', glasses: 'rund' }));
@@ -540,6 +648,10 @@ export function initialObjects() {
   o.push(ch('friseur', 240, 572, { skin: '#b97a4a', hair: 'lang', hc: '#3b2416', style: 'tshirt', shirt: '#ff924c', pants: '#00bbf9', shoes: '#ff6fb5', hat: '', glasses: '' }, 'friseur:s1'));
   o.push(ch('park', 1905, 612, { skin: '#e0a46e', hair: 'irokese', hc: '#9b5de5', style: 'pulli', shirt: '#00bbf9', pants: '#333333', shoes: '#ffca3a', hat: '', glasses: 'sonne' }, 'park:bank1'));
   o.push(ch('bad', 300, 700, { skin: '#ffe3cf', hair: 'pony', hc: '#4f8cff', style: 'streifen', shirt: '#2ec4b6', pants: '#ffca3a', shoes: '#ff595e', hat: '', glasses: '' }));
+  o.push(ch('buero', 790, 592, { skin: '#f8c9a0', hair: 'kurz', hc: '#3b2416', style: 'pulli', shirt: '#50af30', pants: '#333333', shoes: '#333333', hat: '', glasses: 'rund' }, 'buero:0a'));
+  o.push(ch('buero', 1680, 592, { skin: '#b97a4a', hair: 'dutt', hc: '#111111', style: 'tshirt', shirt: '#ffffff', pants: '#1982c4', shoes: '#50af30', hat: '', glasses: '' }, 'buero:1b'));
+  o.push(ch('buero', 1990, 592, { skin: '#ffe3cf', hair: 'lang', hc: '#f2c94c', style: 'streifen', shirt: '#575757', pants: '#6a4c93', shoes: '#ffffff', hat: '', glasses: 'rund' }, 'buero:2a'));
+  o.push(ch('buero', 400, 700, { skin: '#e0a46e', hair: 'pony', hc: '#c8501e', style: 'kleid', shirt: '#50af30', pants: '#ffffff', shoes: '#575757', hat: '', glasses: '' }));
   o.push(ch('park', 700, 700, { skin: '#ffc4d6', hair: 'dutt', hc: '#ff7eb6', style: 'kleid', shirt: '#ffca3a', pants: '#ffffff', shoes: '#9b5de5', hat: 'schleife', glasses: '' }));
   return o;
 }

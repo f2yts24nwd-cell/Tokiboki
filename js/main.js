@@ -808,6 +808,14 @@ function tick() {
           }
         }
       }
+      if (z.kind === 'desk') {
+        const c = occupant(z.seat);
+        if (c && !on) { state.props[z.prop].on = true; applyProp(z.prop); }
+        if (c && s.id === state.scene) {
+          if (Math.random() < 0.35) burst(s.id, c.x + 90, c.y - 200, pick(['💬', '📊', '✅', '💡', '⌨️', '📧']), 1, 'up');
+          if (Math.random() < 0.5) sfx.click();
+        }
+      }
       if (z.kind === 'rain' && on && s.id === state.scene) {
         for (const o of objs) {
           if (o.t === 'c' && o.sc === s.id && !o.seat && !o._dragging && !o._stored && o.x >= z.x1 && o.x <= z.x2) {
@@ -1014,7 +1022,7 @@ for (const s of SCENES) {
   const b = document.createElement('button');
   b.className = 'nb place';
   b.dataset.target = s.id;
-  b.innerHTML = `<b>${s.icon}</b><i>${s.name}</i>`;
+  b.innerHTML = `<b>${s.iconHTML || s.icon}</b><i>${s.name}</i>`;
   b.addEventListener('click', () => { unlock(); if (state.scene !== s.id) switchScene(s.id); });
   places.append(b);
 }
@@ -1123,7 +1131,7 @@ function openFigList() {
   closeModals();
   const g = figList.querySelector('.figs');
   const chars = Object.values(state.objs).filter((o) => o.t === 'c');
-  g.innerHTML = chars.map((c) => `<button class="fig" data-id="${c.id}">${miniSVG(c.look, '-10 -40 140 260', 96)}<i>${SC[c.sc].icon}</i></button>`).join('') +
+  g.innerHTML = chars.map((c) => `<button class="fig" data-id="${c.id}">${miniSVG(c.look, '-10 -40 140 260', 96)}<i>${SC[c.sc].iconHTML || SC[c.sc].icon}</i></button>`).join('') +
     '<button class="fig new" data-new="1"><b>＋</b><i>Neue Figur</i></button>';
   figList.classList.remove('hidden');
   sfx.pop();

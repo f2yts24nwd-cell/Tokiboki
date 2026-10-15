@@ -233,6 +233,8 @@ button {
 }
 .nb.small { width: 52px; }
 .nb b { font-size: 32px; line-height: 1; font-weight: normal; }
+.nb b img { width: 32px; height: 34px; display: block; }
+.fig i img { width: 26px; height: 28px; display: block; }
 .nb i { font-style: normal; font-size: 12px; font-weight: 700; margin-top: 3px; white-space: nowrap; }
 .nb:active { transform: scale(0.92); }
 .nb.place.active { background: #ffe066; }

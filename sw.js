@@ -1,6 +1,6 @@
 'use strict';
 // Offline-Cache für die Spielwelt. Bei Änderungen VERSION erhöhen.
-const VERSION = 'kunterbunt-v2';
+const VERSION = 'kunterbunt-v3';
 const FILES = [
   './',
   './index.html',
@@ -14,6 +14,8 @@ const FILES = [
   './icons/icon-180.png',
   './icons/icon-192.png',
   './icons/icon-512.png',
+  './icons/itmx-logo.png',
+  './icons/itmx-x.png',
 ];
 
 self.addEventListener('install', (event) => {
