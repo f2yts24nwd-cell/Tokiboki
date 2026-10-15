@@ -1,0 +1,19 @@
+{
+  "name": "Tokiboki",
+  "short_name": "Tokiboki",
+  "description": "Eine bunte Spielwelt mit Häusern, Figuren und vielen Sachen zum Ausprobieren.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#ff6b6b",
+  "theme_color": "#ff6b6b",
+  "lang": "de",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

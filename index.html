@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Tokiboki</title>
+  <meta name="description" content="Eine bunte Spielwelt mit Häusern, Figuren und vielen Sachen zum Ausprobieren.">
+  <meta name="theme-color" content="#ff6b6b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Tokiboki">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="stage"></div>
+
+  <nav id="nav">
+    <button class="nb tool" id="bKiste"><b>🧺</b><i>Kiste</i></button>
+    <div id="places"></div>
+    <button class="nb tool" id="bFig"><b>🙂</b><i>Figuren</i></button>
+    <button class="nb tool" id="bNight"><b>🌙</b><i>Nacht</i></button>
+    <button class="nb tool trash" id="bTrash" data-target="trash"><b>🗑️</b><i>Weg</i></button>
+    <button class="nb tool small" id="bSet"><b>⚙️</b></button>
+  </nav>
+
+  <div id="drawer" class="hidden">
+    <div class="tabs"></div>
+    <button class="x" id="drawerClose" aria-label="Schließen">✕</button>
+    <div class="grid"></div>
+    <p class="hint">Antippen oder in die Welt ziehen</p>
+  </div>
+
+  <div id="figList" class="modal hidden">
+    <div class="card">
+      <h2>Figuren</h2>
+      <div class="figs"></div>
+      <button class="btn" data-close>Fertig</button>
+    </div>
+  </div>
+
+  <div id="editor" class="modal hidden">
+    <div class="card ed">
+      <div class="ed-left">
+        <div class="ed-prev"></div>
+        <button class="btn" id="edRandom">🎲 Zufall</button>
+        <button class="btn primary" data-close>Fertig ✓</button>
+      </div>
+      <div class="ed-opts"></div>
+    </div>
+  </div>
+
+  <div id="settings" class="modal hidden">
+    <div class="card set">
+      <h2>Einstellungen</h2>
+      <button class="btn" id="sSound">🔊 Ton ist an</button>
+      <button class="btn" id="sReset">🔄 Welt neu starten</button>
+      <div id="resetAsk" class="hidden">
+        <p>Alles zurück auf Anfang?</p>
+        <button class="btn danger" id="sResetYes">Ja</button>
+        <button class="btn" id="sResetNo">Nein</button>
+      </div>
+      <p class="small">Tipp: In Safari auf <b>Teilen</b> ⬆️ → <b>Zum Home-Bildschirm</b> tippen. Dann startet das Spiel wie eine App und funktioniert auch ohne Internet. Ist kein Ton zu hören, den Stummschalter am iPad prüfen.</p>
+      <button class="btn primary" data-close>Weiterspielen</button>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <div id="rotate">
+    <div>
+      <div class="big">📱↪️</div>
+      <p>Bitte das iPad quer halten!</p>
+      <button class="btn" id="rotateOk">Trotzdem spielen</button>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
