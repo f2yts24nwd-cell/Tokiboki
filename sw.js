@@ -1,6 +1,6 @@
 'use strict';
 // Offline-Cache für die Spielwelt. Bei Änderungen VERSION erhöhen.
-const VERSION = 'kunterbunt-v6';
+const VERSION = 'kunterbunt-v7';
 const FILES = [
   './',
   './index.html',
@@ -11,6 +11,10 @@ const FILES = [
   './js/world.js',
   './js/sound.js',
   './js/map.js',
+  './js/dj.js',
+  './audio/track1.mp3',
+  './audio/track2.mp3',
+  './audio/track3.mp3',
   './icons/icon.svg',
   './icons/icon-180.png',
   './icons/icon-192.png',

@@ -853,6 +853,113 @@ const bueroFG = [
   { x: 2550, y: 556, w: 380, h: 144, svg: svgWrap0(380, 144, E(190, 144, 180, 8, 'url(#g-sh)') + R(0, 0, 380, 18, '#ffffff', 8) + R(0, 0, 380, 18, 'url(#g-vol)', 8) + P('M14 18 L366 18 L366 144 L14 144Z', GREY) + P('M14 18 L366 18 L366 40 L14 54Z', ITMX) + img('icons/itmx-x.png', 166, 66, 48, 52)) },
 ];
 
+// ======================= FESTIVAL (Tokiland) =======================
+const RAINBOW = ['#ff595e', '#ff924c', '#ffca3a', '#8ac926', '#1982c4', '#6a4c93', '#ff6fb5', '#00bbf9'];
+
+function festivalBG() {
+  const W = 3000;
+  let s = `<defs>
+    <linearGradient id="fest-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#14062e"/><stop offset=".45" stop-color="#4b1d7a"/><stop offset=".75" stop-color="#b8459a"/><stop offset="1" stop-color="#ff9a6b"/></linearGradient>
+    <linearGradient id="fest-ground" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f6b4a"/><stop offset="1" stop-color="#173d2b"/></linearGradient>
+    <linearGradient id="fest-beam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".75"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <linearGradient id="fest-gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3b0"/><stop offset=".5" stop-color="#e9b949"/><stop offset="1" stop-color="#a8741a"/></linearGradient>
+    <radialGradient id="fest-face" cx="45%" cy="40%" r="65%"><stop offset="0" stop-color="#fff1d6"/><stop offset="1" stop-color="#f2b880"/></radialGradient>
+  </defs>`;
+  s += R(0, 0, W, H, 'url(#fest-sky)') + stars(0, 10, W, 360, 70) + C(260, 110, 46, '#fff6d5') + C(276, 98, 40, '#4b1d7a', 'opacity=".25"');
+  // Hügel & Bäume am Horizont
+  s += P(`M0 600 Q300 520 620 590 T1300 570 T2000 590 T2700 560 T${W} 590 L${W} 700 L0 700Z`, '#2a1350') + P(`M0 640 Q400 590 800 630 T1600 620 T2400 640 T${W} 620 L${W} 700 L0 700Z`, '#3b1a63');
+  for (let x = 30; x < W; x += 140) s += P(`M${x} 640 l18 -70 l18 70z`, '#241046');
+  // Riesenrad-Stützen (das Rad selbst dreht sich als eigenes Element)
+  s += P('M2620 690 L2700 330 L2780 690', 'none', 'stroke="#d9d2e9" stroke-width="14" stroke-linejoin="round"') + R(2600, 680, 200, 14, '#bdb3d6', 6);
+  // Boden
+  s += R(0, FLOOR - 30, W, H - FLOOR + 30, 'url(#fest-ground)') + R(0, FLOOR, W, H - FLOOR, '#24543b') + R(0, FLOOR, W, H - FLOOR, 'url(#p-noise)') + R(0, FLOOR, W, 10, '#000', 0, 'opacity=".2"');
+  for (let x = 6; x < W; x += 19) s += P(`M${x} ${FLOOR + 18 + (x % 4) * 10} l3 -9 l3 9`, 'none', 'stroke="#3f8a5f" stroke-width="2" opacity=".6"');
+  // Wimpelketten
+  for (const [x1, x2] of [[40, 620], [1980, 2560], [2560, 2990]]) {
+    s += P(`M${x1} 150 Q${(x1 + x2) / 2} 220 ${x2} 150`, 'none', 'stroke="#ddd" stroke-width="2"');
+    for (let k = 1; k < 12; k++) {
+      const t = k / 12, x = x1 + (x2 - x1) * t, y = 150 + Math.sin(t * Math.PI) * 52;
+      s += P(`M${x - 11} ${y} L${x + 11} ${y} L${x} ${y + 24}Z`, RAINBOW[k % RAINBOW.length]);
+    }
+  }
+  // ---------- Eingangstor ----------
+  const tower = (x) => G(x, 230, R(0, 0, 70, 470, '#7b2cbf', 8) + R(0, 0, 70, 470, 'url(#g-volh)', 8) + [60, 160, 260, 360].map((y) => R(18, y, 34, 50, '#ffe08a', 17, 'class="cwin"')).join('') +
+    P('M-14 4 L35 -80 L84 4Z', '#ff6fb5') + P('M-14 4 L35 -80 L84 4Z', 'url(#g-volh)') + R(33, -122, 4, 44, '#ddd') + P('M37 -122 L74 -110 L37 -98Z', '#ffca3a'));
+  s += tower(60) + tower(400);
+  s += P('M130 300 Q265 150 400 300 L400 340 Q265 200 130 340Z', 'url(#fest-gold)');
+  for (let k = 0; k <= 14; k++) { const t = k / 14, x = 130 + 270 * t, y = 300 - Math.sin(t * Math.PI) * 140; s += C(x, y + 6, 5, RAINBOW[k % RAINBOW.length]) + C(x, y + 6, 12, RAINBOW[k % RAINBOW.length], 'opacity=".3"'); }
+  s += G(110, 330, R(0, 0, 310, 70, '#14062e', 18) + R(4, 4, 302, 62, 'none', 15, 'stroke="url(#fest-gold)" stroke-width="4"') + [...'TOKILAND'].map((ch, i) => T(32 + i * 35, 50, 40, RAINBOW[i % RAINBOW.length], ch, 'stroke="#fff" stroke-width="1.5" paint-order="stroke"')).join(''));
+  // ---------- Hauptbühne ----------
+  // Lautsprecher-Türme
+  const speaker = (x) => G(x, 250, R(0, 0, 80, 450, '#1c1c24', 6) + R(0, 0, 80, 450, 'url(#g-volh)', 6) +
+    [0, 1, 2, 3, 4].map((i) => C(40, 50 + i * 86, 28, '#2e2e3a') + C(40, 50 + i * 86, 20, '#111') + C(40, 50 + i * 86, 8, '#444') + C(36, 46 + i * 86, 4, '#777')).join(''));
+  s += speaker(620) + speaker(1900);
+  // Märchen-Fassade
+  s += P('M720 520 L720 250 Q760 140 820 180 Q900 40 1050 120 Q1150 10 1300 40 Q1450 10 1550 120 Q1700 40 1780 180 Q1840 140 1880 250 L1880 520Z', '#2b1356');
+  s += P('M720 520 L720 250 Q760 140 820 180 Q900 40 1050 120 Q1150 10 1300 40 Q1450 10 1550 120 Q1700 40 1780 180 Q1840 140 1880 250 L1880 520Z', 'url(#g-vol)');
+  // Seitentürme
+  const ftower = (x, c) => G(x, 120, R(0, 60, 140, 340, c, 10) + R(0, 60, 140, 340, 'url(#g-volh)', 10) + P('M-16 70 L70 -60 L156 70Z', '#ff6fb5') + P('M-16 70 L70 -60 L156 70Z', 'url(#g-volh)') +
+    C(70, -64, 10, '#ffca3a') + R(20, 170, 100, 170, '#000', 8) + R(24, 174, 92, 162, '#ff6fb5', 6, 'class="ledscr"') + R(24, 174, 92, 162, 'url(#g-glass)', 6) +
+    [96, 130].map((y) => C(70, y, 14, '#ffe08a', 'class="cwin"')).join('') + P('M10 400 q20 -40 40 0 q20 -40 40 0 q20 -40 40 0', '#8ac926'));
+  s += ftower(760, '#6a3fb5') + ftower(1700, '#6a3fb5');
+  // Blütenkranz + großes Märchengesicht
+  for (let k = 0; k < 16; k++) {
+    const a = (k / 16) * Math.PI * 2;
+    s += `<ellipse cx="${1300 + Math.cos(a) * 205}" cy="${270 + Math.sin(a) * 205}" rx="52" ry="26" fill="${RAINBOW[k % RAINBOW.length]}" transform="rotate(${(a * 180) / Math.PI} ${1300 + Math.cos(a) * 205} ${270 + Math.sin(a) * 205})"/>`;
+  }
+  s += C(1300, 270, 186, 'url(#fest-gold)') + C(1300, 270, 170, 'url(#fest-face)') +
+    `<g class="festeyes">${E(1238, 236, 30, 36, '#fff')}${E(1362, 236, 30, 36, '#fff')}${C(1244, 244, 17, '#4b1d7a')}${C(1368, 244, 17, '#4b1d7a')}${C(1250, 236, 6, '#fff')}${C(1374, 236, 6, '#fff')}</g>` +
+    P('M1200 196 q38 -22 70 -4 M1330 192 q32 -18 70 4', 'none', 'stroke="#7a3b1f" stroke-width="7" stroke-linecap="round"') +
+    E(1218, 300, 26, 14, '#ff8fab', 'opacity=".6"') + E(1382, 300, 26, 14, '#ff8fab', 'opacity=".6"') + P('M1240 318 Q1300 380 1360 318 Q1300 340 1240 318Z', '#8c2f39') + P('M1262 338 q38 18 76 0', '#ff8fa0');
+  // Traverse mit Scheinwerfern (Strahlen bewegen sich per CSS)
+  s += R(690, 66, 1220, 18, '#8a8f99') + Array.from({ length: 60 }, (_, i) => P(`M${692 + i * 20} 66 l10 18 l10 -18`, 'none', 'stroke="#5d626b" stroke-width="2"')).join('') + R(690, 66, 1220, 3, '#c9ced6');
+  s += `<g class="beams">${[760, 900, 1040, 1180, 1420, 1560, 1700, 1840].map((x, i) => `<g class="beam b${i % 4}" style="transform-origin:${x}px 90px">${P(`M${x - 8} 92 L${x + 8} 92 L${x + 120} 700 L${x - 120} 700Z`, 'url(#fest-beam)', `opacity=".22" style="fill:url(#fest-beam)"`)}</g>`).join('')}</g>`;
+  s += [760, 900, 1040, 1180, 1420, 1560, 1700, 1840].map((x, i) => R(x - 14, 82, 28, 22, '#2b2b33', 5) + E(x, 104, 11, 5, RAINBOW[i])).join('');
+  // Laser (nur bei Musik sichtbar)
+  s += `<g class="lasers">${[-60, -40, -20, 0, 20, 40, 60].map((a) => `<g class="laser" style="transform-origin:1300px 440px;--a:${a}deg"><path d="M1300 440 L1300 -200" stroke="${a % 40 ? '#39ff14' : '#ff2bd6'}" stroke-width="4" opacity=".85"/></g>`).join('')}</g>`;
+  // Bühnenboden
+  s += R(700, 520, 1200, 180, '#1a1030') + R(700, 520, 1200, 10, '#3a2a60') + R(700, 524, 1200, 2, '#fff', 0, 'opacity=".2"') +
+    `<g class="stagelights">${Array.from({ length: 24 }, (_, i) => R(716 + i * 49.5, 560, 34, 12, RAINBOW[i % RAINBOW.length], 6)).join('')}</g>` + R(700, 600, 1200, 100, 'url(#g-vol)') + T(1300, 660, 42, '#ffe08a', '✦ TOKILAND MAINSTAGE ✦', 'opacity=".9"');
+  // ---------- Waldbühne ----------
+  s += G(2080, 0, P('M0 560 L0 330 Q200 170 400 330 L400 560Z', '#1f5a3b') + P('M0 560 L0 330 Q200 170 400 330 L400 560Z', 'url(#g-vol)') +
+    P('M-30 340 Q200 120 430 340 Q380 300 330 330 Q280 290 230 320 Q200 280 170 320 Q120 290 70 330 Q20 300 -30 340Z', '#c0392b') + Array.from({ length: 9 }, (_, i) => C(40 + i * 40, 270 + Math.abs(4 - i) * 12, 7, '#fff', 'opacity=".85"')).join('') +
+    T(200, 300, 30, '#fff', 'WALDBÜHNE') + R(20, 560, 360, 140, '#3d2a1a') + R(20, 560, 360, 140, 'url(#p-grain)') + R(20, 560, 360, 8, '#6b4a2a') +
+    `<g class="stagelights">${Array.from({ length: 8 }, (_, i) => R(36 + i * 43, 590, 28, 10, RAINBOW[(i + 3) % 8], 5)).join('')}</g>` +
+    [60, 340].map((x) => `<g transform="translate(${x} 360)">${R(-4, 0, 8, 200, '#5b3a1f')}${C(0, -10, 34, '#2d8a55')}${C(-14, 4, 22, '#40b073')}${C(10, -24, 6, '#ffca3a')}</g>`).join(''));
+  // Foodtruck-Schild & Flaggenmasten
+  for (const x of [560, 2010, 2500]) s += R(x - 3, 220, 6, 480, '#ccc') + P(`M${x + 3} 222 L${x + 70} 244 L${x + 3} 266Z`, RAINBOW[x % 7]);
+  return svgWrap(W, s);
+}
+
+const festivalProps = [
+  { id: 'riesenrad', kind: 'deco', x: 2480, y: 110, w: 440, h: 440,
+    svg: svgWrap0(440, 440, `<g class="wheel">${C(220, 220, 210, 'none', 'stroke="#efe7ff" stroke-width="10"')}${C(220, 220, 150, 'none', 'stroke="#d9cdf2" stroke-width="5"')}` +
+      Array.from({ length: 12 }, (_, i) => { const a = (i / 12) * Math.PI * 2; const x = 220 + Math.cos(a) * 210, y = 220 + Math.sin(a) * 210; return P(`M220 220 L${x} ${y}`, 'none', 'stroke="#d9cdf2" stroke-width="4"') + C(x, y, 18, RAINBOW[i % 8]) + C(x, y, 9, '#fff8c4') + C(220 + Math.cos(a) * 150, 220 + Math.sin(a) * 150, 5, '#fff8c4'); }).join('') +
+      `</g>${C(220, 220, 24, '#efe7ff')}${C(220, 220, 10, '#7b2cbf')}`) },
+  { id: 'djpult', kind: 'dj', x: 1170, y: 418, w: 260, h: 50,
+    svg: svgWrap0(260, 50, R(0, 20, 260, 30, '#2b2b33', 6) + R(0, 20, 260, 6, '#555', 3) + C(52, 18, 34, '#111') + C(208, 18, 34, '#111') +
+      `<g class="spin">${C(52, 18, 30, '#1b1b1b')}${C(52, 18, 22, 'none', 'stroke="#333" stroke-width="2"')}${C(52, 18, 10, '#ff6fb5')}</g><g class="spin">${C(208, 18, 30, '#1b1b1b')}${C(208, 18, 22, 'none', 'stroke="#333" stroke-width="2"')}${C(208, 18, 10, '#2ec4b6')}</g>` +
+      R(100, 0, 60, 30, '#3a3a46', 4) + [110, 125, 140].map((x) => R(x, 6, 6, 18, '#7cffb2', 2, 'class="led"')).join('') + T(130, 46, 12, '#fff', 'TIPP MICH!', 'class="djtip"')) },
+  { id: 'djpult2', kind: 'dj', x: 2190, y: 506, w: 180, h: 54,
+    svg: svgWrap0(180, 54, R(0, 24, 180, 30, '#2b2b33', 6) + C(42, 22, 26, '#111') + C(138, 22, 26, '#111') + `<g class="spin">${C(42, 22, 22, '#1b1b1b')}${C(42, 22, 8, '#ffca3a')}</g><g class="spin">${C(138, 22, 22, '#1b1b1b')}${C(138, 22, 8, '#8ac926')}</g>` +
+      R(70, 4, 40, 28, '#3a3a46', 4) + R(78, 10, 5, 14, '#7cffb2', 2, 'class="led"') + R(90, 10, 5, 14, '#7cffb2', 2, 'class="led"')) },
+  { id: 'pyroL', kind: 'deco', x: 700, y: 430, w: 60, h: 90, svg: svgWrap0(60, 90, R(10, 60, 40, 30, '#333', 4) + `<g class="flames">${P('M30 60 Q4 30 22 -20 Q30 10 34 -40 Q60 10 30 60Z', '#ff9f1c')}${P('M30 60 Q16 34 28 0 Q34 20 38 -6 Q50 30 30 60Z', '#ffd60a')}</g>`) },
+  { id: 'pyroR', kind: 'deco', x: 1840, y: 430, w: 60, h: 90, svg: svgWrap0(60, 90, R(10, 60, 40, 30, '#333', 4) + `<g class="flames">${P('M30 60 Q4 30 22 -20 Q30 10 34 -40 Q60 10 30 60Z', '#ff9f1c')}${P('M30 60 Q16 34 28 0 Q34 20 38 -6 Q50 30 30 60Z', '#ffd60a')}</g>`) },
+  { id: 'foodtruck', kind: 'spawn', x: 2620, y: 470, w: 300, h: 230, spawn: ['🍟', '🍕', '🌭', '🥤', '🍦', '🧃'], sound: 'pop', from: [2700, 470],
+    svg: svgWrap0(300, 230, E(150, 230, 150, 8, 'url(#g-sh)') + R(0, 30, 300, 170, '#ffca3a', 16) + R(0, 30, 300, 170, 'url(#g-vol)', 16) + R(30, 70, 170, 70, '#2b1356', 6) + R(30, 70, 170, 70, 'url(#g-glass)', 6) +
+      Array.from({ length: 10 }, (_, i) => P(`M${i * 30} 30 h30 l-4 20 q-11 8 -22 0z`, i % 2 ? '#fff' : '#ff595e')).join('') + R(20, 136, 190, 10, '#e9a93a', 3) +
+      T(115, 24, 26, '#ff595e', 'SNACKS', 'stroke="#fff" stroke-width="3" paint-order="stroke"') + R(220, 70, 60, 120, '#e9a93a', 8) + C(250, 130, 4, '#555') +
+      `<text x="50" y="118" font-size="30">🍟🌭🥤</text>` + C(60, 205, 24, '#2b2b2b') + C(240, 205, 24, '#2b2b2b') + C(60, 205, 9, 'url(#g-metal)') + C(240, 205, 9, 'url(#g-metal)')) },
+  { id: 'konfettikanone', kind: 'confetti', x: 2000, y: 600, w: 70, h: 100,
+    svg: svgWrap0(70, 100, R(20, 60, 30, 40, '#444', 4) + `<g transform="rotate(-25 35 60)">${R(22, 0, 26, 66, '#ff6fb5', 8)}${R(22, 0, 26, 66, 'url(#g-volh)', 8)}${R(18, 0, 34, 10, '#ffca3a', 4)}</g>`) },
+];
+
+const festivalFG = [
+  { x: 1170, y: 440, w: 260, h: 80, prop: 'djpult', svg: svgWrap0(260, 80, R(0, 0, 260, 80, '#1c1c24', 6) + R(0, 0, 260, 80, 'url(#g-vol)', 6) + R(0, 0, 260, 5, '#ff6fb5', 2) +
+    T(130, 42, 26, '#ff6fb5', 'DJ') + T(130, 62, 13, '#fff', '👆 TIPP MICH', 'class="djtip"') + R(20, 68, 220, 6, '#2ec4b6', 3, 'class="led"')) },
+  { x: 2190, y: 530, w: 180, h: 30, prop: 'djpult2', svg: svgWrap0(180, 30, R(0, 0, 180, 30, '#1c1c24', 5) + R(0, 0, 180, 4, '#ffca3a', 2)) },
+];
+
 // ======================= Szenen =======================
 export const SCENES = [
   {
@@ -959,6 +1066,16 @@ export const SCENES = [
     zones: OFFICES.flatMap((d, i) => [{ kind: 'desk', seat: `buero:${i}a`, prop: `mon${i}a` }, { kind: 'desk', seat: `buero:${i}b`, prop: `mon${i}b` }]),
   },
   {
+    id: 'festival', name: 'Festival', icon: '🎡', W: 3000, ceil: 90, dusk: true, bg: festivalBG(), props: festivalProps, fg: festivalFG,
+    glows: [{ x: 265, y: 230, r: 260 }, { x: 1300, y: 270, r: 380 }, { x: 830, y: 330, r: 200 }, { x: 1770, y: 330, r: 200 }, { x: 2280, y: 420, r: 220 }, { x: 2700, y: 330, r: 300 }, { x: 2760, y: 560, r: 200 }],
+    surfaces: [
+      { x1: 700, x2: 1170, y: 520 }, { x1: 1430, x2: 1900, y: 520 }, { x1: 1170, x2: 1430, y: 520 },
+      { x1: 620, x2: 700, y: 250 }, { x1: 1900, x2: 1980, y: 250 }, { x1: 2100, x2: 2460, y: 560 }, { x1: 2640, x2: 2830, y: 606 },
+    ],
+    seats: [],
+    zones: [],
+  },
+  {
     id: 'park', name: 'Park', icon: '🌳', W: 2600, ceil: 110, bg: parkBG(), props: parkProps, fg: parkFG,
     glows: [{ x: 950, y: 400, r: 260 }, { x: 1800, y: 400, r: 260 }],
     surfaces: [
@@ -1025,6 +1142,8 @@ export function initialObjects() {
     o.push(it('buero', ['📁', '🎧', '📎'][i], d + 60, 540), it('buero', ['☕', '📱', '📄'][i], d + 345, 540), it('buero', ['📎', '☕', '🖊️'][i], d + 520, 540));
   });
   o.push(it('buero', '💻', 2650, 556), it('buero', '📊', 2760, 556), it('buero', '☕', 2850, 556), it('buero', '🪴', 2470, 700));
+  // Festival
+  o.push(it('festival', '🥤', 960, 700), it('festival', '🎈', 1500, 140), it('festival', '🎈', 1060, 160), it('festival', '🕶️', 1650, 700), it('festival', '🍟', 2400, 560), it('festival', '🧢', 300, 700), it('festival', '🎧', 760, 520), it('festival', '🪩', 1840, 520));
   // Figuren
   o.push(ch('haus', 280, 596, { skin: '#f8c9a0', hair: 'zoepfe', hc: '#c8501e', style: 'kleid', shirt: '#ff6fb5', pants: '#1982c4', shoes: '#ff595e', hat: '', glasses: '' }, 'haus:sofa2'));
   o.push(ch('haus', 1060, 700, { skin: '#8a5530', hair: 'afro', hc: '#111111', style: 'tshirt', shirt: '#ffca3a', pants: '#1982c4', shoes: '#333333', hat: '', glasses: 'rund' }));
@@ -1041,6 +1160,11 @@ export function initialObjects() {
   o.push(ch('buero', 1680, 592, { skin: '#b97a4a', hair: 'dutt', hc: '#111111', style: 'tshirt', shirt: '#ffffff', pants: '#1982c4', shoes: '#50af30', hat: '', glasses: '' }, 'buero:1b'));
   o.push(ch('buero', 1990, 592, { skin: '#ffe3cf', hair: 'lang', hc: '#f2c94c', style: 'streifen', shirt: '#575757', pants: '#6a4c93', shoes: '#ffffff', hat: '', glasses: 'rund' }, 'buero:2a'));
   o.push(ch('buero', 400, 700, { skin: '#e0a46e', hair: 'pony', hc: '#c8501e', style: 'kleid', shirt: '#50af30', pants: '#ffffff', shoes: '#575757', hat: '', glasses: '' }));
+  o.push(ch('festival', 1300, 520, { skin: '#e0a46e', hair: 'irokese', hc: '#ff7eb6', style: 'streifen', shirt: '#333333', pants: '#333333', shoes: '#ff595e', hat: '', glasses: 'sonne', eyes: '#5a3a22' }));
+  o.push(ch('festival', 900, 700, { skin: '#ffe3cf', hair: 'zoepfe', hc: '#f2c94c', style: 'kleid', shirt: '#ff6fb5', pants: '#ffffff', shoes: '#ffffff', hat: 'krone', glasses: '', eyes: '#2f6db5' }));
+  o.push(ch('festival', 1080, 700, { skin: '#8a5530', hair: 'afro', hc: '#9b5de5', style: 'tshirt', shirt: '#00bbf9', pants: '#1982c4', shoes: '#ffca3a', hat: '', glasses: '', eyes: '#5a3a22' }));
+  o.push(ch('festival', 1560, 700, { skin: '#f8c9a0', hair: 'kurz', hc: '#c8501e', style: 'pulli', shirt: '#8ac926', pants: '#333333', shoes: '#ffffff', hat: 'cap', glasses: '', eyes: '#3c7a3a' }));
+  o.push(ch('festival', 1740, 700, { skin: '#b97a4a', hair: 'lang', hc: '#111111', style: 'kleid', shirt: '#ffca3a', pants: '#ffffff', shoes: '#ff6fb5', hat: 'schleife', glasses: '', eyes: '#8a5a2b' }));
   o.push(ch('park', 700, 700, { skin: '#ffc4d6', hair: 'dutt', hc: '#ff7eb6', style: 'kleid', shirt: '#ffca3a', pants: '#ffffff', shoes: '#9b5de5', hat: 'schleife', glasses: '' }));
   return o;
 }

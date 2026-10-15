@@ -7,7 +7,7 @@ Auf dem iPad in Safari öffnen → Teilen ⬆️ → „Zum Home-Bildschirm“.
 
 ## Inhalt
 - Startseite: animierte Weltkarte – Ort antippen und hineinzoomen (auch über „Karte“ in der Leiste)
-- 8 Orte: Haus (Wohnzimmer, Küche, Bad, Schlafzimmer), Café, Supermarkt, Friseur, Badezimmer (Regendusche, Badewanne, Waschbecken, 2 WCs), Heylinschule (Flur und Klassenzimmer der 4A), itmX Büro (Empfang, 3 Büros, Meetingraum), Park
+- 9 Orte: Haus (Wohnzimmer, Küche, Bad, Schlafzimmer), Café, Supermarkt, Friseur, Badezimmer (Regendusche, Badewanne, Waschbecken, 2 WCs), Heylinschule (Flur und Klassenzimmer der 4A), itmX Büro (Empfang, 3 Büros, Meetingraum), Festival „Tokiland“ (Hauptbühne, Waldbühne, Riesenrad, DJ-Pult mit echter Musik und Scratchen), Park
 - Auf dem Klo machen die Figuren ein 💩 – Spülung antippen und weg ist es
 - Figuren herumziehen, hinsetzen (Sofa, Stühle, Bett, Badewanne, Schaukel, Rutsche), anziehen und umstylen
 - Über 100 Gegenstände: essen, halten, kochen (🥚→🍳), Kühlschrank (💧→🧊), Geschenke auspacken …
@@ -20,3 +20,7 @@ Deploy: Push auf `main` → GitHub Actions → GitHub Pages.
 
 ## Einrichtung GitHub Pages
 Einmalig unter **Settings → Pages → Source** „GitHub Actions“ wählen. Danach veröffentlicht jeder Push auf `main` das Spiel automatisch.
+
+## Musik
+Die Festival-Tracks in `audio/` sind eigene, mit `tools/make_music.py` synthetisierte Kompositionen
+(gemeinfrei, CC0 – siehe `audio/LIZENZ.txt`). Neu erzeugen: `python3 tools/make_music.py`.

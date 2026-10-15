@@ -10,6 +10,10 @@ export function setMuted(m) {
   if (m) music(false);
 }
 
+export function getAudio() {
+  return { ctx, master };
+}
+
 export function unlock() {
   if (!ctx) {
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -149,6 +153,25 @@ export const sfx = {
     tone({ f: 2000, f2: 2800, t: 0.1, v: 0.12, delay: 0.15 });
   },
   dryer: () => noise({ t: 1.2, v: 0.15, f: 600, f2: 900, q: 0.4 }),
+  airhorn: () => {
+    for (let k = 0; k < 3; k++) {
+      [466, 587, 698].forEach((f) => tone({ type: 'sawtooth', f, f2: f * 0.97, t: 0.22, v: 0.09, lp: 2600, delay: k * 0.26 }));
+    }
+  },
+  laser: () => {
+    for (let k = 0; k < 3; k++) tone({ type: 'square', f: 2400, f2: 180, t: 0.25, v: 0.07, lp: 4000, delay: k * 0.12 });
+  },
+  siren: () => {
+    for (let k = 0; k < 4; k++) {
+      tone({ type: 'sawtooth', f: 600, f2: 1100, t: 0.3, v: 0.06, lp: 2500, delay: k * 0.6 });
+      tone({ type: 'sawtooth', f: 1100, f2: 600, t: 0.3, v: 0.06, lp: 2500, delay: k * 0.6 + 0.3 });
+    }
+  },
+  boom: () => {
+    noise({ t: 0.9, v: 0.35, f: 400, f2: 80, q: 0.7 });
+    tone({ f: 90, f2: 40, t: 0.6, v: 0.35 });
+  },
+  whooshUp: () => noise({ t: 0.7, v: 0.2, f: 400, f2: 5000, q: 1.2 }),
   tv: () => [784, 988, 1175].forEach((f, i) => tone({ type: 'square', f, t: 0.1, v: 0.05, lp: 3000, delay: i * 0.08 })),
 };
 

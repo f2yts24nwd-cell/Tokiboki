@@ -625,3 +625,101 @@ body.map-open #nav, body.map-open #drawer { display: none; }
 .o.c::after { width: 70%; bottom: -6px; height: 14px; }
 .o.c.seated::after, .o.dragging::after, .hand .o::after, .o.floaty::after { display: none; }
 #map.night .owin { animation: none; fill: #ffe066; }
+
+/* ---------- Festival ---------- */
+.scene.dusk .glow.lit { opacity: 0.85; }
+.scene .beam { animation: sweep 7s ease-in-out infinite alternate; transform-box: view-box; opacity: 0.55; }
+.scene .beam.b1 { animation-duration: 5s; animation-delay: -2s; }
+.scene .beam.b2 { animation-duration: 8s; animation-delay: -4s; }
+.scene .beam.b3 { animation-duration: 6s; animation-delay: -1s; }
+.scene.party .beam { opacity: 1; animation-duration: calc(480s / var(--bpm)); }
+.scene .lasers { opacity: 0; transition: opacity 0.4s; }
+.scene.party .lasers, .scene.laserfx .lasers { opacity: 1; }
+.scene .laser { transform-box: view-box; animation: lsweep 2.4s ease-in-out infinite alternate; }
+.scene.laserfx .laser { animation-duration: 0.5s; }
+.scene .ledscr { animation: tvcol 4s steps(1) infinite; }
+.scene.party .ledscr { animation-duration: calc(240s / var(--bpm)); }
+.scene .stagelights rect { animation: pulse 1.2s ease-in-out infinite alternate; }
+.scene .stagelights rect:nth-child(odd) { animation-delay: -0.6s; }
+.scene.party .stagelights rect { animation-duration: calc(60s / var(--bpm)); }
+.scene .festeyes { animation: blink 5s infinite; transform-box: fill-box; transform-origin: center; }
+.scene .wheel { transform-box: fill-box; transform-origin: center; animation: spin 45s linear infinite; }
+.prop .flames { display: none; transform-box: fill-box; transform-origin: 50% 100%; }
+.prop.fire .flames { display: inline; animation: flick 0.08s infinite alternate; }
+.prop .spin { transform-box: fill-box; transform-origin: center; }
+.scene.party .prop .spin { animation: spin 1.8s linear infinite; }
+.fgp.fgtap { pointer-events: auto; }
+.djtip { animation: pulse 0.8s infinite alternate; }
+.scene.party .djtip { display: none; }
+.scene.party .c:not(.seated):not(.dragging) > .ci { animation: dance calc(60s / var(--bpm)) ease-in-out infinite alternate; }
+.scene.party.beat .glow.lit { animation: gflash 0.25s ease-out; }
+.fconf { position: absolute; width: 12px; height: 18px; border-radius: 3px; animation: fconf 2s cubic-bezier(0.2, 0.7, 0.4, 1) forwards; }
+.fw { position: absolute; width: 0; height: 0; }
+.fw i { position: absolute; left: -5px; top: -5px; width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 12px currentColor; animation: fwb 1.4s ease-out forwards; }
+@keyframes sweep { from { transform: rotate(-16deg); } to { transform: rotate(16deg); } }
+@keyframes lsweep { from { transform: rotate(calc(var(--a) - 22deg)); } to { transform: rotate(calc(var(--a) + 22deg)); } }
+@keyframes dance { from { transform: translateY(0) rotate(-3deg); } to { transform: translateY(-18px) rotate(3deg); } }
+@keyframes gflash { 0% { filter: brightness(1.8); } 100% { filter: none; } }
+@keyframes fconf { 0% { transform: translate(0, 0) rotate(0); opacity: 1; } 70% { opacity: 1; } 100% { transform: translate(var(--dx), calc(var(--dy) + 420px)) rotate(var(--r)); opacity: 0; } }
+@keyframes fwb { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 80% { opacity: 1; } 100% { transform: translate(var(--dx), calc(var(--dy) + 40px)) scale(0.3); opacity: 0; } }
+
+/* ---------- DJ-Pult ---------- */
+body.dj-open #nav, body.dj-open #drawer { display: none; }
+#dj { position: fixed; left: 0; right: 0; bottom: 0; z-index: 32; padding: 0 10px calc(8px + env(safe-area-inset-bottom)); }
+#dj.hidden { display: none; }
+.djpanel {
+  position: relative; display: flex; gap: 12px; margin: 0 auto; max-width: 1100px; padding: 14px;
+  background: linear-gradient(#26124f, #12082a); border: 2px solid #7b2cbf; border-radius: 28px;
+  box-shadow: 0 0 40px rgba(255, 111, 181, 0.35); color: #fff; animation: slideup2 0.25s ease-out;
+}
+@keyframes slideup2 { from { transform: translateY(40px); opacity: 0; } }
+.deck { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.tt { position: relative; width: 220px; height: 220px; border-radius: 22px; background: linear-gradient(145deg, #444452, #1c1c24); display: flex; align-items: center; justify-content: center; box-shadow: inset 0 2px 0 rgba(255,255,255,.15); }
+.tt::after { content: ""; position: absolute; left: 10px; top: 10px; width: 200px; height: 200px; border-radius: 50%; pointer-events: none;
+  background: conic-gradient(from 20deg, transparent 0 18%, rgba(255,255,255,.14) 24%, transparent 30% 68%, rgba(255,255,255,.1) 74%, transparent 80%); }
+.vinyl { width: 200px; height: 200px; border-radius: 50%; touch-action: none; display: flex; align-items: center; justify-content: center;
+  background: repeating-radial-gradient(circle, #151515 0 2px, #232323 2px 4px); box-shadow: 0 6px 16px rgba(0,0,0,.6), inset 0 0 0 4px #000; }
+.vinyl.grab { box-shadow: 0 0 0 4px #ff6fb5, 0 6px 16px rgba(0,0,0,.6); }
+.vlabel { width: 74px; height: 74px; border-radius: 50%; background: var(--c, #ff6fb5); border: 3px solid rgba(255,255,255,.7); display: flex; align-items: center; justify-content: center; position: relative; }
+.vlabel b { font-size: 22px; }
+.vlabel::after { content: ""; position: absolute; width: 8px; height: 8px; border-radius: 50%; background: #111; }
+.vlabel b { position: absolute; top: 8px; }
+.arm { position: absolute; right: 14px; top: 12px; width: 10px; height: 120px; border-radius: 5px; background: linear-gradient(90deg, #888, #eee, #888); transform: rotate(22deg); transform-origin: top; pointer-events: none; }
+.arm::before { content: ""; position: absolute; top: -8px; left: -8px; width: 26px; height: 26px; border-radius: 50%; background: #666; }
+.tracks { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; }
+.tbtn { padding: 8px 10px; border-radius: 12px; background: #2b1b4f; color: #fff; font-size: 13px; font-weight: 800; border: 2px solid transparent; }
+.tbtn.sel { border-color: var(--c); box-shadow: 0 0 12px var(--c); }
+.dctl { display: flex; align-items: center; gap: 10px; }
+.play { width: 70px; height: 52px; border-radius: 16px; background: #8ac926; font-size: 26px; color: #fff; box-shadow: inset 0 -4px 0 rgba(0,0,0,.25); }
+.deck.on .play { background: #ff595e; }
+.vu { width: 14px; height: 52px; background: #000; border-radius: 4px; overflow: hidden; }
+.vu i { display: block; width: 100%; height: 100%; background: linear-gradient(#ff595e, #ffca3a 30%, #8ac926 60%); transform-origin: bottom; transform: scaleY(0); }
+.status { font-size: 13px; opacity: 0.8; min-width: 70px; }
+.mixer { width: 330px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.djlogo { font-weight: 900; font-size: 26px; letter-spacing: 2px; background: linear-gradient(90deg, #ff6fb5, #ffca3a, #2ec4b6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.djlogo span { color: #fff; -webkit-text-fill-color: #fff; font-size: 16px; }
+.bpm { font-family: ui-monospace, Menlo, monospace; font-size: 22px; color: #7cffb2; background: #000; padding: 4px 14px; border-radius: 8px; }
+.xf { display: flex; align-items: center; gap: 10px; width: 100%; font-weight: 900; }
+.xtrack { flex: 1; height: 14px; margin: 16px 0; background: #000; border-radius: 7px; position: relative; touch-action: none; }
+.xknob { position: absolute; top: 50%; width: 34px; height: 48px; margin: -24px 0 0 -17px; border-radius: 8px; background: linear-gradient(#f4f4f4, #9a9a9a); box-shadow: 0 3px 6px rgba(0,0,0,.5); }
+.pads { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
+.pad { height: 62px; border-radius: 14px; background: #2b1b4f; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: inset 0 -4px 0 rgba(0,0,0,.3); touch-action: none; }
+.pad b { font-size: 26px; font-weight: normal; line-height: 1; }
+.pad i { font-style: normal; font-size: 12px; font-weight: 800; margin-top: 2px; }
+.pad.hit { animation: padhit 0.35s ease-out; }
+@keyframes padhit { 0% { background: #ff6fb5; transform: scale(0.92); } 100% { background: #2b1b4f; } }
+.djhint { margin: 0; font-size: 12px; opacity: 0.7; }
+.djx { position: absolute; top: -18px; right: -6px; width: 48px; height: 48px; border-radius: 50%; background: #ff595e; color: #fff; font-size: 22px; font-weight: 900; border: 3px solid #fff; }
+@media (max-width: 1100px), (max-height: 780px) {
+  .tt { width: 186px; height: 186px; } .tt::after { width: 166px; height: 166px; } .vinyl { width: 166px; height: 166px; }
+  .mixer { width: 290px; } .tbtn { font-size: 11px; padding: 6px 7px; } .pad { height: 54px; }
+}
+@media (max-width: 1100px) { .nb { width: 56px; } .nb i { font-size: 9px; } }
+
+.mbeam { transform-box: fill-box; transform-origin: 50% 100%; animation: msweep 3s ease-in-out infinite alternate; }
+@keyframes msweep { from { transform: rotate(calc(var(--a) - 18deg)); } to { transform: rotate(calc(var(--a) + 18deg)); } }
+.mwheel { transform-box: fill-box; transform-origin: center; animation: spin 18s linear infinite; }
+.mled { animation: pulse 0.5s ease-in-out infinite alternate; }
+.mled:nth-child(odd) { animation-delay: -0.25s; }
+@keyframes carL { from { transform: translateX(1600px); } to { transform: translateX(-150px); } }
+@keyframes carR { from { transform: translateX(-150px); } to { transform: translateX(1650px); } }

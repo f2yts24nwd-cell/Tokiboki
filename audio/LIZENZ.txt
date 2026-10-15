@@ -1,0 +1,4 @@
+Die Musikstücke in diesem Ordner (track1.mp3 "Tokiland Hymne", track2.mp3 "Neonwald",
+track3.mp3 "Raketenstart") wurden vollständig mit tools/make_music.py synthetisiert –
+ohne fremde Samples oder Vorlagen. Sie sind gemeinfrei (CC0 1.0):
+https://creativecommons.org/publicdomain/zero/1.0/deed.de

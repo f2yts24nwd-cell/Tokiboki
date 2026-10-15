@@ -2,6 +2,7 @@ import { sfx, unlock, setMuted, music } from './sound.js';
 import * as A from './art.js';
 import { SCENES, H, initialObjects, GLOBAL_DEFS } from './world.js';
 import { createMap } from './map.js';
+import * as DJ from './dj.js';
 
 const SAVE_KEY = 'kunterbunt-welt-v1';
 const FLOOR = 700;
@@ -104,7 +105,7 @@ function box(e, x, y, w, h) {
 }
 
 function buildScene(s) {
-  const root = div('scene');
+  const root = div('scene' + (s.dusk ? ' dusk' : ''));
   root.style.width = s.W + 'px';
   root.innerHTML = '<div class="layer bg"></div><div class="layer props"></div><div class="layer objs"></div><div class="layer fg"></div>' +
     '<div class="layer drag"></div><div class="layer shade"></div><div class="layer glows"></div><div class="layer fx"></div>';
@@ -120,7 +121,8 @@ function buildScene(s) {
     propEls[p.id] = e;
   }
   for (const f of s.fg) {
-    const e = div('fgp');
+    const e = div('fgp' + (f.prop ? ' fgtap' : ''));
+    if (f.prop) e.dataset.prop = f.prop;
     box(e, f.x, f.y, f.w, f.h);
     e.innerHTML = f.svg;
     L('fg').append(e);
@@ -760,6 +762,15 @@ function tapProp(id) {
       if (kid) bubble(kid, pick(['Pause! 🎉', 'Juhu, Pause!', 'Ding dong! 🔔']));
       break;
     }
+    case 'dj':
+      DJ.open();
+      sfx.pop();
+      break;
+    case 'confetti':
+      propBump(e);
+      sfx.pop();
+      festConfetti(p.sc, p.x + 30, p.y + 10, 40);
+      break;
     case 'dryer': {
       e.classList.add('on');
       setTimeout(() => e.classList.remove('on'), 1300);
@@ -781,6 +792,97 @@ function tapProp(id) {
     }
   }
   save();
+}
+
+// ---------------- Festival ----------------
+const FEST_COLORS = ['#ff595e', '#ff924c', '#ffca3a', '#8ac926', '#1982c4', '#6a4c93', '#ff6fb5', '#00bbf9'];
+
+function festConfetti(sc, x, y, n = 30) {
+  if (sc !== state.scene) return;
+  const layer = sceneEls[sc].fx;
+  for (let i = 0; i < n; i++) {
+    const c = document.createElement('i');
+    c.className = 'fconf';
+    c.style.background = FEST_COLORS[i % FEST_COLORS.length];
+    box(c, x, y);
+    c.style.setProperty('--dx', rand(-260, 260) + 'px');
+    c.style.setProperty('--dy', rand(-420, -120) + 'px');
+    c.style.setProperty('--r', rand(-720, 720) + 'deg');
+    c.style.animationDuration = rand(1.4, 2.4) + 's';
+    layer.append(c);
+    setTimeout(() => c.remove(), 2600);
+  }
+}
+
+function firework(sc, x, y) {
+  if (sc !== state.scene) return;
+  const layer = sceneEls[sc].fx;
+  const col = pick(FEST_COLORS);
+  const fw = div('fw');
+  box(fw, x, y);
+  for (let i = 0; i < 18; i++) {
+    const d = document.createElement('i');
+    const a = (i / 18) * Math.PI * 2;
+    d.style.background = d.style.color = i % 3 ? col : '#fff8c4';
+    d.style.setProperty('--dx', Math.cos(a) * rand(90, 140) + 'px');
+    d.style.setProperty('--dy', Math.sin(a) * rand(90, 140) + 'px');
+    fw.append(d);
+  }
+  layer.append(fw);
+  setTimeout(() => fw.remove(), 1600);
+}
+
+function festFx(fx) {
+  const sc = 'festival';
+  const root = sceneEls[sc] && sceneEls[sc].root;
+  if (!root) return;
+  const here = state.scene === sc;
+  const view = state.scroll[sc];
+  const chars = Object.values(state.objs).filter((o) => o.t === 'c' && o.sc === sc && !o._stored);
+  if (fx === 'konfetti') {
+    festConfetti(sc, 2035, 600, 40);
+    festConfetti(sc, 1300, 440, 40);
+    festConfetti(sc, view + VW / 2, 300, 30);
+  } else if (fx === 'feuer') {
+    for (const id of ['pyroL', 'pyroR']) {
+      const e = sceneEls[sc].propEls[id];
+      e.classList.add('fire');
+      setTimeout(() => e.classList.remove('fire'), 1600);
+    }
+    if (here) sfx.boom();
+  } else if (fx === 'feuerwerk') {
+    for (let i = 0; i < 6; i++) {
+      setTimeout(() => {
+        firework(sc, view + rand(120, VW - 120), rand(80, 320));
+        if (here) sfx.boom();
+      }, i * 350);
+    }
+  } else if (fx === 'laser') {
+    root.classList.add('laserfx');
+    setTimeout(() => root.classList.remove('laserfx'), 2200);
+  }
+  if (fx === 'airhorn' || fx === 'siren' || fx === 'feuerwerk') {
+    chars.forEach((c, i) => setTimeout(() => { bump(c, 'jump'); setMood(c, 'happy', 1500); }, i * 60));
+    if (here && chars.length) bubble(pick(chars), pick(['Juhuuu! 🎉', 'Party! 🥳', 'Lauter! 🔊', 'Wooo! 🙌']));
+  }
+}
+
+let lastBeat = -1;
+function festivalFrame() {
+  const fe = sceneEls.festival;
+  if (!fe) return;
+  const bi = DJ.beatInfo();
+  fe.root.classList.toggle('party', !!bi);
+  if (!bi) { lastBeat = -1; return; }
+  fe.root.style.setProperty('--bpm', bi.bpm);
+  const b = Math.floor(bi.beat);
+  if (b !== lastBeat) {
+    lastBeat = b;
+    fe.root.classList.remove('beat');
+    void fe.root.offsetWidth;
+    fe.root.classList.add('beat');
+    if (state.scene === 'festival' && b % 16 === 0) firework('festival', state.scroll.festival + rand(150, VW - 150), rand(90, 260));
+  }
 }
 
 // ---------------- Effekte ----------------
@@ -901,7 +1003,7 @@ stage.addEventListener('pointerdown', (e) => {
     }
   }
   if (!pan) {
-    const pe = e.target.closest('.prop');
+    const pe = e.target.closest('.prop, .fgtap');
     const t = performance.now();
     pan = { id: e.pointerId, sx: e.clientX, start: state.scroll[state.scene], prop: pe ? pe.dataset.prop : null, moved: false, lx: e.clientX, lt: t, v: 0 };
     panV = 0;
@@ -1299,7 +1401,7 @@ function init() {
   addEventListener('resize', layout);
   addEventListener('orientationchange', () => setTimeout(layout, 200));
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { saveNow(); music(false); state.props.radio.on = false; applyProp('radio'); }
+    if (document.hidden) { saveNow(); music(false); state.props.radio.on = false; applyProp('radio'); DJ.stopAll(); }
   });
   document.addEventListener('gesturestart', (e) => e.preventDefault());
   document.addEventListener('dblclick', (e) => e.preventDefault());
@@ -1311,6 +1413,7 @@ function init() {
     last = t;
     stepFalling(dt);
     stepSlides(dt);
+    festivalFrame();
     for (const d of drags.values()) {
       if (d.active && d.auto && d.o.sc === state.scene) {
         setScroll(state.scroll[state.scene] + d.auto * dt);
@@ -1334,6 +1437,7 @@ function init() {
   });
   $('#bMap').addEventListener('click', () => { unlock(); closeDrawer(); closeModals(); sfx.whoosh(); map.open(); });
   map.open(true);
+  DJ.initDJ({ onFx: festFx });
   if (!localStorage.getItem('kunterbunt-hint')) {
     setTimeout(() => { if (!document.body.classList.contains('map-open')) toast('Zieh alles herum! 👆'); }, 600);
     try { localStorage.setItem('kunterbunt-hint', '1'); } catch (e) { /* egal */ }

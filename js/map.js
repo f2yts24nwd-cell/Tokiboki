@@ -1,7 +1,7 @@
 // Weltkarte (Startseite): animierte Übersicht aller Orte.
 import { charSVG } from './art.js';
 
-const VW = 1400;
+const VW = 1500;
 const VH = 900;
 const R = (x, y, w, h, fill, rx = 0, extra = '') => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="${fill}" ${extra}/>`;
 const C = (cx, cy, r, fill, extra = '') => `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" ${extra}/>`;
@@ -20,7 +20,7 @@ const ROOF = (d, c) => P(d, c) + P(d, 'url(#g-volh)');
 const DOOR = (x, y, w, h, c) => R(x, y, w, h, c, 8) + VOL(x, y, w, h, 8) + R(x + 5, y + 6, w - 10, h * 0.4, '#fff', 4, 'opacity=".18"') + C(x + w - 8, y + h * 0.55, 3.5, '#ffd166') + R(x - 4, y + h - 2, w + 8, 4, '#bbb', 2);
 
 const BUILDINGS = {
-  haus: { x: 200, y: 360, draw: () =>
+  haus: { x: 160, y: 360, draw: () =>
     `<g class="smoke">${C(62, -215, 10, '#fff', 'style="--i:0"')}${C(62, -215, 10, '#fff', 'style="--i:1"')}${C(62, -215, 10, '#fff', 'style="--i:2"')}</g>` +
     R(48, -208, 28, 66, '#c1121f', 3) + VOLH(48, -208, 28, 66, 3) + R(44, -212, 36, 8, '#8f0d17', 2) +
     R(-95, -130, 190, 130, '#ffd6a5', 6) + R(-95, -130, 190, 130, 'url(#mstripes)', 6) + VOLH(-95, -130, 190, 130, 6) + R(-95, -20, 190, 20, '#e8b98a', 0) +
@@ -29,24 +29,33 @@ const BUILDINGS = {
     C(0, -160, 18, '#fff') + C(0, -160, 14, '#9ee7ff', 'class="win"') + C(0, -160, 14, 'url(#g-glass)') +
     MW(-80, -110, 44, 40) + MW(36, -110, 44, 40) + R(-82, -64, 48, 10, '#ff8fab', 3) + R(34, -64, 48, 10, '#ff8fab', 3) +
     DOOR(-22, -68, 44, 68, '#9b5de5') + R(-30, -4, 60, 6, '#c9c2bb', 2) + EMO(-100, 6, 34, '🌷') + EMO(100, 6, 34, '🌻') },
-  cafe: { x: 520, y: 350, draw: () =>
+  cafe: { x: 450, y: 350, draw: () =>
     R(-100, -165, 200, 165, '#ffc8dd', 6) + VOLH(-100, -165, 200, 165, 6) + R(-100, -40, 200, 40, '#f4a9c4') + R(-100, -40, 200, 3, '#fff', 0, 'opacity=".5"') +
     R(-108, -180, 216, 22, '#ff5d8f', 6) + VOL(-108, -180, 216, 22, 6) + T(0, -128, 30, '#ff5d8f', 'CAFÉ', 'stroke="#fff" stroke-width="3" paint-order="stroke"') +
     Array.from({ length: 8 }, (_, i) => { const d = `M${-100 + i * 25} -112 L${-75 + i * 25} -112 L${-80 + i * 25} -88 Q${-87 + i * 25} -80 ${-95 + i * 25} -88Z`; return P(d, i % 2 ? '#fff' : '#ff5d8f') + P(d, 'url(#g-vol)'); }).join('') +
     MW(-82, -80, 74, 58) + EMO(-46, -32, 22, '🧁') + DOOR(14, -78, 56, 78, '#8d5524') + R(26, -64, 32, 24, '#9ee7ff', 3, 'class="win"') +
     `<g class="steam">${P('M-30 -215 q10 -14 0 -28', 'none', 'stroke="#fff" stroke-width="6" stroke-linecap="round"')}${P('M0 -218 q10 -14 0 -28', 'none', 'stroke="#fff" stroke-width="6" stroke-linecap="round" style="animation-delay:.4s"')}</g>` +
     EMO(-14, -180, 56, '☕', 'class="cup"') + EMO(-118, 4, 32, '🪴') + R(80, -30, 30, 30, '#fff', 4) + R(80, -30, 30, 30, 'url(#g-vol)', 4) + EMO(95, -8, 18, '🍰') },
-  markt: { x: 850, y: 360, draw: () =>
+  markt: { x: 760, y: 360, draw: () =>
     R(-125, -150, 250, 150, '#d8f3dc', 6) + VOLH(-125, -150, 250, 150, 6) + R(-132, -174, 264, 46, '#52b788', 10) + VOL(-132, -174, 264, 46, 10) + T(0, -139, 30, '#fff', 'MARKT') +
     Array.from({ length: 10 }, (_, i) => P(`M${-125 + i * 25} -128 l25 0 l-4 16 q-8 6 -17 0z`, i % 2 ? '#fff' : '#2d9a6a')).join('') +
     R(-104, -104, 94, 104, '#9ee7ff', 4, 'class="win"') + R(-104, -104, 94, 104, 'url(#g-glass)', 4) + R(-58, -104, 3, 104, '#fff') + R(-108, -108, 102, 6, '#40916c', 2) +
     MW(20, -108, 84, 52, false) + R(20, -46, 84, 46, '#c9894a', 4) + VOL(20, -46, 84, 46, 4) + EMO(40, -16, 24, '🍎') + EMO(62, -16, 24, '🍊') + EMO(86, -16, 24, '🍌') + EMO(-150, 4, 46, '🛒', 'class="cart"') },
-  friseur: { x: 1180, y: 360, draw: () =>
+  friseur: { x: 1060, y: 360, draw: () =>
     R(-90, -160, 180, 160, '#ffe5ec', 6) + VOLH(-90, -160, 180, 160, 6) + R(-98, -178, 196, 42, '#fb6f92', 10) + VOL(-98, -178, 196, 42, 10) + T(0, -147, 24, '#fff', 'FRISEUR') +
     MW(-72, -118, 82, 70) + EMO(-31, -66, 30, '💇') + DOOR(28, -86, 46, 86, '#7b2cbf') +
     `<clipPath id="poleclip"><rect x="-120" y="-130" width="22" height="110" rx="10"/></clipPath>` + R(-122, -136, 26, 122, 'url(#g-metal)', 12) +
     `<g clip-path="url(#poleclip)">${R(-120, -130, 22, 110, '#fff')}<g class="pole">${Array.from({ length: 9 }, (_, i) => P(`M-120 ${-150 + i * 26} L-98 ${-170 + i * 26} L-98 ${-158 + i * 26} L-120 ${-138 + i * 26}Z`, i % 2 ? '#1982c4' : '#e63946')).join('')}</g>${R(-120, -130, 22, 110, 'url(#g-volh)')}</g>` +
     EMO(-30, -186, 44, '✂️', 'class="snip"') },
+  festival: { x: 1340, y: 360, draw: () =>
+    `<g class="mbeams">${[-50, -25, 0, 25, 50].map((a, i) => `<g class="mbeam" style="--a:${a}deg;animation-delay:${-i * 0.7}s">${P('M-4 -150 L4 -150 L60 -330 L-60 -330Z', ['#ff6fb5', '#2ec4b6', '#ffca3a', '#8ac926', '#00bbf9'][i], 'opacity=".35"')}</g>`).join('')}</g>` +
+    `<g transform="translate(-60 -175)"><g class="mwheel">${C(0, 0, 70, 'none', 'stroke="#efe7ff" stroke-width="5"')}${Array.from({ length: 8 }, (_, i) => { const a = (i / 8) * Math.PI * 2; return P(`M0 0 L${Math.cos(a) * 70} ${Math.sin(a) * 70}`, 'none', 'stroke="#d9cdf2" stroke-width="2"') + C(Math.cos(a) * 70, Math.sin(a) * 70, 9, ['#ff595e', '#ffca3a', '#8ac926', '#00bbf9'][i % 4]); }).join('')}</g>${C(0, 0, 8, '#7b2cbf')}</g>` +
+    P('M-90 -10 L-60 -175 L-30 -10', 'none', 'stroke="#d9cdf2" stroke-width="6"') +
+    P('M-120 -10 L-120 -120 Q-90 -170 -50 -150 Q0 -230 50 -150 Q90 -170 120 -120 L120 -10Z', '#2b1356') + P('M-120 -10 L-120 -120 Q-90 -170 -50 -150 Q0 -230 50 -150 Q90 -170 120 -120 L120 -10Z', 'url(#g-vol)') +
+    Array.from({ length: 10 }, (_, i) => { const a = (i / 10) * Math.PI * 2; return E(Math.cos(a) * 44, -110 + Math.sin(a) * 44, 16, 8, ['#ff595e', '#ffca3a', '#8ac926', '#00bbf9', '#ff6fb5'][i % 5], `transform="rotate(${(a * 180) / Math.PI} ${Math.cos(a) * 44} ${-110 + Math.sin(a) * 44})"`); }).join('') +
+    C(0, -110, 38, '#e9b949') + C(0, -110, 33, '#ffe1b8') + C(-12, -116, 5, '#4b1d7a') + C(12, -116, 5, '#4b1d7a') + P('M-12 -100 q12 12 24 0', 'none', 'stroke="#8c2f39" stroke-width="3" stroke-linecap="round"') +
+    R(-130, -12, 260, 16, '#1a1030', 4) + Array.from({ length: 10 }, (_, i) => R(-124 + i * 25.5, -8, 16, 6, ['#ff595e', '#ffca3a', '#8ac926', '#00bbf9', '#ff6fb5'][i % 5], 3, 'class="mled"')).join('') +
+    R(-150, -130, 22, 126, '#1c1c24', 4) + R(128, -130, 22, 126, '#1c1c24', 4) + T(0, -28, 18, '#ffe08a', 'TOKILAND') + EMO(-150, 6, 28, '🎪') + EMO(160, 6, 28, '🎶', 'class="duck"') },
   bad: { x: 175, y: 680, draw: () =>
     R(-100, -140, 200, 140, '#bde8f6', 6) + R(-100, -140, 200, 140, 'url(#p-tiles)', 6) + VOLH(-100, -140, 200, 140, 6) +
     ROOF('M-110 -136 Q0 -252 110 -136Z', '#2ec4b6') + P('M-80 -150 Q-30 -220 30 -230', 'none', 'stroke="#7fe0d6" stroke-width="6" stroke-linecap="round" opacity=".7"') + T(0, -152, 30, '#fff', 'BAD') +
@@ -79,7 +88,7 @@ const BUILDINGS = {
     R(30, -30, 6, 26, '#333') + R(26, -40, 14, 12, '#333', 3) + R(29, -38, 8, 8, '#fff7c2', 2) + EMO(-182, 4, 30, '🌼') + EMO(172, 6, 30, '🌷') },
 };
 
-const DECOR_TREES = [[40, 470], [1370, 470], [1350, 800], [40, 820], [480, 820], [960, 820]];
+const DECOR_TREES = [[40, 470], [1460, 470], [1450, 800], [40, 820], [480, 820], [960, 820], [1380, 560]];
 
 function mapSVG(scenes, counts) {
   let s = `<defs>
@@ -94,7 +103,7 @@ function mapSVG(scenes, counts) {
   s += cloud(60, 1, 46, -8) + cloud(130, 0.7, 60, -30) + cloud(90, 0.9, 52, -44);
   // Flugzeug mit Banner
   s += `<g transform="translate(0 150)"><g class="plane">${R(-250, -20, 200, 40, '#fff', 8)}${T(-150, 9, 24, '#ff6b6b', 'Willkommen! 🎉')}${P('M-50 0 L0 0', 'none', 'stroke="#999" stroke-width="2"')}${EMO(30, 16, 48, '✈️', 'transform="rotate(45 30 0)"')}</g></g>`;
-  s += `<g transform="translate(1290 260)"><g class="balloon">${EMO(0, 0, 70, '🎈')}</g></g>`;
+  s += `<g transform="translate(1220 130)"><g class="balloon">${EMO(0, 0, 64, '🎈')}</g></g>`;
   // Wiese, Straßen
   s += P(`M0 170 Q350 140 700 170 T${VW} 165 L${VW} ${VH} L0 ${VH}Z`, '#95d5b2') + P(`M0 170 Q350 140 700 170 T${VW} 165 L${VW} ${VH} L0 ${VH}Z`, 'url(#p-noise)');
   s += P(`M0 175 Q350 145 700 175 T${VW} 170`, 'none', 'stroke="#b7e4c7" stroke-width="6"');
@@ -104,7 +113,7 @@ function mapSVG(scenes, counts) {
   for (let x = 10; x < VW; x += 70) s += R(x, 405, 36, 6, '#fff', 3) + R(x + 30, 737, 36, 6, '#fff', 3);
   s += R(316, 436, 28, 276, '#5f666d') + R(614, 436, 28, 276, '#5f666d') + R(925, 436, 28, 276, '#5f666d');
   for (const x of [300, 600, 910]) for (let k = 0; k < 4; k++) s += R(x + 18, 440 + k * 10, 24, 5, '#fff', 1, 'opacity=".85"');
-  for (const x of [80, 1000, 1330]) s += `<g transform="translate(${x} 470)">${R(-3, -60, 6, 60, '#333')}${R(-10, -74, 20, 16, '#333', 4)}${R(-6, -70, 12, 9, '#fff7c2', 2, 'class="win"')}${E(0, 0, 14, 4, '#000', 'opacity=".15"')}</g>`;
+  for (const x of [80, 1000, 1440]) s += `<g transform="translate(${x} 470)">${R(-3, -60, 6, 60, '#333')}${R(-10, -74, 20, 16, '#333', 4)}${R(-6, -70, 12, 9, '#fff7c2', 2, 'class="win"')}${E(0, 0, 14, 4, '#000', 'opacity=".15"')}</g>`;
   for (const [x, y] of DECOR_TREES) s += `<g transform="translate(${x} ${y})">${E(0, 20, 26, 6, '#000', 'opacity=".15"')}<g class="sway" style="animation-delay:${(x % 7) * 0.3}s">${R(-6, -10, 12, 30, '#8d5524', 4)}${VOLH(-6, -10, 12, 30, 4)}${C(0, -32, 31, '#2d8a55')}${C(0, -30, 30, '#4aa36f')}${C(-14, -20, 18, '#40916c')}${C(-8, -42, 12, '#74c69d', 'opacity=".6"')}</g></g>`;
   // Autos
   s += `<g transform="translate(0 425)"><g class="car carL">${EMO(0, 0, 54, '🚗')}</g></g>`;
