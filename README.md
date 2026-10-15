@@ -15,3 +15,6 @@ Auf dem iPad in Safari öffnen → Teilen ⬆️ → „Zum Home-Bildschirm“.
 Reines HTML/CSS/JavaScript ohne Build-Schritt. `sw.js` ist der Offline-Cache – bei Änderungen dort `VERSION` erhöhen.
 Lokal starten: `python3 -m http.server` und `http://localhost:8000` öffnen.
 Deploy: Push auf `main` → GitHub Actions → GitHub Pages.
+
+## Einrichtung GitHub Pages
+Einmalig unter **Settings → Pages → Source** „GitHub Actions“ wählen. Danach veröffentlicht jeder Push auf `main` das Spiel automatisch.
