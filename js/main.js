@@ -1,6 +1,7 @@
 import { sfx, unlock, setMuted, music } from './sound.js';
 import * as A from './art.js';
 import { SCENES, H, initialObjects } from './world.js';
+import { createMap } from './map.js';
 
 const SAVE_KEY = 'kunterbunt-welt-v1';
 const FLOOR = 700;
@@ -1295,8 +1296,18 @@ function init() {
     requestAnimationFrame(loop);
   };
   requestAnimationFrame(loop);
+  const map = createMap({
+    scenes: SCENES,
+    go: (id) => { closeDrawer(); closeModals(); switchScene(id, state.scene === id); },
+    chars: () => Object.values(state.objs).filter((o) => o.t === 'c'),
+    isNight: () => state.night,
+    sfx,
+    unlock,
+  });
+  $('#bMap').addEventListener('click', () => { unlock(); closeDrawer(); closeModals(); sfx.whoosh(); map.open(); });
+  map.open(true);
   if (!localStorage.getItem('kunterbunt-hint')) {
-    setTimeout(() => toast('Zieh alles herum! 👆'), 600);
+    setTimeout(() => { if (!document.body.classList.contains('map-open')) toast('Zieh alles herum! 👆'); }, 600);
     try { localStorage.setItem('kunterbunt-hint', '1'); } catch (e) { /* egal */ }
   }
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {});
