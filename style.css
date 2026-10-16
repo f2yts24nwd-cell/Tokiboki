@@ -926,3 +926,56 @@ body.lite .wxl.r2, body.lite .wxl.s2 { display: none !important; }
 @keyframes petwalk { from { translate: 0 0; rotate: -4deg; } to { translate: 0 -12px; rotate: 4deg; } }
 .o.i.driving > span { animation: drivebob .16s ease-in-out infinite alternate; }
 @keyframes drivebob { from { translate: 0 0; } to { translate: 0 -4px; } }
+
+/* ---------- Fotos ---------- */
+#flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 70; }
+#flash.go { animation: flash .55s ease-out; }
+@keyframes flash { 0% { opacity: .95; } 100% { opacity: 0; } }
+#bAlbum.got { animation: albumgot .7s ease-out; }
+@keyframes albumgot { 0% { transform: scale(1); } 40% { transform: scale(1.45) rotate(-12deg); background: #ffe066; } 100% { transform: scale(1); } }
+.photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 16px; justify-items: center; margin-bottom: 10px; }
+.pcard { position: relative; display: inline-block; padding: 10px; border-radius: 12px; background: #fff; box-shadow: 0 6px 18px rgba(0, 0, 0, .18); cursor: pointer; line-height: 0; }
+.pcard:nth-child(odd) { rotate: -1.5deg; }
+.pcard:nth-child(even) { rotate: 1.2deg; }
+.pv-img .pcard { rotate: 0deg; cursor: default; }
+.pshot { position: relative; overflow: hidden; border-radius: 4px; background: #222; }
+.pinner { position: absolute; left: 0; top: 0; transform-origin: 0 0; overflow: hidden; pointer-events: none; }
+.pinner .scene { pointer-events: none; }
+.pst { position: absolute; inset: 0; pointer-events: none; line-height: 1; }
+.pst span { position: absolute; pointer-events: auto; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .3)); }
+.pdate { position: absolute; right: 16px; bottom: 16px; font-style: normal; background: rgba(255, 255, 255, .88); border-radius: 8px; padding: 3px 8px; font-weight: 800; font-size: 13px; line-height: 1.2; }
+.frame-holz { background: linear-gradient(135deg, #a0612b, #6b3d17 50%, #a0612b); padding: 16px; }
+.frame-gold { background: linear-gradient(135deg, #fff1a8, #d4a017 30%, #fff3b0 55%, #b8860b 80%, #ffe680); padding: 16px; }
+.frame-regenbogen { background: linear-gradient(135deg, #ff595e, #ff924c, #ffca3a, #8ac926, #1982c4, #6a4c93); padding: 14px; }
+.frame-polaroid { background: #fffdf6; padding: 12px 12px 48px; }
+.frame-polaroid .pdate { bottom: 14px; background: none; font-size: 16px; }
+.pwx { position: absolute; inset: 0; }
+.pwx-rain { background: repeating-linear-gradient(105deg, transparent 0 22px, rgba(225, 238, 255, .5) 22px 24px, transparent 24px 46px); background-color: rgba(30, 50, 90, .18); }
+.pwx-snow { background-image: radial-gradient(#fff 3px, transparent 4px), radial-gradient(#fff 2px, transparent 3px); background-size: 70px 70px, 43px 43px; background-position: 0 0, 20px 30px; }
+.pwx-rainbow { background: radial-gradient(circle at 50% 100%, transparent 38%, rgba(106, 76, 147, .35) 39%, rgba(25, 130, 196, .35) 41%, rgba(138, 201, 38, .35) 43%, rgba(255, 202, 58, .35) 45%, rgba(255, 146, 76, .35) 47%, rgba(255, 89, 94, .35) 49%, transparent 51%); }
+.card.pview { max-width: 860px; }
+.pv-img { margin-bottom: 8px; }
+.pvrow { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin: 6px 0; }
+.pvframe { width: 46px; height: 46px; border-radius: 10px; box-shadow: inset 0 0 0 3px rgba(0, 0, 0, .1); }
+.pvframe.frame-weiss { background: #fff; box-shadow: inset 0 0 0 3px #ddd; }
+.pvframe.sel { outline: 4px solid var(--sel); outline-offset: 2px; }
+.pvst { width: 48px; height: 48px; font-size: 30px; border-radius: 12px; background: #f6f2ff; }
+.pvst:active { transform: scale(1.2); }
+.pcard.export { rotate: 0deg !important; box-shadow: none; border-radius: 0; }
+
+/* ---------- Freibad & Zoo ---------- */
+.scene .waves { animation: waves 2.4s linear infinite; }
+@keyframes waves { to { transform: translateX(60px); } }
+.scene .caustic { animation: caustic 3s ease-in-out infinite alternate; }
+@keyframes caustic { from { transform: translateX(-12px); opacity: .7; } to { transform: translateX(12px); opacity: 1; } }
+.scene .slidewater { animation: slidew 0.8s linear infinite; }
+@keyframes slidew { to { stroke-dashoffset: -64; } }
+.prop.wobble .board { animation: boardw .6s ease-out; transform-box: fill-box; transform-origin: 100% 50%; }
+@keyframes boardw { 20% { transform: rotate(-6deg); } 45% { transform: rotate(4deg); } 70% { transform: rotate(-2deg); } }
+.prop .zbell { transform-box: fill-box; transform-origin: 50% 0; }
+.prop.bump .zbell { animation: ring 0.15s ease-in-out 6 alternate; }
+body.lite .scene .waves, body.lite .scene .caustic, body.lite .scene .slidewater { animation: none; }
+@keyframes carL { from { transform: translateX(1900px); } to { transform: translateX(-150px); } }
+@keyframes carR { from { transform: translateX(-150px); } to { transform: translateX(1950px); } }
+#map .waveg { animation: waves 2s linear infinite; }
+@keyframes plane { from { transform: translateX(-400px); } 60%, to { transform: translateX(2100px); } }

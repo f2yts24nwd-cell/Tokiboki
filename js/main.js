@@ -266,7 +266,7 @@ function updateStored(sc) {
 // ---------------- Physik ----------------
 // Regalbretter in geschlossenen Schränken zählen nur für Dinge, die schon drin liegen.
 function surfacesOf(o) {
-  return SC[o.sc].surfaces.filter((s) => !s.c || state.props[s.c].open || (o._cin && o._cin.includes(s.c)));
+  return SC[o.sc].surfaces.filter((s) => (!s.items || o.t === 'i') && (!s.c || state.props[s.c].open || (o._cin && o._cin.includes(s.c))));
 }
 
 // Liegende Gegenstände sind selbst kleine Ablageflächen (Stapeln).
@@ -377,12 +377,24 @@ function stepFalling(dt) {
         if (o.sc === state.scene) sfx.land();
       }
       updateStored(o.sc);
+      if (o.t === 'c' && landY === FLOOR) intoPool(o);
       save();
     } else {
       o.y = ny;
     }
     place(o);
   }
+}
+
+// Wer im Freibad ins Becken fällt, schwimmt.
+function intoPool(c) {
+  const pool = SC[c.sc].pool;
+  if (!pool || c.x < pool.x1 || c.x > pool.x2 || c.seat) return;
+  const free = SC[c.sc].seats.filter((st) => st.swim && !occupant(st.id)).sort((a, b) => Math.abs(a.x - c.x) - Math.abs(b.x - c.x))[0];
+  if (!free) return;
+  sitDown(c, SEATS[free.id]);
+  burst(c.sc, c.x, c.y - 60, '💦', 8);
+  setMood(c, 'happy', 1500);
 }
 
 function bump(o, cls = 'land') {
@@ -847,6 +859,34 @@ function tapProp(id) {
       }
       const kid = Object.values(state.objs).find((c) => c.t === 'c' && c.sc === p.sc && !c._stored);
       if (kid) bubble(kid, pick(['Pause! 🎉', 'Juhu, Pause!', 'Ding dong! 🔔']));
+      break;
+    }
+    case 'dive': {
+      propBump(e, 'wobble');
+      const top = SC[p.sc].surfaces.find((s) => s.y === 324);
+      const divers = Object.values(state.objs).filter((c) => c.t === 'c' && c.sc === p.sc && !c.seat && !c._dragging && Math.abs(c.y - top.y) < 4 && c.x >= top.x1 - 10 && c.x <= top.x2 + 10);
+      if (!divers.length) { sfx.boing(); toast('Stell zuerst eine Figur aufs Sprungbrett!'); break; }
+      divers.forEach((c, i) => setTimeout(() => {
+        sfx.boing();
+        bubble(c, pick(['Arschbombe! 💦', 'Jaaa! 🏊', 'Juhuuu! 🤸']));
+        setMood(c, 'happy');
+        startFall(c, rand(-520, -380), -900);
+        setTimeout(() => sfx.splash(), 900);
+      }, i * 400));
+      break;
+    }
+    case 'animals': {
+      propBump(e);
+      sfx.bell2();
+      const pets = Object.values(state.objs).filter((o) => o.t === 'i' && o.sc === p.sc && info(o).pet && !o._stored);
+      pets.forEach((o, i) => setTimeout(() => {
+        bump(o, 'jump');
+        const snd = info(o).pet;
+        if (i < 6 && sfx[snd]) sfx[snd]();
+        burst(o.sc, o.x, o.y - info(o).size, pick(['❤️', '🎵', '😋']), 1, 'up');
+      }, 200 + i * 180));
+      const kid = Object.values(state.objs).find((c) => c.t === 'c' && c.sc === p.sc && !c._stored);
+      if (kid) bubble(kid, pick(['Fütterungszeit! 🥕', 'Die Tiere haben Hunger! 🍌']));
       break;
     }
     case 'dj':
@@ -1917,6 +1957,228 @@ function stepVehicles(dt) {
     posRider(c, v);
   }
 }
+
+// ---------------- Fotos & Album ----------------
+const FRAMES = ['weiss', 'holz', 'gold', 'regenbogen', 'polaroid'];
+const STICKERS = ['⭐', '❤️', '🌈', '🦄', '😎', '🎉', '✨', '🌸', '👑', '🐶', '😂', '🔥'];
+function takePhoto() {
+  unlock();
+  const sc = state.scene;
+  const ids = new Set();
+  const objs = [];
+  for (const o of Object.values(state.objs)) {
+    if (o.sc !== sc || o._stored) continue;
+    if (o.t === 'i' && o.hold && state.objs[o.hold]) continue;
+    const copy = JSON.parse(JSON.stringify(o, (k, v) => (k.startsWith('_') ? undefined : v)));
+    if (o.t === 'c' && o.holding && state.objs[o.holding]) copy.heldK = state.objs[o.holding].k;
+    objs.push(copy);
+    ids.add(o.id);
+  }
+  const props = {};
+  for (const p of SC[sc].props) props[p.id] = { ...state.props[p.id] };
+  const ph = { id: 'p' + Date.now(), ts: Date.now(), sc, scroll: state.scroll[sc], VW, night: !!state.night, wx: SC[sc].outdoor ? state.weather || 'sun' : 'sun', objs, props, frame: 'weiss', stickers: [] };
+  state.photos = [ph, ...(state.photos || [])].slice(0, 12);
+  save();
+  const f = $('#flash');
+  f.classList.remove('go');
+  void f.offsetWidth;
+  f.classList.add('go');
+  sfx.shutter();
+  for (const o of Object.values(state.objs)) if (o.t === 'c' && o.sc === sc && !o._stored && Math.random() < 0.7) setTimeout(() => { setMood(o, 'happy', 1400); bump(o, 'jump'); }, 120);
+  const ab = $('#bAlbum');
+  ab.classList.remove('hidden', 'got');
+  void ab.offsetWidth;
+  ab.classList.add('got');
+  toast('📸 Foto im Album!');
+}
+
+function renderPhoto(ph, w) {
+  const k = w / ph.VW;
+  const frame = div('pshot');
+  frame.style.width = w + 'px';
+  frame.style.height = Math.round(H * k) + 'px';
+  const inner = div('pinner' + (ph.night ? ' night' : ''));
+  inner.style.width = ph.VW + 'px';
+  inner.style.height = H + 'px';
+  inner.style.transform = `scale(${k})`;
+  const root = sceneEls[ph.sc].root.cloneNode(true);
+  root.classList.add('active');
+  root.classList.remove('party', 'beat', 'laserfx');
+  root.classList.toggle('wx-snow', ph.wx === 'snow');
+  root.style.transform = `translateX(${-ph.scroll}px)`;
+  for (const l of root.querySelectorAll('.layer.objs, .layer.drag, .layer.fx')) l.innerHTML = '';
+  for (const [id, st] of Object.entries(ph.props)) {
+    const pe = root.querySelector(`.prop[data-prop="${id}"]`);
+    if (pe) {
+      pe.classList.toggle('on', !!st.on);
+      pe.classList.toggle('open', !!st.open);
+      pe.classList.remove('swing0', 'swing1');
+      if (st.page != null) pe.dataset.page = st.page;
+    }
+    root.querySelectorAll(`.glow[data-prop="${id}"]`).forEach((g) => g.classList.toggle('lit', !!st.on));
+  }
+  const layer = root.querySelector('.layer.objs');
+  for (const o of ph.objs) {
+    const e = document.createElement('div');
+    e.style.zIndex = o.z;
+    if (o.t === 'c') {
+      const pose = o.ride ? POSE.sit : o.seat && SEATS[o.seat] ? POSE[SEATS[o.seat].pose] : POSE.stand;
+      e.className = 'o c';
+      e.innerHTML = `<div class="ci">${A.charSVG(o.look, pose.sit)}<div class="hand">${o.heldK ? `<div class="o i" style="width:${A.itemInfo(o.heldK).size}px;height:${A.itemInfo(o.heldK).size}px;transform:translate(${-A.itemInfo(o.heldK).size / 2}px,${-A.itemInfo(o.heldK).size * 0.72}px)"><span style="font-size:${Math.round(A.itemInfo(o.heldK).size * 0.8)}px;line-height:${A.itemInfo(o.heldK).size}px">${o.heldK}</span></div>` : ''}</div></div>`;
+      e.style.transformOrigin = `${pose.ax}px ${pose.ay}px`;
+      e.style.transform = `translate(${o.x - pose.ax}px,${o.y - pose.ay}px)` + (pose.r ? ` rotate(${pose.r}deg)` : '');
+      if (ph.night && o.seat && SEATS[o.seat] && SEATS[o.seat].pose === 'lie') e.classList.add('m-sleep');
+      else e.classList.add('m-happy');
+    } else {
+      const inf = A.itemInfo(o.k);
+      e.className = 'o i';
+      e.style.width = e.style.height = inf.size + 'px';
+      e.style.transform = `translate(${o.x - inf.size / 2}px,${o.y - inf.size}px)`;
+      e.innerHTML = `<span style="font-size:${Math.round(inf.size * 0.8)}px;line-height:${inf.size}px">${o.k}</span>`;
+    }
+    layer.append(e);
+  }
+  inner.append(root);
+  if (SC[ph.sc].outdoor && ph.wx !== 'sun') inner.insertAdjacentHTML('beforeend', `<div class="pwx pwx-${ph.wx}"></div>`);
+  frame.append(inner);
+  return frame;
+}
+
+function photoCard(ph, w) {
+  const card = div('pcard frame-' + (ph.frame || 'weiss'));
+  card.dataset.id = ph.id;
+  card.append(renderPhoto(ph, w));
+  const st = div('pst');
+  for (const s of ph.stickers || []) {
+    const e = document.createElement('span');
+    e.textContent = s.e;
+    e.style.left = s.x + '%';
+    e.style.top = s.y + '%';
+    e.style.fontSize = Math.round(w * 0.09) + 'px';
+    st.append(e);
+  }
+  card.append(st);
+  const d = new Date(ph.ts);
+  card.insertAdjacentHTML('beforeend', `<i class="pdate">${SC[ph.sc].icon} ${d.getDate()}.${d.getMonth() + 1}.</i>`);
+  return card;
+}
+
+function openAlbum() {
+  unlock();
+  closeDrawer();
+  closeModals();
+  const g = $('#album .photos');
+  g.innerHTML = '';
+  const list = state.photos || [];
+  if (!list.length) g.innerHTML = '<p class="dempty">Noch keine Fotos. Tippe oben auf 📸!</p>';
+  for (const ph of list) g.append(photoCard(ph, 250));
+  $('#album').classList.remove('hidden');
+  sfx.pop();
+}
+$('#album .photos').addEventListener('click', (e) => {
+  const c = e.target.closest('.pcard');
+  if (c) openPhoto(c.dataset.id);
+});
+
+let viewing = null;
+function openPhoto(id) {
+  viewing = (state.photos || []).find((p) => p.id === id);
+  if (!viewing) return;
+  closeModals();
+  renderPhotoView();
+  $('#photoView').classList.remove('hidden');
+  sfx.pop();
+}
+function renderPhotoView() {
+  const box = $('#photoView .pv-img');
+  box.innerHTML = '';
+  const w = Math.min(innerWidth - 120, 760);
+  box.append(photoCard(viewing, w));
+  $('#photoView .pv-stickers').innerHTML =
+    `<div class="pvrow">${FRAMES.map((f) => `<button class="pvframe frame-${f}${viewing.frame === f ? ' sel' : ''}" data-frame="${f}"></button>`).join('')}</div>` +
+    `<div class="pvrow">${STICKERS.map((s) => `<button class="pvst" data-st="${s}">${s}</button>`).join('')}</div>`;
+}
+$('#photoView .pv-stickers').addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b || !viewing) return;
+  if (b.dataset.frame) viewing.frame = b.dataset.frame;
+  if (b.dataset.st) {
+    viewing.stickers = (viewing.stickers || []).concat({ e: b.dataset.st, x: rand(4, 86), y: rand(4, 80) }).slice(-12);
+    sfx.pop();
+  } else sfx.click();
+  save();
+  renderPhotoView();
+});
+$('#photoView .pv-img').addEventListener('click', (e) => {
+  // Sticker antippen = wieder abziehen
+  const sp = e.target.closest('.pst span');
+  if (!sp || !viewing) return;
+  const i = [...sp.parentNode.children].indexOf(sp);
+  viewing.stickers.splice(i, 1);
+  sfx.whoosh();
+  save();
+  renderPhotoView();
+});
+$('#pvBack').addEventListener('click', openAlbum);
+$('#pvDel').addEventListener('click', () => {
+  if (!viewing) return;
+  state.photos = state.photos.filter((p) => p !== viewing);
+  viewing = null;
+  sfx.poof();
+  save();
+  openAlbum();
+});
+$('#pvSave').addEventListener('click', async () => {
+  if (!viewing) return;
+  toast('⏳ Einen Moment …');
+  try {
+    const blob = await photoPNG(viewing);
+    const name = `tokiboki-foto-${viewing.id.slice(1)}.png`;
+    const file = new File([blob], name, { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'Tokiboki-Foto' });
+    } else {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = name;
+      document.body.append(a);
+      a.click();
+      setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    }
+    toast('💾 Gespeichert!');
+  } catch (err) {
+    if (err && err.name === 'AbortError') return;
+    if (DEBUG) console.warn('photoPNG', err && (err.message || err.type || err));
+    toast('😕 Geht hier nicht – mach einfach ein Bildschirmfoto!');
+  }
+});
+let cssText = null;
+async function photoPNG(ph) {
+  if (!cssText) cssText = await (await fetch('style.css')).text();
+  const W0 = Math.round(ph.VW);
+  const [pa, pb] = { holz: [16, 16], gold: [16, 16], regenbogen: [14, 14], polaroid: [12, 48] }[ph.frame] || [10, 10];
+  const cw = W0 + pa * 2;
+  const chh = H + pa + pb;
+  const card = photoCard(ph, W0);
+  card.classList.add('export');
+  card.querySelectorAll('image').forEach((im) => im.remove());
+  const html = new XMLSerializer().serializeToString(card);
+  const defs = new XMLSerializer().serializeToString($('#gdefs'));
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${cw}" height="${chh}"><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml">${defs}<style><![CDATA[${cssText.replace(/]]>/g, '')}]]></style>${html}</div></foreignObject></svg>`;
+  const img = new Image();
+  await new Promise((res, rej) => {
+    img.onload = res;
+    img.onerror = rej;
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  });
+  const cv = document.createElement('canvas');
+  cv.width = cw;
+  cv.height = chh;
+  cv.getContext('2d').drawImage(img, 0, 0);
+  return await new Promise((res, rej) => cv.toBlob((b) => (b ? res(b) : rej(new Error('leer'))), 'image/png'));
+}
+$('#bPhoto').addEventListener('click', takePhoto);
+$('#bAlbum').addEventListener('click', openAlbum);
 
 // ---------------- Rückgängig ----------------
 const undoStack = [];

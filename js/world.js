@@ -960,6 +960,121 @@ const festivalFG = [
   { x: 2190, y: 530, w: 180, h: 30, prop: 'djpult2', svg: svgWrap0(180, 30, R(0, 0, 180, 30, '#1c1c24', 5) + R(0, 0, 180, 4, '#ffca3a', 2)) },
 ];
 
+// ======================= FREIBAD =======================
+const POOL = { x1: 520, x2: 1720 };
+function skyBits(W, sunX) {
+  let s = R(0, 0, W, H, 'url(#g-sky)', 0, 'class="sky"') + stars(0, 20, W, 300, 40) +
+    C(sunX, 120, 80, '#ffe066', 'class="daysun" opacity=".25"') + C(sunX, 120, 54, '#ffe066', 'class="daysun"') + C(sunX, 120, 44, '#fff8c4', 'class="moon"');
+  const cloud = (x, y, k) => G(x, y, `<g class="daysun" transform="scale(${k})">${E(10, 10, 80, 18, '#dceefa')}${E(0, 0, 60, 26, '#fff')}${E(40, -16, 44, 30, '#fff')}${E(80, 0, 54, 24, '#fff')}</g>`);
+  for (let x = 250, i = 0; x < W; x += 620, i++) s += cloud(x, 90 + (i % 3) * 50, 0.7 + (i % 2) * 0.35);
+  return s;
+}
+function freibadBG() {
+  const W = 2600;
+  let s = `<defs><linearGradient id="fb-water" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4fd1f2"/><stop offset="1" stop-color="#1678c2"/></linearGradient>
+    <pattern id="fb-deck" width="70" height="40" patternUnits="userSpaceOnUse"><rect width="70" height="40" fill="#f3e3c3"/><rect width="70" height="40" fill="none" stroke="#d6bf94" stroke-width="2"/><rect x="2" y="2" width="66" height="6" fill="#fff" opacity=".35"/></pattern>
+    <pattern id="fb-ptiles" width="40" height="40" patternUnits="userSpaceOnUse"><rect width="40" height="40" fill="none" stroke="#fff" stroke-opacity=".25" stroke-width="2"/></pattern></defs>`;
+  s += skyBits(W, 2100);
+  // Bäume & Hecke hinten
+  for (let x = 30; x < W; x += 150) s += R(x + 40, 470, 12, 120, '#7a5230') + C(x + 46, 450, 58, '#3e9a5c') + C(x + 20, 476, 40, '#4aa36f') + C(x + 76, 470, 44, '#4aa36f') + C(x + 30, 430, 22, '#74c69d', 'opacity=".5"');
+  s += R(0, 560, W, 70, '#2d8a55', 0) + [...Array(Math.ceil(W / 40))].map((_, i) => C(i * 40 + 20, 562, 26, i % 2 ? '#3aa36a' : '#35995f')).join('');
+  // Umkleide-Häuschen
+  s += G(2180, 400, R(0, 40, 380, 190, '#fff', 8) + R(0, 40, 380, 190, 'url(#g-volh)', 8) + P('M-14 46 L190 0 L394 46Z', '#00bbf9') + P('M-14 46 L190 0 L394 46Z', 'url(#g-vol)') +
+    [30, 140, 250].map((x, i) => R(x, 90, 90, 140, ['#ff6fb5', '#ffca3a', '#8ac926'][i], 6) + R(x, 90, 90, 140, 'url(#g-vol)', 6) + C(x + 76, 160, 4, '#fff')).join('') + T(190, 74, 22, '#1678c2', 'UMKLEIDE'));
+  // Deck
+  s += R(0, 630, W, H - 630, 'url(#fb-deck)') + R(0, 630, W, 6, '#fff', 0, 'opacity=".6"');
+  // Becken (innen, liegt tiefer)
+  s += R(POOL.x1, 628, POOL.x2 - POOL.x1, H - 628, '#1678c2') + R(POOL.x1, 650, POOL.x2 - POOL.x1, H - 650, 'url(#fb-water)') + R(POOL.x1, 650, POOL.x2 - POOL.x1, H - 650, 'url(#fb-ptiles)');
+  for (let k = 0; k < 5; k++) s += R(POOL.x1 + 100 + k * 240, 700, 6, 134, '#0d5c99', 0, 'opacity=".4"');
+  s += R(POOL.x1 - 14, 620, POOL.x2 - POOL.x1 + 28, 14, '#fff', 6) + R(POOL.x1 - 14, 630, POOL.x2 - POOL.x1 + 28, 4, '#000', 0, 'opacity=".12"');
+  s += `<g class="caustic">${[...Array(14)].map((_, i) => E(POOL.x1 + 60 + i * 85, 690 + (i % 3) * 40, 30, 6, '#fff', 'opacity=".25"')).join('')}</g>`;
+  // Leiter am Beckenrand
+  s += G(1680, 560, P('M0 70 Q0 0 20 0 Q40 0 40 30 M20 70 Q20 10 40 10 Q60 10 60 40', 'none', 'stroke="#c9d6df" stroke-width="7" stroke-linecap="round"'));
+  // Fliesenwand-Schild
+  s += G(980, 470, R(0, 0, 260, 70, '#fff', 14) + R(0, 0, 260, 70, 'url(#g-vol)', 14) + T(130, 47, 38, '#1678c2', 'FREIBAD 🏊'));
+  return svgWrap(W, s);
+}
+function lounger(x, c) {
+  return svgWrap0(220, 110, E(110, 108, 100, 7, 'url(#g-sh)') + R(14, 60, 8, 48, '#bbb', 3) + R(196, 60, 8, 48, '#bbb', 3) +
+    P('M0 60 L170 60 L214 14 L224 22 L180 74 L0 74Z', c) + P('M0 60 L170 60 L214 14 L224 22 L180 74 L0 74Z', 'url(#g-vol)') +
+    [20, 50, 80, 110, 140].map((k) => R(k, 60, 14, 14, '#fff', 2, 'opacity=".35"')).join('') + R(0, 74, 182, 6, '#ccc', 3));
+}
+const freibadProps = [
+  { id: 'wasserrutsche', kind: 'deco', x: 60, y: 250, w: 520, h: 450,
+    svg: svgWrap0(520, 450, E(120, 448, 110, 8, 'url(#g-sh)') + R(40, 60, 14, 390, '#ff924c', 4) + R(160, 60, 14, 390, '#ff924c', 4) +
+      [110, 170, 230, 290, 350, 410].map((y) => R(46, y, 120, 8, '#ff924c', 4) + R(46, y, 120, 3, '#ffc29a', 2)).join('') + R(26, 40, 160, 18, '#ff595e', 8) + R(26, 40, 160, 6, '#ff9a9d', 3) +
+      P('M180 44 Q300 50 330 160 Q360 290 470 400 L500 420 L480 446 Q340 330 300 190 Q276 90 180 74Z', '#ffca3a') + P('M180 44 Q300 50 330 160 Q360 290 470 400 L500 420', 'none', 'stroke="#fff3b0" stroke-width="7"') +
+      P('M180 74 Q276 90 300 190 Q340 330 480 446', 'none', 'stroke="#e9a93a" stroke-width="5"') + `<g class="slidewater">${P('M190 58 Q300 66 318 170 Q346 300 470 414', 'none', 'stroke="#9ee7ff" stroke-width="5" stroke-dasharray="14 18" opacity=".9"')}</g>`) },
+  { id: 'sprungbrett', kind: 'dive', x: 1600, y: 240, w: 330, h: 460,
+    svg: svgWrap0(330, 460, E(250, 458, 90, 8, 'url(#g-sh)') + R(190, 90, 16, 370, '#c9d6df', 4) + R(290, 90, 16, 370, '#c9d6df', 4) + R(192, 90, 4, 370, '#fff', 0, 'opacity=".6"') +
+      [140, 200, 260, 320, 380, 440].map((y) => R(196, y, 100, 8, '#9fb3c2', 4)).join('') +
+      R(170, 82, 160, 18, '#1982c4', 6) + `<g class="board">${R(0, 84, 200, 14, '#00bbf9', 7)}${R(0, 84, 200, 5, '#9ee7ff', 3)}</g>` + R(306, 30, 8, 60, '#c9d6df', 3) + T(250, 72, 20, '#1982c4', '3 m') + T(100, 130, 16, '#1678c2', '👆 TIPP = SPRINGEN', 'class="djtip"')) },
+  { id: 'liege1', kind: 'deco', x: 1880, y: 590, w: 220, h: 110, svg: lounger(0, '#ff6fb5') },
+  { id: 'liege2', kind: 'deco', x: 2130, y: 590, w: 220, h: 110, svg: lounger(0, '#8ac926') },
+  { id: 'schirm', kind: 'deco', x: 2040, y: 380, w: 180, h: 320,
+    svg: svgWrap0(180, 320, R(86, 40, 8, 280, '#eee', 3) + P('M0 70 Q90 -20 180 70Z', '#ff595e') + P('M0 70 Q90 -20 180 70Z', 'url(#g-vol)') +
+      [0, 1, 2, 3, 4, 5].map((i) => P(`M${i * 30} 70 q15 12 30 0`, i % 2 ? '#fff' : '#ff595e')).join('') + P('M45 70 Q90 -10 90 30 M135 70 Q90 -10 90 30', 'none', 'stroke="#fff" stroke-width="10" opacity=".7"')) },
+  { id: 'kiosk', kind: 'spawn', x: 2390, y: 430, w: 200, h: 270, spawn: ['🍦', '🍉', '🧃', '🍟', '🍭', '🥤'], sound: 'ding', from: [2490, 520],
+    svg: svgWrap0(200, 270, E(100, 268, 100, 8, 'url(#g-sh)') + R(10, 70, 180, 200, '#fff', 8) + R(10, 70, 180, 200, 'url(#g-volh)', 8) + R(28, 100, 144, 60, '#2b9fd6', 4) + R(28, 100, 144, 60, 'url(#g-glass)', 4) +
+      P('M0 40 L200 40 L200 70 L0 70Z', '#00bbf9') + Array.from({ length: 8 }, (_, i) => P(`M${i * 25} 70 q12.5 14 25 0`, i % 2 ? '#fff' : '#00bbf9')).join('') + T(100, 64, 20, '#fff', 'KIOSK') +
+      R(10, 160, 180, 12, '#e9a93a', 3) + `<text x="40" y="146" font-size="30">🍦🍉🧃</text>` + T(100, 230, 15, '#1678c2', '👆 TIPP MICH', 'class="djtip"')) },
+];
+const freibadFG = [
+  { x: POOL.x1 - 14, y: 646, w: POOL.x2 - POOL.x1 + 28, h: 188, svg: svgWrap0(POOL.x2 - POOL.x1 + 28, 188,
+    R(14, 6, POOL.x2 - POOL.x1, 182, '#2aa7e0', 0, 'opacity=".55"') + `<g class="waves">${[...Array(Math.ceil((POOL.x2 - POOL.x1) / 60) + 2)].map((_, i) => P(`M${i * 60 - 60} 8 q15 -10 30 0 q15 10 30 0`, 'none', 'stroke="#d8f6ff" stroke-width="4" opacity=".9"')).join('')}</g>` +
+    R(0, 0, 14, 188, '#fff') + R(POOL.x2 - POOL.x1 + 14, 0, 14, 188, '#fff')) },
+];
+
+// ======================= ZOO =======================
+function fenceFG(x, w, c = '#a0612b') {
+  let s = '';
+  for (let k = 0; k < w; k += 78) s += R(k, 0, 14, 52, c, 5) + R(k, 0, 14, 52, 'url(#p-grain)', 5) + R(k + 2, 2, 4, 48, '#fff', 2, 'opacity=".25"');
+  s += R(0, 10, w, 9, shadeHex(c), 4) + R(0, 34, w, 9, shadeHex(c), 4) + R(0, 10, w, 3, '#fff', 2, 'opacity=".2"');
+  return { x, y: 652, w, h: 52, svg: svgWrap0(w, 52, s) };
+}
+function zooBG() {
+  const W = 2800;
+  let s = skyBits(W, 900);
+  s += E(500, 640, 700, 200, '#c7e3a3') + E(1600, 660, 800, 220, '#b5d98c') + E(2600, 640, 600, 200, '#c7e3a3');
+  for (const [x, y] of [[300, 520], [1250, 500], [2050, 520], [2700, 510]]) s += R(x - 4, y, 8, 60, '#7a5230') + E(x, y - 6, 70, 20, '#5a9a3c') + E(x, y - 22, 46, 14, '#6cb24a');
+  s += R(0, 600, W, 100, '#a8d08d') + R(0, FLOOR, W, H - FLOOR, '#e6c99a') + R(0, FLOOR, W, H - FLOOR, 'url(#p-noise)') + R(0, FLOOR, W, 8, '#000', 0, 'opacity=".1"');
+  for (let x = 30; x < W; x += 120) s += E(x, 760 + (x % 3) * 18, 10, 4, '#c9a46e');
+  // Gehege-Böden
+  s += P('M600 700 L600 610 Q830 580 1060 610 L1060 700Z', '#e0c58f') + E(980, 640, 70, 14, '#4cc9f0') + E(980, 636, 60, 9, '#9ee7ff', 'opacity=".7"');
+  s += P('M1100 700 L1100 610 L1440 610 L1440 700Z', '#d9c27a');
+  s += G(1180, 210, R(-8, 160, 16, 240, '#7a5230', 4) + E(0, 150, 150, 40, '#4a8f2f') + E(-40, 130, 90, 30, '#5fa83c') + E(60, 140, 80, 26, '#5fa83c'));
+  s += P('M1480 700 L1480 610 L1780 610 L1780 700Z', '#9fcf78');
+  s += P('M1820 700 L1820 600 L2160 600 L2160 700Z', '#d6f1ff') + E(2000, 668, 140, 26, '#4cc9f0') + E(2000, 664, 126, 18, '#9ee7ff', 'opacity=".7"') + P('M1830 620 L1880 560 L1930 620Z', '#fff') + P('M2090 620 L2130 570 L2160 620Z', '#eef9ff');
+  s += P('M2200 700 L2200 610 L2500 610 L2500 700Z', '#e7c27a');
+  // Schilder
+  const sign = (x, txt, e) => G(x, 540, R(-4, 30, 8, 60, '#7a5230') + R(-70, 0, 140, 40, '#fff8e1', 8) + R(-70, 0, 140, 40, 'none', 8, 'stroke="#a0612b" stroke-width="4"') + T(-10, 28, 18, '#7a3e12', txt) + `<text x="40" y="30" font-size="24">${e}</text>`);
+  s += sign(700, 'Elefanten', '🐘') + sign(1380, 'Giraffen', '🦒') + sign(1560, 'Affen', '🐒') + sign(2100, 'Pinguine', '🐧') + sign(2440, 'Löwen', '🦁');
+  return svgWrap(W, s);
+}
+const zooProps = [
+  { id: 'zootor', kind: 'animals', x: 30, y: 300, w: 300, h: 400,
+    svg: svgWrap0(300, 400, E(150, 398, 150, 8, 'url(#g-sh)') + R(10, 80, 50, 320, '#a0612b', 8) + R(240, 80, 50, 320, '#a0612b', 8) + R(10, 80, 50, 320, 'url(#p-grain)', 8) + R(240, 80, 50, 320, 'url(#p-grain)', 8) +
+      P('M0 90 Q150 -30 300 90 L300 130 Q150 20 0 130Z', '#8ac926') + P('M0 90 Q150 -30 300 90 L300 130 Q150 20 0 130Z', 'url(#g-vol)') +
+      T(150, 92, 48, '#fff', 'ZOO', 'stroke="#2d6a4f" stroke-width="5" paint-order="stroke"') + `<text x="50" y="60" font-size="34">🦁</text><text x="214" y="60" font-size="34">🐘</text>` +
+      `<g class="zbell">${C(150, 150, 22, '#ffd166')}${C(150, 150, 22, 'url(#g-volh)')}</g>` + T(150, 200, 15, '#2d6a4f', '👆 FÜTTERUNGSZEIT', 'class="djtip"')) },
+  { id: 'kletterbaum', kind: 'tree', x: 1480, y: 230, w: 300, h: 470, spawn: ['🍌', '🍌', '🥥', '🍌'], sound: 'monkey',
+    svg: svgWrap0(300, 470, E(150, 468, 130, 8, 'url(#g-sh)') + R(130, 120, 40, 350, '#8d5524', 14) + R(130, 120, 40, 350, 'url(#g-volh)', 14) +
+      P('M150 290 L40 250 M150 200 L262 160', 'none', 'stroke="#8d5524" stroke-width="18" stroke-linecap="round"') + R(20, 240, 110, 12, '#a0612b', 6) + R(180, 150, 100, 12, '#a0612b', 6) +
+      P('M60 252 Q70 330 50 400 M240 160 Q250 260 230 330', 'none', 'stroke="#c9a46e" stroke-width="6"') +
+      `<g class="canopy">${C(150, 90, 110, '#2d8a55')}${C(70, 120, 60, '#40916c')}${C(230, 110, 60, '#40916c')}${C(150, 50, 60, '#52b788')}${[[90, 90], [200, 70], [160, 130]].map(([x, y]) => `<text x="${x}" y="${y}" font-size="26">🍌</text>`).join('')}</g>`) },
+  { id: 'futter', kind: 'spawn', x: 2540, y: 420, w: 220, h: 280, spawn: ['🥕', '🍌', '🥜', '🥬', '🍉', '🍎'], sound: 'coin', from: [2650, 520],
+    svg: svgWrap0(220, 280, E(110, 278, 110, 8, 'url(#g-sh)') + R(20, 60, 180, 220, '#ffca3a', 12) + R(20, 60, 180, 220, 'url(#g-vol)', 12) + R(44, 90, 132, 90, '#fff', 8) + R(44, 90, 132, 90, 'url(#g-glass)', 8) +
+      `<text x="56" y="150" font-size="34">🥕🍌🥜</text>` + R(80, 196, 60, 34, '#333', 6) + R(90, 204, 40, 6, '#777', 3) + P('M10 64 L110 10 L210 64Z', '#e63946') + P('M10 64 L110 10 L210 64Z', 'url(#g-vol)') +
+      T(110, 56, 18, '#fff', 'FUTTER') + T(110, 262, 15, '#7a3e12', '👆 TIPP MICH', 'class="djtip"')) },
+  { id: 'loewenfels', kind: 'deco', x: 2200, y: 470, w: 300, h: 230,
+    svg: svgWrap0(300, 230, E(150, 228, 150, 8, 'url(#g-sh)') + P('M0 230 L30 90 Q60 40 140 50 L280 70 Q300 150 300 230Z', '#b08968') + P('M0 230 L30 90 Q60 40 140 50 L280 70 Q300 150 300 230Z', 'url(#g-vol)') +
+      P('M40 100 Q120 80 200 110', 'none', 'stroke="#8a6a4c" stroke-width="4" opacity=".6"') + P('M60 160 Q150 140 260 170', 'none', 'stroke="#8a6a4c" stroke-width="4" opacity=".5"')) },
+  { id: 'bank', kind: 'deco', x: 340, y: 560, w: 240, h: 140,
+    svg: svgWrap0(240, 140, E(120, 138, 115, 7, 'url(#g-sh)') + [0, 28].map((y) => R(0, y, 240, 20, '#8ac926', 8) + R(0, y, 240, 4, '#c3ec8a', 3)).join('') + R(0, 74, 240, 16, '#8ac926', 8) + R(0, 74, 240, 4, '#c3ec8a', 3) +
+      R(18, 50, 12, 90, '#444', 4) + R(210, 50, 12, 90, '#444', 4)) },
+];
+const zooFG = [fenceFG(600, 460), fenceFG(1100, 340), fenceFG(1820, 340, '#9fb3c2'), fenceFG(2200, 300)];
+
 // ======================= Szenen =======================
 export const SCENES = [
   {
@@ -1076,6 +1191,30 @@ export const SCENES = [
     zones: [],
   },
   {
+    id: 'freibad', name: 'Freibad', icon: '🏊', W: 2600, ceil: 110, outdoor: true, bg: freibadBG(), props: freibadProps, fg: freibadFG,
+    glows: [],
+    pool: { x1: POOL.x1, x2: POOL.x2 },
+    surfaces: [
+      { x1: POOL.x1, x2: POOL.x2, y: 652, items: true }, { x1: 90, x2: 240, y: 290 },
+      { x1: 1600, x2: 1800, y: 324 }, { x1: 1880, x2: 2060, y: 650 }, { x1: 2130, x2: 2310, y: 650 }, { x1: 2410, x2: 2580, y: 590 },
+    ],
+    seats: [
+      ...[0, 1, 2, 3, 4, 5].map((i) => ({ id: 'freibad:pool' + i, x: POOL.x1 + 110 + i * 196, y: 736, pose: 'tub', swim: true })),
+      { id: 'freibad:liege1', x: 1975, y: 650, pose: 'lie' }, { id: 'freibad:liege2', x: 2225, y: 650, pose: 'lie' },
+      { id: 'freibad:rutsche', x: 200, y: 296, pose: 'slide', path: [[200, 296], [300, 300], [360, 330], [390, 420], [420, 520], [470, 600], [540, 650], [600, 690]] },
+    ],
+    zones: [{ kind: 'bath', seats: [0, 1, 2, 3, 4, 5].map((i) => 'freibad:pool' + i) }],
+  },
+  {
+    id: 'zoo', name: 'Zoo', icon: '🦁', W: 2800, ceil: 110, outdoor: true, bg: zooBG(), props: zooProps, fg: zooFG,
+    glows: [],
+    surfaces: [
+      { x1: 1500, x2: 1610, y: 470 }, { x1: 1660, x2: 1760, y: 380 }, { x1: 2240, x2: 2470, y: 530 }, { x1: 2560, x2: 2740, y: 580 },
+    ],
+    seats: [{ id: 'zoo:bank1', x: 400, y: 636, pose: 'sit' }, { id: 'zoo:bank2', x: 520, y: 636, pose: 'sit' }],
+    zones: [],
+  },
+  {
     id: 'park', name: 'Park', icon: '🌳', W: 2600, ceil: 110, outdoor: true, bg: parkBG(), props: parkProps, fg: parkFG,
     glows: [{ x: 950, y: 400, r: 260 }, { x: 1800, y: 400, r: 260 }],
     surfaces: [
@@ -1144,6 +1283,16 @@ export function initialObjects() {
   o.push(it('buero', '💻', 2650, 556), it('buero', '📊', 2760, 556), it('buero', '☕', 2850, 556), it('buero', '🪴', 2470, 700));
   // Festival
   o.push(it('festival', '🥤', 960, 700), it('festival', '🎈', 1500, 140), it('festival', '🎈', 1060, 160), it('festival', '🕶️', 1650, 700), it('festival', '🍟', 2400, 560), it('festival', '🧢', 300, 700), it('festival', '🎧', 760, 520), it('festival', '🪩', 1840, 520));
+  // Freibad
+  o.push(it('freibad', '🛟', 760, 652), it('freibad', '🦆', 1100, 652), it('freibad', '🏐', 1450, 652), it('freibad', '🍉', 2470, 590), it('freibad', '🥽', 1960, 650), it('freibad', '🩱', 2200, 700), it('freibad', '🐬', 1300, 652));
+  o.push(ch('freibad', POOL.x1 + 110 + 196, 736, { skin: '#e0a46e', hair: 'kurz', hc: '#3b2416', style: 'tshirt', shirt: '#00bbf9', pants: '#ff595e', shoes: '#ffca3a', hat: '', glasses: 'sonne' }, 'freibad:pool1'));
+  o.push(ch('freibad', 2225, 650, { skin: '#ffe3cf', hair: 'lang', hc: '#f2c94c', style: 'kleid', shirt: '#ff6fb5', pants: '#ffffff', shoes: '#ff6fb5', hat: 'sonnenhut', glasses: 'sonne' }, 'freibad:liege2'));
+  o.push(ch('freibad', 1700, 324, { skin: '#8a5530', hair: 'afro', hc: '#111111', style: 'streifen', shirt: '#8ac926', pants: '#1982c4', shoes: '#ffffff', hat: '', glasses: '' }));
+  // Zoo
+  o.push(it('zoo', '🐘', 760, 700), it('zoo', '🐘', 900, 700), it('zoo', '🦒', 1250, 700), it('zoo', '🐒', 1550, 470), it('zoo', '🐒', 1700, 380), it('zoo', '🐧', 1900, 700), it('zoo', '🐧', 1980, 700), it('zoo', '🐧', 2070, 700));
+  o.push(it('zoo', '🦁', 2350, 530), it('zoo', '🦓', 1380, 700), it('zoo', '🦩', 1050, 700), it('zoo', '🥕', 2600, 580), it('zoo', '🍌', 2680, 580));
+  o.push(ch('zoo', 230, 700, { skin: '#f8c9a0', hair: 'kurz', hc: '#c8501e', style: 'pulli', shirt: '#2d6a4f', pants: '#a0612b', shoes: '#333333', hat: 'cap', glasses: '' }));
+  o.push(ch('zoo', 400, 636, { skin: '#b97a4a', hair: 'zoepfe', hc: '#111111', style: 'kleid', shirt: '#ffca3a', pants: '#ffffff', shoes: '#ff595e', hat: 'schleife', glasses: '' }, 'zoo:bank1'));
   // Figuren
   o.push(ch('haus', 280, 596, { skin: '#f8c9a0', hair: 'zoepfe', hc: '#c8501e', style: 'kleid', shirt: '#ff6fb5', pants: '#1982c4', shoes: '#ff595e', hat: '', glasses: '' }, 'haus:sofa2'));
   o.push(ch('haus', 1060, 700, { skin: '#8a5530', hair: 'afro', hc: '#111111', style: 'tshirt', shirt: '#ffca3a', pants: '#1982c4', shoes: '#333333', hat: '', glasses: 'rund' }));

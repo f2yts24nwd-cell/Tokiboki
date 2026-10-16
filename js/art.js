@@ -304,7 +304,7 @@ export function charSVG(L0, sit = false) {
 }
 
 // ---------- Gegenstände ----------
-const FOOD = '🍎🍌🍐🍇🍓🍉🍒🥕🌽🥔🥦🍅🍳🍞🧀🥐🍕🍔🌭🍟🍪🍩🧁🍰🍫🍦🍭🍿🍖🥪🍯🥨🍧🍨🧇🥞🍋🥝🍑🥒';
+const FOOD = '🥥🥜🥬🍎🍌🍐🍇🍓🍉🍒🥕🌽🥔🥦🍅🍳🍞🧀🥐🍕🍔🌭🍟🍪🍩🧁🍰🍫🍦🍭🍿🍖🥪🍯🥨🍧🍨🧇🥞🍋🥝🍑🥒';
 const DRINK = '🥛☕🧃🥤💧🍵';
 const PETS = {
   '🐶': 'woof', '🐱': 'meow', '🐰': 'squeak', '🐹': 'squeak', '🐭': 'squeak', '🐦': 'tweet', '🐥': 'tweet', '🦆': 'quack', '🐸': 'croak', '🐢': 'squeak', '🐠': 'pop', '🦋': 'pop',

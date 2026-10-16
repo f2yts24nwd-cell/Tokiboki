@@ -32,7 +32,8 @@
     <div class="tl"><button class="tb" id="bUndo" aria-label="Rückgängig"><b>↩️</b></button></div>
     <div class="tr">
       <button class="tb hidden" id="bWeather" aria-label="Wetter"><b>☀️</b></button>
-      <button class="tb hidden" id="bPhoto" aria-label="Foto"><b>📸</b></button>
+      <button class="tb" id="bAlbum" aria-label="Fotoalbum"><b>🖼️</b></button>
+      <button class="tb" id="bPhoto" aria-label="Foto"><b>📸</b></button>
       <button class="tb" id="bSet" aria-label="Einstellungen"><b>⚙️</b></button>
     </div>
   </div>
@@ -100,6 +101,28 @@
       <button class="btn primary" data-close>Weiterspielen</button>
     </div>
   </div>
+
+  <div id="album" class="modal hidden">
+    <div class="card">
+      <h2>🖼️ Mein Fotoalbum</h2>
+      <div class="photos"></div>
+      <button class="btn primary" data-close>Fertig</button>
+    </div>
+  </div>
+
+  <div id="photoView" class="modal hidden">
+    <div class="card pview">
+      <div class="pv-img"></div>
+      <div class="pv-stickers"></div>
+      <div>
+        <button class="btn" id="pvBack">◀ Album</button>
+        <button class="btn" id="pvSave">💾 Als Bild speichern</button>
+        <button class="btn danger" id="pvDel">🗑️ Löschen</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="flash"></div>
 
   <div id="tut" class="modal hidden">
     <div class="card tut">
