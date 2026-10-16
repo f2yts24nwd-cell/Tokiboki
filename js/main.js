@@ -3,6 +3,7 @@ import * as A from './art.js';
 import { SCENES, H, initialObjects, GLOBAL_DEFS } from './world.js';
 import { createMap } from './map.js';
 import * as DJ from './dj.js';
+import * as Learn from './learn.js';
 
 const SAVE_KEY = 'kunterbunt-welt-v1';
 const FLOOR = 700;
@@ -1287,14 +1288,15 @@ $('#bFig').addEventListener('click', () => { unlock(); openFigList(); });
 const ED_ROWS = [
   { key: 'skin', label: 'Haut', colors: A.SKINS },
   { key: 'hair', label: 'Frisur', opts: A.HAIR_STYLES, vb: '-12 -40 144 150' },
-  { key: 'hc', label: 'Haarfarbe', colors: A.HAIR_COLORS },
+  { key: 'hc', label: 'Haarfarbe', colors: A.HAIR_COLORS.concat(A.HAIR_COLORS_EXTRA) },
   { key: 'eyes', label: 'Augen', colors: A.EYE_COLORS },
   { key: 'style', label: 'Kleidung', opts: A.SHIRT_STYLES, vb: '0 80 120 130' },
   { key: 'shirt', label: 'Oberteil', colors: A.CLOTH_COLORS },
   { key: 'pants', label: 'Hose', colors: A.CLOTH_COLORS },
   { key: 'shoes', label: 'Schuhe', colors: A.CLOTH_COLORS },
-  { key: 'hat', label: 'Hut', opts: A.HATS, vb: '-12 -46 144 150' },
-  { key: 'glasses', label: 'Brille', opts: A.GLASSES, vb: '10 30 100 70' },
+  { key: 'hat', label: 'Hut', opts: A.HATS.concat(A.HATS_EXTRA), vb: '-12 -46 144 150' },
+  { key: 'glasses', label: 'Brille', opts: A.GLASSES.concat(A.GLASSES_EXTRA), vb: '10 30 100 70' },
+  { key: 'extra', label: 'Extras', opts: A.EXTRAS, vb: '-40 -40 200 270' },
 ];
 
 function renderEditor() {
@@ -1302,10 +1304,15 @@ function renderEditor() {
   editor.querySelector('.ed-prev').innerHTML = miniSVG(c.look, '-14 -40 148 256', 260);
   const box = editor.querySelector('.ed-opts');
   box.innerHTML = ED_ROWS.map((r) => {
-    const cur = c.look[r.key];
+    const cur = c.look[r.key] || '';
+    const lock = (v) => {
+      const rw = Learn.rewardFor(r.key, v);
+      return rw && !Learn.isUnlocked(rw.id) ? ` locked" data-lock="${rw.id}` : '';
+    };
+    const swBg = (col) => (col === 'rainbow' ? 'linear-gradient(135deg,#ff595e,#ffca3a,#8ac926,#1982c4,#6a4c93)' : col);
     const items = r.colors
-      ? r.colors.map((col) => `<button class="sw${col === cur ? ' sel' : ''}" data-k="${r.key}" data-v="${col}" style="background:${col}"></button>`).join('')
-      : r.opts.map(([v, name]) => `<button class="opt${v === cur ? ' sel' : ''}" data-k="${r.key}" data-v="${v}" title="${name}">${miniSVG({ ...c.look, [r.key]: v }, r.vb, 58)}</button>`).join('');
+      ? r.colors.map((col) => `<button class="sw${col === cur ? ' sel' : ''}${lock(col)}" data-k="${r.key}" data-v="${col}" style="background:${swBg(col)}"></button>`).join('')
+      : r.opts.map(([v, name]) => `<button class="opt${v === cur ? ' sel' : ''}${lock(v)}" data-k="${r.key}" data-v="${v}" title="${name}">${miniSVG({ ...c.look, [r.key]: v }, r.vb, 58)}</button>`).join('');
     return `<div class="row"><span class="lbl">${r.label}</span><div class="items">${items}</div></div>`;
   }).join('');
 }
@@ -1313,6 +1320,13 @@ function renderEditor() {
 editor.querySelector('.ed-opts').addEventListener('click', (e) => {
   const b = e.target.closest('button[data-k]');
   if (!b || !editing) return;
+  if (b.dataset.lock) {
+    sfx.boing();
+    toast('🔒 Mit Vokabeln freischalten!');
+    closeModals();
+    Learn.open('shop');
+    return;
+  }
   editing.look[b.dataset.k] = b.dataset.v;
   rerenderChar(editing);
   renderEditor();
@@ -1438,6 +1452,35 @@ function init() {
   $('#bMap').addEventListener('click', () => { unlock(); closeDrawer(); closeModals(); sfx.whoosh(); map.open(); });
   map.open(true);
   DJ.initDJ({ onFx: festFx });
+  const anyChar = () => Object.values(state.objs).find((o) => o.t === 'c' && o.sc === state.scene) || Object.values(state.objs).find((o) => o.t === 'c');
+  const updateLearnBadge = () => { $('#bLearn .nbadge').textContent = '⭐' + Learn.stars(); };
+  Learn.initLearn({
+    getState: () => state,
+    save,
+    sfx,
+    unlock,
+    previewLook: () => (anyChar() ? anyChar().look : A.randomLook()),
+    mascotSVG: () => {
+      const c = anyChar();
+      return A.charSVG(c ? c.look : A.randomLook(), false).replace('viewBox="0 0 120 210" width="120" height="210"', 'viewBox="-10 -30 140 170" width="90" height="110"');
+    },
+    onTry: (r) => {
+      const c = anyChar();
+      if (!c) return;
+      if (c.sc !== state.scene) switchScene(c.sc, true);
+      setScroll(c.x - VW / 2);
+      c.look[r.key] = r.value;
+      rerenderChar(c);
+      burst(c.sc, c.x, c.y - 120, '✨', 10);
+      sfx.sparkle();
+      save();
+      openEditor(c);
+      updateLearnBadge();
+    },
+    onClose: updateLearnBadge,
+  });
+  updateLearnBadge();
+  $('#bLearn').addEventListener('click', () => { unlock(); closeDrawer(); closeModals(); Learn.open('path'); });
   if (!localStorage.getItem('kunterbunt-hint')) {
     setTimeout(() => { if (!document.body.classList.contains('map-open')) toast('Zieh alles herum! 👆'); }, 600);
     try { localStorage.setItem('kunterbunt-hint', '1'); } catch (e) { /* egal */ }

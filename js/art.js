@@ -10,6 +10,11 @@ export const CLOTH_COLORS = ['#ff595e', '#ff924c', '#ffca3a', '#8ac926', '#1982c
 export const SHIRT_STYLES = [['tshirt', 'T-Shirt'], ['streifen', 'Streifen'], ['pulli', 'Pulli'], ['kleid', 'Kleid']];
 export const HATS = [['', 'Kein Hut'], ['cap', 'Kappe'], ['krone', 'Krone'], ['schleife', 'Schleife'], ['zylinder', 'Zylinder'], ['sonnenhut', 'Sonnenhut']];
 export const GLASSES = [['', 'Keine'], ['rund', 'Brille'], ['sonne', 'Sonnenbrille']];
+// Freischaltbar über den Vokabel-Trainer
+export const HATS_EXTRA = [['kopfhoerer', 'Kopfhörer'], ['ninja', 'Ninja-Band'], ['pirat', 'Piratenhut'], ['einhorn', 'Einhorn-Horn'], ['helm', 'Astronautenhelm']];
+export const GLASSES_EXTRA = [['herz', 'Herzbrille'], ['stern', 'Sternbrille']];
+export const HAIR_COLORS_EXTRA = ['#ffd700', 'rainbow'];
+export const EXTRAS = [['', 'Kein Extra'], ['umhang', 'Umhang'], ['fluegel', 'Flügel'], ['jetpack', 'Jetpack'], ['glitzer', 'Glitzer']];
 
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 
@@ -120,6 +125,29 @@ function hat(L) {
       return `<rect x="32" y="-34" width="56" height="54" rx="5" fill="#2b2b2b"/><rect x="36" y="-30" width="10" height="44" rx="4" fill="#fff" opacity=".12"/>
         <rect x="32" y="4" width="56" height="10" fill="#c1121f"/><rect x="32" y="4" width="56" height="3" fill="#ff6b6b" opacity=".6"/>
         <ellipse cx="60" cy="20" rx="46" ry="8" fill="#1e1e1e"/><ellipse cx="60" cy="18" rx="40" ry="4" fill="#3a3a3a"/>`;
+    case 'kopfhoerer':
+      return `<path d="M10 66 Q8 -6 60 -6 Q112 -6 110 66" stroke="#2b2b33" stroke-width="9" fill="none" stroke-linecap="round"/>
+        <path d="M14 50 Q16 2 60 0" stroke="#fff" stroke-width="2" fill="none" opacity=".35"/>
+        <rect x="-2" y="48" width="24" height="38" rx="10" fill="#ff6fb5"/><rect x="98" y="48" width="24" height="38" rx="10" fill="#ff6fb5"/>
+        <rect x="-2" y="48" width="24" height="12" rx="6" fill="#fff" opacity=".3"/><rect x="98" y="48" width="24" height="12" rx="6" fill="#fff" opacity=".3"/>
+        <circle cx="10" cy="67" r="5" fill="#2b2b33"/><circle cx="110" cy="67" r="5" fill="#2b2b33"/>`;
+    case 'ninja':
+      return `<rect x="12" y="30" width="96" height="14" rx="5" fill="#e63946"/><rect x="12" y="30" width="96" height="4" rx="2" fill="#ff8a8f"/>
+        <path d="M104 36 q20 -2 26 14 q-12 -6 -24 -6z M104 38 q22 8 22 26 q-8 -12 -22 -18z" fill="#c1121f"/><circle cx="60" cy="37" r="5" fill="#fff"/>`;
+    case 'pirat':
+      return `<path d="M4 34 Q60 -40 116 34 Q60 18 4 34Z" fill="#1d1d1d"/><path d="M4 34 Q60 18 116 34" stroke="#d4a017" stroke-width="3" fill="none"/>
+        <circle cx="60" cy="10" r="8" fill="#fff"/><circle cx="57" cy="9" r="2" fill="#1d1d1d"/><circle cx="63" cy="9" r="2" fill="#1d1d1d"/>
+        <path d="M50 22 L70 14 M50 14 L70 22" stroke="#fff" stroke-width="3" stroke-linecap="round"/>`;
+    case 'einhorn': {
+      const horn = '<linearGradient id="unihorn" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ffd1f0"/><stop offset=".5" stop-color="#fff6c2"/><stop offset="1" stop-color="#c9b6ff"/></linearGradient>';
+      return `<defs>${horn}</defs><path d="M50 16 L60 -42 L70 16Z" fill="url(#unihorn)" stroke="#e0a8d8" stroke-width="2" stroke-linejoin="round"/>
+        <path d="M52 6 L68 0 M54 -6 L66 -11 M56 -18 L64 -22" stroke="#e0a8d8" stroke-width="2"/>
+        ${[[30, 20, '#ff6fb5'], [44, 12, '#ffca3a'], [76, 12, '#8ac926'], [90, 20, '#00bbf9']].map(([x, y, c]) => `<circle cx="${x}" cy="${y}" r="7" fill="${c}"/><circle cx="${x}" cy="${y}" r="2.5" fill="#fff"/>`).join('')}`;
+    }
+    case 'helm':
+      return `<circle cx="60" cy="58" r="64" fill="#bfe9ff" opacity=".22"/><circle cx="60" cy="58" r="64" fill="none" stroke="#fff" stroke-width="5" opacity=".9"/>
+        <path d="M22 26 Q40 2 70 0" stroke="#fff" stroke-width="7" fill="none" opacity=".7" stroke-linecap="round"/><circle cx="96" cy="26" r="5" fill="#fff" opacity=".7"/>
+        <rect x="18" y="112" width="84" height="14" rx="7" fill="#d9e2ea"/><rect x="18" y="112" width="84" height="4" rx="2" fill="#fff"/><circle cx="60" cy="119" r="4" fill="#e63946"/>`;
     case 'sonnenhut':
       return `<ellipse cx="60" cy="26" rx="66" ry="13" fill="#e9b94f"/><ellipse cx="60" cy="24" rx="60" ry="9" fill="#f6d186"/>
         <path d="M6 26 Q60 34 114 26" stroke="#c99a3a" stroke-width="1.5" fill="none" stroke-dasharray="3 3"/>
@@ -136,6 +164,13 @@ function glasses(L) {
       <path d="M35 55 l5 -3 M69 55 l5 -3" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".8"/>
       <path d="M56 61 Q60 56 64 61 M30 60 L16 56 M90 60 L104 56" stroke="#2f3b52" stroke-width="3" fill="none"/>`;
   }
+  if (L.glasses === 'herz' || L.glasses === 'stern') {
+    const shape = (x) => L.glasses === 'herz'
+      ? `<path d="M${x} 72 C${x - 22} 58 ${x - 14} 44 ${x} 54 C${x + 14} 44 ${x + 22} 58 ${x} 72Z" fill="#ff6fb5" stroke="#d6336c" stroke-width="2.5"/>`
+      : `<path d="M${x} 46 l4.5 9.5 10.5 1.2 -7.8 7.2 2.2 10.4 -9.4 -5.4 -9.4 5.4 2.2 -10.4 -7.8 -7.2 10.5 -1.2z" fill="#ffca3a" stroke="#e09f00" stroke-width="2.5" stroke-linejoin="round"/>`;
+    return `${shape(43)}${shape(77)}<path d="M53 59 L67 59 M28 58 L16 55 M92 58 L104 55" stroke="${L.glasses === 'herz' ? '#d6336c' : '#e09f00'}" stroke-width="3"/>
+      <path d="M36 56 l4 -2 M70 56 l4 -2" stroke="#fff" stroke-width="2.5" stroke-linecap="round" opacity=".8"/>`;
+  }
   if (L.glasses === 'sonne') {
     return `<rect x="27" y="52" width="31" height="21" rx="9" fill="#1d1d2b"/><rect x="62" y="52" width="31" height="21" rx="9" fill="#1d1d2b"/>
       <rect x="29" y="54" width="27" height="8" rx="4" fill="#5b5f8a" opacity=".55"/><rect x="64" y="54" width="27" height="8" rx="4" fill="#5b5f8a" opacity=".55"/>
@@ -145,10 +180,40 @@ function glasses(L) {
   return '';
 }
 
+function extraBack(L) {
+  switch (L.extra) {
+    case 'umhang':
+      return `<path d="M38 102 Q20 150 10 204 Q60 214 110 204 Q100 150 82 102Z" fill="#c1121f"/><path d="M38 102 Q24 150 18 200 Q40 206 60 207 Q44 150 46 104Z" fill="#000" opacity=".15"/>
+        <path d="M30 150 Q36 180 34 200 M90 150 Q86 180 88 200" stroke="#8f0d17" stroke-width="2" fill="none"/>`;
+    case 'fluegel': {
+      const wing = (sx) => `<g transform="translate(60 112) scale(${sx} 1)"><g class="wing"><path d="M6 0 Q60 -70 96 -46 Q84 -24 70 -18 Q82 -6 66 4 Q74 16 56 18 Q36 24 6 10Z" fill="#fff" stroke="#d8e6f5" stroke-width="2"/>
+        <path d="M14 4 Q50 -30 84 -40 M14 8 Q46 -6 66 -12 M14 10 Q40 6 56 10" stroke="#c9dbee" stroke-width="2" fill="none"/></g></g>`;
+      return wing(1) + wing(-1);
+    }
+    case 'jetpack':
+      return `${[-2, 96].map((x) => `<rect x="${x}" y="90" width="26" height="64" rx="12" fill="#9aa5b1"/><rect x="${x + 3}" y="92" width="8" height="58" rx="4" fill="#fff" opacity=".45"/><path d="M${x} 104 a13 13 0 0 1 26 0" fill="#e63946"/><rect x="${x + 4}" y="150" width="18" height="8" rx="3" fill="#555"/>
+        <g class="jetflame"><path d="M${x + 4} 158 Q${x + 13} 204 ${x + 22} 158Z" fill="#ff9f1c"/><path d="M${x + 8} 158 Q${x + 13} 184 ${x + 18} 158Z" fill="#ffd60a"/></g>`).join('')}`;
+    default: return '';
+  }
+}
+
+function extraFront(L) {
+  if (L.extra === 'umhang') return `<circle cx="44" cy="104" r="5" fill="#ffd166"/><circle cx="76" cy="104" r="5" fill="#ffd166"/><path d="M44 104 Q60 112 76 104" stroke="#ffd166" stroke-width="2.5" fill="none"/>`;
+  if (L.extra === 'jetpack') return `<path d="M42 100 L42 138 M78 100 L78 138" stroke="#444" stroke-width="5" stroke-linecap="round"/><rect x="38" y="118" width="44" height="7" rx="3" fill="#444"/><circle cx="60" cy="121" r="5" fill="#ffca3a"/>`;
+  return '';
+}
+
+function glitter() {
+  return `<g class="glitter">${[[2, 10], [116, 30], [-6, 120], [122, 140], [20, 190], [104, 92], [56, -30]].map(([x, y], i) =>
+    `<path class="tw" style="animation-delay:${i * 0.25}s" d="M${x} ${y - 9} L${x + 2.5} ${y - 2.5} L${x + 9} ${y} L${x + 2.5} ${y + 2.5} L${x} ${y + 9} L${x - 2.5} ${y + 2.5} L${x - 9} ${y} L${x - 2.5} ${y - 2.5}Z" fill="${['#ffd166', '#ff6fb5', '#8ef', '#fff'][i % 4]}"/>`).join('')}</g>`;
+}
+
 export const EYE_COLORS = ['#5a3a22', '#2f6db5', '#3c7a3a', '#7a8a99', '#8a5a2b', '#6a4c93'];
 
 // Figur im 120×210-Koordinatensystem, Füße unten Mitte. Detaillierter Stil mit Schattierung.
-export function charSVG(L, sit = false) {
+export function charSVG(L0, sit = false) {
+  const rainbow = L0.hc === 'rainbow';
+  const L = rainbow ? { ...L0, hc: '#ff6fb5' } : L0;
   const g = 'cg' + ++uid + '-';
   const sk = L.skin;
   const skL = shade(sk, 0.35);
@@ -163,7 +228,8 @@ export function charSVG(L, sit = false) {
     <radialGradient id="${g}s" cx="40%" cy="35%" r="72%"><stop offset="0" stop-color="${skL}"/><stop offset=".72" stop-color="${sk}"/><stop offset="1" stop-color="${skD}"/></radialGradient>
     <linearGradient id="${g}t" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${shirtL}"/><stop offset="1" stop-color="${shirtD}"/></linearGradient>
     <linearGradient id="${g}p" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${pantsD}"/><stop offset=".5" stop-color="${L.pants}"/><stop offset="1" stop-color="${pantsD}"/></linearGradient>
-    <linearGradient id="${g}h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${shade(L.hc, 0.2)}"/><stop offset="1" stop-color="${shade(L.hc, -0.12)}"/></linearGradient>
+    ${rainbow ? `<linearGradient id="${g}h" x1="0" y1="0" x2="1" y2="1">${['#ff595e', '#ff924c', '#ffca3a', '#8ac926', '#1982c4', '#6a4c93'].map((c, i) => `<stop offset="${i / 5}" stop-color="${c}"/>`).join('')}</linearGradient>`
+      : `<linearGradient id="${g}h" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${shade(L.hc, 0.2)}"/><stop offset="1" stop-color="${shade(L.hc, -0.12)}"/></linearGradient>`}
     <radialGradient id="${g}i" cx="50%" cy="35%" r="65%"><stop offset="0" stop-color="${shade(eyeC, 0.45)}"/><stop offset="1" stop-color="${eyeC}"/></radialGradient>
     <clipPath id="${g}b"><path d="M35 112 q0 -14 15 -14 h20 q15 0 15 14 v32 h-50z"/></clipPath>
   </defs>`;
@@ -228,12 +294,12 @@ export function charSVG(L, sit = false) {
     <g class="m-o"><ellipse cx="60" cy="87" rx="6.5" ry="7.5" fill="#6b1f2a"/><ellipse cx="60" cy="91" rx="4" ry="2.5" fill="#ff7b8a"/></g>
     <g class="m-happy"><path d="M45 80 Q60 104 75 80 Z" fill="#6b1f2a"/><path d="M47 81 h26 v3 q-13 3 -26 0z" fill="#fff"/><path d="M52 92 Q60 98 68 92 Q60 87 52 92Z" fill="#ff7b8a"/></g>`;
   return `<svg class="cs" viewBox="0 0 120 210" width="120" height="210" overflow="visible">${defs}
-    ${hairBack(L, g)}${legs}${body}${arms}
+    ${extraBack(L)}${hairBack(L, g)}${legs}${body}${arms}${extraFront(L)}
     <rect x="52" y="92" width="16" height="12" fill="${skD}"/>
     <circle cx="14" cy="64" r="10" fill="url(#${g}s)"/><path d="M11 60 q5 4 1 9" stroke="${skD}" stroke-width="2" fill="none"/>
     <circle cx="106" cy="64" r="10" fill="url(#${g}s)"/><path d="M109 60 q-5 4 -1 9" stroke="${skD}" stroke-width="2" fill="none"/>
     <circle cx="60" cy="59" r="47" fill="url(#${g}s)"/>
-    ${face}${hairFront(L, g)}${hat(L)}${glasses(L)}
+    ${face}${hairFront(L, g)}${hat(L)}${glasses(L)}${L.extra === 'glitzer' ? glitter() : ''}
   </svg>`;
 }
 

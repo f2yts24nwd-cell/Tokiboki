@@ -24,3 +24,8 @@ Einmalig unter **Settings → Pages → Source** „GitHub Actions“ wählen. D
 ## Musik
 Die Festival-Tracks in `audio/` sind eigene, mit `tools/make_music.py` synthetisierte Kompositionen
 (gemeinfrei, CC0 – siehe `audio/LIZENZ.txt`). Neu erzeugen: `python3 tools/make_music.py`.
+
+## Vokabel-Trainer
+Über **🎓 Lernen** gibt es kurze Englisch-Lektionen (Klasse 6) im Stil von Lern-Apps. Für gelöste Lektionen
+gibt es ⭐, damit schaltet man im Shop neue Sachen für die Figuren frei. Die Wortlisten stehen in
+`js/vocab.js` und lassen sich dort leicht gegen die genauen Unit-Listen aus dem Schulbuch austauschen.
