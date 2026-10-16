@@ -6,6 +6,7 @@ import * as DJ from './dj.js';
 import * as Learn from './learn.js';
 
 const SAVE_KEY = 'kunterbunt-welt-v1';
+const DEBUG = location.search.includes('debug');
 const FLOOR = 700;
 const GRAV = 2600;
 const SC = Object.fromEntries(SCENES.map((s) => [s.id, s]));
@@ -266,6 +267,64 @@ function surfacesOf(o) {
   return SC[o.sc].surfaces.filter((s) => !s.c || state.props[s.c].open || (o._cin && o._cin.includes(s.c)));
 }
 
+// Liegende Gegenstände sind selbst kleine Ablageflächen (Stapeln).
+function stackTops(o) {
+  if (o.t !== 'i') return [];
+  const res = [];
+  for (const b of Object.values(state.objs)) {
+    if (b === o || b.t !== 'i' || b.sc !== o.sc || b.hold || b._dragging || b._stored || falling.has(b)) continue;
+    const inf = info(b);
+    if (inf.floaty || inf.pet || inf.size < 44) continue;
+    const hw = inf.size * 0.34;
+    res.push({ x1: b.x - hw, x2: b.x + hw, y: Math.round(b.y - inf.size * 0.76), on: b.id });
+  }
+  return res;
+}
+
+// Wie weit darf ein Gegenstand neben der Kante losgelassen werden und trotzdem liegen bleiben?
+const xTol = (o) => (o.t === 'i' ? Math.min(22, info(o).size * 0.3) : 6);
+const fitsX = (o, s, x = o.x) => x >= s.x1 - xTol(o) && x <= s.x2 + xTol(o);
+
+/** Fläche, auf der ein losgelassenes Objekt landen wird (inkl. „magnetischem“ Einrasten knapp darunter). */
+function dropTarget(o) {
+  const surf = surfacesOf(o).concat(stackTops(o));
+  const snap = o.t === 'i' ? 58 : 26;
+  let above = null; // knapp darüber → einrasten
+  let below = null; // darunter → hinfallen
+  for (const s of surf) {
+    if (!fitsX(o, s)) continue;
+    if (s.y >= o.y - 2) { if (!below || s.y < below.y) below = s; }
+    else if (o.y - s.y <= snap && (!above || s.y > above.y)) above = s;
+  }
+  const floor = { x1: 0, x2: SC[o.sc].W, y: FLOOR, floor: true };
+  if (!below || below.y > FLOOR) below = floor;
+  if (o.y > FLOOR) return floor;
+  if (above && (o.y - above.y) <= (below.y - o.y) + (below.floor ? 24 : 0)) return above;
+  return below;
+}
+
+function snapDrop(o) {
+  const t = dropTarget(o);
+  if (t.y < o.y) o.y = t.y - 1;
+  if (!t.floor) o.x = clamp(o.x, t.x1 + 2, t.x2 - 2);
+  place(o);
+}
+
+// Liegt etwas noch auf einer Fläche? Sonst fällt es (z. B. wenn das Teil darunter weggenommen wurde).
+function supported(o) {
+  if (o.y >= FLOOR - 1) return true;
+  for (const s of SC[o.sc].surfaces) if (Math.abs(s.y - o.y) <= 2 && fitsX(o, s)) return true;
+  for (const s of stackTops(o)) if (Math.abs(s.y - o.y) <= 3 && fitsX(o, s)) return true;
+  return false;
+}
+
+function checkSupport(sc) {
+  for (const o of Object.values(state.objs)) {
+    if (o.sc !== sc || o.t !== 'i' || o.hold || o._dragging || falling.has(o) || info(o).floaty) continue;
+    if (!supported(o)) startFall(o);
+  }
+}
+
 function startFall(o, vx = 0, vy = 0) {
   o._vx = vx;
   o._vy = vy;
@@ -297,16 +356,18 @@ function stepFalling(dt) {
       o._vx = -(o._vx || 0) * 0.5;
     }
     let landY = null;
+    let landS = null;
     if (o._vy > 0) {
-      for (const s of surfacesOf(o)) {
-        if (nx >= s.x1 && nx <= s.x2 && s.y >= o.y - 2 && s.y <= ny && (landY === null || s.y < landY)) landY = s.y;
+      for (const s of surfacesOf(o).concat(stackTops(o))) {
+        if (fitsX(o, s, nx) && s.y >= o.y - 2 && s.y <= ny && (landY === null || s.y < landY)) { landY = s.y; landS = s; }
       }
-      if (ny >= FLOOR && (landY === null || landY > FLOOR)) landY = FLOOR;
+      if (ny >= FLOOR && (landY === null || landY > FLOOR)) { landY = FLOOR; landS = null; }
     }
     o.x = nx;
     if (landY !== null) {
       const speed = o._vy;
       o.y = landY;
+      if (landS) o.x = clamp(o.x, landS.x1 + 2, landS.x2 - 2);
       falling.delete(o);
       o._vy = o._vx = 0;
       if (speed > 500) {
@@ -404,6 +465,18 @@ function sitDown(c, seat) {
     setMood(c, null);
   }
   save();
+}
+
+function seatFor(c) {
+  let best = null;
+  let bd = 110;
+  for (const st of SC[c.sc].seats) {
+    const occ = occupant(st.id);
+    if (occ && occ !== c) continue;
+    const d = Math.hypot(st.x - c.x, st.y - (c.y - 36));
+    if (d < bd) { bd = d; best = st; }
+  }
+  return best;
 }
 
 function trySeat(c) {
@@ -528,6 +601,7 @@ function removeObj(o, fx = true) {
   const e = els.get(o.id);
   if (e) e.remove();
   els.delete(o.id);
+  checkSupport(o.sc);
   save();
 }
 
@@ -976,6 +1050,7 @@ function tick() {
     }
   }
   const sc = state.scene;
+  checkSupport(sc);
   if (state.props.radio.on && sc === 'haus' && tickN % 2 === 0) burst('haus', 680, 220, pick(['🎵', '🎶']), 1, 'up');
   for (const o of objs) {
     if (o.sc !== sc) continue;
@@ -1073,6 +1148,7 @@ function beginDrag(d) {
   if (o.t === 'c' && o.seat) leaveSeat(o);
   falling.delete(o);
   o._vx = o._vy = 0;
+  if (o.t === 'i') checkSupport(o.sc);
   const w = clientToWorld(d.sx, d.sy);
   if (o.t === 'c') { d.ox = 0; d.oy = 120; } else { d.ox = o.x - w.x; d.oy = o.y - w.y; }
   o.z = ++state.ztop;
@@ -1096,6 +1172,43 @@ function moveDrag(d) {
   d.auto = d.lx < edge ? -(edge - d.lx) * 10 : d.lx > innerWidth - edge ? (d.lx - (innerWidth - edge)) * 10 : 0;
   const t = navTargetAt(d.lx, d.ly);
   document.querySelectorAll('.nb[data-target]').forEach((b) => b.classList.toggle('hover', b.dataset.target === t));
+  showDropHint(t ? null : o);
+}
+
+// Vorschau beim Ziehen: Wo landet das Ding?
+const dropLine = div('dropline');
+const dropRing = div('dropring');
+let hintChar = null;
+function showDropHint(o) {
+  let line = null, ring = null, ch = null;
+  if (o) {
+    if (o.t === 'c') {
+      const st = seatFor(o);
+      if (st) ring = { x: st.x, y: st.y };
+      else line = dropTarget(o);
+    } else {
+      ch = charAt(o);
+      if (!ch || !(info(o).food || info(o).drink || info(o).hat || info(o).glasses || info(o).tool || o.k === '💩' || (info(o).size <= 95 && !info(o).floaty))) ch = null;
+      if (!ch && !info(o).floaty) line = dropTarget(o);
+    }
+  }
+  if (hintChar !== ch) {
+    if (hintChar && els.get(hintChar.id)) els.get(hintChar.id).classList.remove('target');
+    if (ch) els.get(ch.id).classList.add('target');
+    hintChar = ch;
+  }
+  if (line) {
+    const half = o.t === 'i' ? info(o).size * 0.5 : 50;
+    const x1 = line.floor ? o.x - half : Math.max(line.x1, o.x - half - 20);
+    const x2 = line.floor ? o.x + half : Math.min(line.x2, o.x + half + 20);
+    box(dropLine, x1, line.y - 3, Math.max(24, x2 - x1));
+    sceneEls[o.sc].drag.append(dropLine);
+    dropLine.classList.toggle('stack', !!line.on);
+  } else dropLine.remove();
+  if (ring) {
+    box(dropRing, ring.x - 45, ring.y - 24);
+    sceneEls[o.sc].drag.append(dropRing);
+  } else dropRing.remove();
 }
 
 function endDrag(d, cx, cy) {
@@ -1103,6 +1216,7 @@ function endDrag(d, cx, cy) {
   const e = els.get(o.id);
   o._dragging = false;
   e.classList.remove('dragging');
+  showDropHint(null);
   if (![...drags.values()].some((x) => x.active)) nav.classList.remove('dropmode');
   document.querySelectorAll('.nb.hover').forEach((b) => b.classList.remove('hover'));
   if (d.fromDrawer) closeDrawer();
@@ -1130,8 +1244,24 @@ function endDrag(d, cx, cy) {
     if (c && applyToChar(o, c)) return;
   }
   sfx.drop();
+  autoOpen(o);
+  snapDrop(o);
   startFall(o);
   save();
+}
+
+// Wird etwas in einen geschlossenen Schrank gezogen, geht die Tür von selbst auf.
+function autoOpen(o) {
+  for (const p of SC[o.sc].props) {
+    if (p.kind !== 'container' || state.props[p.id].open) continue;
+    const r = p.region;
+    if (o.x >= r.x1 && o.x <= r.x2 && o.y >= r.y1 && o.y <= r.y2 + 10) {
+      state.props[p.id].open = true;
+      applyProp(p.id);
+      updateStored(o.sc);
+      sfx.door();
+    }
+  }
 }
 
 function moveToScene(o, target) {
@@ -1404,6 +1534,12 @@ function init() {
   }
   state.props.radio.on = false;
   Object.keys(PROPS).forEach(applyProp);
+  // Alte Spielstände: Gegenstände, deren Fläche sich verschoben hat, wieder obenauf legen
+  for (const o of all) {
+    if (o.t !== 'i' || o.hold || info(o).floaty || supported(o)) continue;
+    const up = SC[o.sc].surfaces.filter((s) => fitsX(o, s) && s.y < o.y && o.y - s.y <= 60).sort((a, b) => b.y - a.y)[0];
+    if (up) { o.y = up.y; place(o); }
+  }
   for (const o of all) {
     if (o.t === 'c' && o.seat && SEATS[o.seat].pose === 'swing') swingClass(SEATS[o.seat], true, o);
     if (!o.hold && !o.seat) startFall(o);
@@ -1485,7 +1621,8 @@ function init() {
     setTimeout(() => { if (!document.body.classList.contains('map-open')) toast('Zieh alles herum! 👆'); }, 600);
     try { localStorage.setItem('kunterbunt-hint', '1'); } catch (e) { /* egal */ }
   }
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {});
+  if (DEBUG) window.__dbg = { state, SC, startFall, newObj, falling, sceneEls, removeObj, setScroll, switchScene, place, snapDrop, dropTarget, checkSupport, supported, endDrag, beginDrag, moveDrag, els, get VW() { return VW; } };
+  else if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {});
 }
 
 init();

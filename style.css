@@ -825,3 +825,12 @@ body.learn-open #nav, body.learn-open #drawer { display: none; }
 @keyframes lconf { to { transform: translateY(110vh) rotate(720deg); } }
 .nb { width: 64px; }
 @media (max-width: 1100px) { .nb { width: 54px; } .nb i { font-size: 9px; } }
+
+/* ---------- Ablage-Vorschau ---------- */
+.dropline, .dropring { position: absolute; z-index: 0; pointer-events: none; }
+.dropring { z-index: 100000; }
+.dropline { height: 7px; border-radius: 4px; background: #fff; box-shadow: 0 0 0 2px rgba(46, 196, 182, .9), 0 0 16px 4px rgba(46, 196, 182, .7); animation: dlpulse .7s ease-in-out infinite alternate; }
+.dropline.stack { box-shadow: 0 0 0 2px rgba(255, 202, 58, .95), 0 0 16px 4px rgba(255, 202, 58, .7); }
+.dropring { width: 90px; height: 34px; border-radius: 50%; border: 5px solid #fff; box-shadow: 0 0 14px 4px rgba(255, 111, 181, .8); animation: dlpulse .7s ease-in-out infinite alternate; }
+@keyframes dlpulse { from { opacity: .55; } to { opacity: 1; } }
+.o.c.target svg.cs { filter: drop-shadow(0 0 6px #fff) drop-shadow(0 0 14px #ffca3a); }
