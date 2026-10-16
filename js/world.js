@@ -742,6 +742,8 @@ const deskFront = (w) => svgWrap0(w, 144, E(w / 2, 144, w * 0.48, 7, 'url(#g-sh)
   R(w / 2 - 50, 30, 100, 40, '#60a5fa', 6) + VOL(w / 2 - 50, 30, 100, 40, 6) + R(w / 2 - 14, 46, 28, 6, 'url(#g-metal)', 3) + R(20, 26, 50, 30, '#fff', 3, 'opacity=".9" transform="rotate(-4 45 41)"') + P('M26 34 h36 M26 42 h30 M26 50 h34', 'none', 'stroke="#93c5fd" stroke-width="2" transform="rotate(-4 45 41)"'));
 
 const schuleProps = [
+  { id: 'quiz', kind: 'quiz', x: 940, y: 490, w: 80, h: 70,
+    svg: svgWrap0(80, 70, E(40, 68, 38, 5, 'url(#g-sh)') + R(6, 40, 68, 28, '#333', 8) + R(6, 40, 68, 8, '#555', 4) + `<g class="buzz">${E(40, 40, 28, 10, '#b91c1c')}${R(12, 18, 56, 22, '#ef4444', 4)}${E(40, 18, 28, 10, '#f87171')}${E(32, 15, 10, 3, '#fff', 'opacity=".6"')}</g>` + T(40, 64, 11, '#fff', 'QUIZ')) },
   { id: 'tafel', kind: 'board', x: 1060, y: 130, w: 500, h: 280, sound: 'click',
     svg: svgWrap0(500, 280, R(6, 8, 500, 280, '#000', 12, 'opacity=".14"') + R(0, 0, 500, 280, '#92400e', 12) + GRAIN(0, 0, 500, 280, 12) + VOL(0, 0, 500, 280, 12) + R(14, 14, 472, 252, '#14532d', 6) + R(14, 14, 472, 252, 'url(#p-noise)', 6) +
       P('M40 240 q80 -20 160 6 M300 40 q60 10 150 -4', 'none', 'stroke="#fff" stroke-width="10" opacity=".05" stroke-linecap="round"') +
@@ -1110,8 +1112,8 @@ export const SCENES = [
       { x1: 1040, x2: 1740, y: 500 }, { x1: 1256, x2: 1474, y: 438 }, { x1: 1252, x2: 1478, y: 380 },
     ],
     seats: [
-      { id: 'cafe:s1', x: 95, y: 602, pose: 'sit' }, { id: 'cafe:s2', x: 415, y: 602, pose: 'sit' },
-      { id: 'cafe:s3', x: 555, y: 602, pose: 'sit' }, { id: 'cafe:s4', x: 875, y: 602, pose: 'sit' },
+      { id: 'cafe:s1', x: 95, y: 602, pose: 'sit', order: true }, { id: 'cafe:s2', x: 415, y: 602, pose: 'sit', order: true },
+      { id: 'cafe:s3', x: 555, y: 602, pose: 'sit', order: true }, { id: 'cafe:s4', x: 875, y: 602, pose: 'sit', order: true },
     ],
     zones: [],
   },
@@ -1130,7 +1132,7 @@ export const SCENES = [
     glows: [{ x: 240, y: 255, r: 220 }, { x: 620, y: 255, r: 220 }],
     surfaces: [{ x1: 860, x2: 1120, y: 540 }, { x1: 860, x2: 1120, y: 330 }],
     seats: [
-      { id: 'friseur:s1', x: 240, y: 572, pose: 'sit' }, { id: 'friseur:s2', x: 620, y: 572, pose: 'sit' }, { id: 'friseur:s3', x: 1260, y: 572, pose: 'sit' },
+      { id: 'friseur:s1', x: 240, y: 572, pose: 'sit', wish: true }, { id: 'friseur:s2', x: 620, y: 572, pose: 'sit', wish: true }, { id: 'friseur:s3', x: 1260, y: 572, pose: 'sit', wish: true },
     ],
     zones: [],
   },
@@ -1271,7 +1273,7 @@ export function initialObjects() {
   o.push(it('bad', '💩', 1555, 612), it('bad', '💩', 1825, 612), it('bad', '🧻', 1540, 520), it('bad', '🧻', 1825, 520), it('bad', '💩', 2000, 700), it('bad', '🧻', 1460, 700));
   // Heylinschule
   o.push(it('schule', '🎒', 90, 700), it('schule', '🎒', 170, 700), it('schule', '🎒', 250, 306), it('schule', '🧢', 330, 306), it('schule', '⚽', 420, 700));
-  o.push(it('schule', '🍎', 800, 560), it('schule', '📚', 960, 560), it('schule', '🌍', 1000, 700), it('schule', '🧮', 2340, 700));
+  o.push(it('schule', '🍎', 785, 560), it('schule', '📚', 830, 560), it('schule', '🌍', 1000, 700), it('schule', '🧮', 2340, 700));
   SDESKS.forEach((x, i) => {
     o.push(it('schule', ['✏️', '📓', '🖍️', '📏'][i], x + 30, 560), it('schule', ['📖', '✏️', '📐', '📓'][i], x + 120, 560), it('schule', ['🖍️', '🍌', '✏️', '🍪'][i], x + 210, 560));
   });

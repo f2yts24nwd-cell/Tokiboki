@@ -167,12 +167,23 @@ export function initDJ(opts) {
       <div class="bpm">– BPM</div>
       <div class="xf"><span>A</span><div class="xtrack"><div class="xknob"></div></div><span>B</span></div>
       <div class="pads">${PADS.map(([id, ic, name]) => `<button class="pad" data-fx="${id}"><b>${ic}</b><i>${name}</i></button>`).join('')}</div>
+      <button class="rstart">🎮 Rhythmus-Spiel</button>
       <p class="djhint">Platte mit dem Finger drehen = scratchen</p>
     </div>
     ${deckHTML(1)}
     <button class="djx" aria-label="Schließen">✕</button>
+  </div>
+  <div class="rgame hidden">
+    <div class="rhud"><div><small>Punkte</small><b class="rscore">0</b></div><div class="rjudge"></div><div><small>Kombo</small><b class="rcombo">0</b></div></div>
+    <div class="rlanes">${[0, 1, 2, 3].map((i) => `<div class="rlane" style="--c:${LANE_COL[i]}"><div class="rnotes"></div></div>`).join('')}<div class="rline"></div></div>
+    <div class="rbtns">${[0, 1, 2, 3].map((i) => `<button class="rbtn" data-l="${i}" style="--c:${LANE_COL[i]}">${LANE_ICON[i]}</button>`).join('')}</div>
+    <button class="rquit" aria-label="Spiel beenden">✕</button>
+    <div class="rresult hidden"></div>
   </div>`;
   document.body.append(root);
+  root.querySelector('.rstart').addEventListener('click', startGame);
+  root.querySelector('.rquit').addEventListener('click', endGame);
+  root.querySelectorAll('.rbtn').forEach((b) => b.addEventListener('pointerdown', (e) => { e.preventDefault(); hitLane(+b.dataset.l, b); }));
 
   root.querySelector('.djx').addEventListener('click', close);
   root.querySelectorAll('.deck').forEach((el) => {
@@ -302,8 +313,147 @@ function bindCrossfader(track) {
   track.addEventListener('pointercancel', () => (on = false));
 }
 
+// ---------------- Rhythmus-Spiel ----------------
+const LANE_COL = ['#ff6fb5', '#ffca3a', '#2ec4b6', '#9b5de5'];
+const LANE_ICON = ['🥁', '🎹', '🎺', '🎸'];
+const LANE_FX = ['airhorn', 'laser', 'konfetti', 'feuer'];
+const PX_PER_BEAT = 120;
+let game = null;
+
+function startGame() {
+  unlock();
+  ensureNode();
+  // läuft keine Musik, starten wir den hörbaren Plattenteller
+  if (!beatInfo()) {
+    const k = xf > 0.5 ? 1 : 0;
+    const d = decks[k];
+    const go = () => { d.playing = true; renderButtons(); };
+    if (d.buf) go(); else { selectTrack(k, k); loadTrack(k).then(go); }
+  }
+  const g = root.querySelector('.rgame');
+  g.classList.remove('hidden');
+  g.querySelector('.rresult').classList.add('hidden');
+  g.querySelectorAll('.rnotes').forEach((n) => (n.innerHTML = ''));
+  document.body.classList.add('rgame-open');
+  game = { notes: null, score: 0, combo: 0, best: 0, hits: 0, total: 0 };
+  setJudge('Mach dich bereit! 🎧');
+}
+
+function makeNotes(b0) {
+  const notes = [];
+  let lane = 0;
+  for (let i = 0; i < 32; i++) {
+    lane = (lane + 1 + Math.floor(Math.random() * 3)) % 4;
+    notes.push({ beat: b0 + i, lane, el: null, done: false });
+    if (i > 8 && i % 4 === 3 && Math.random() < 0.5) notes.push({ beat: b0 + i + 0.5, lane: (lane + 2) % 4, el: null, done: false });
+  }
+  return notes;
+}
+
+function setJudge(t, cls = '') {
+  const j = root.querySelector('.rjudge');
+  j.textContent = t;
+  j.className = 'rjudge ' + cls;
+  void j.offsetWidth;
+  j.classList.add('pop');
+}
+
+function hitLane(l, btn) {
+  if (!game || !game.notes) return;
+  btn.classList.remove('hit');
+  void btn.offsetWidth;
+  btn.classList.add('hit');
+  const bi = beatInfo();
+  if (!bi) return;
+  let best = null;
+  for (const n of game.notes) {
+    if (n.done || n.lane !== l) continue;
+    const d = Math.abs(n.beat - bi.beat);
+    if (d < 0.45 && (!best || d < Math.abs(best.beat - bi.beat))) best = n;
+  }
+  if (!best) { game.combo = 0; setJudge('Daneben 🙈', 'miss'); updHud(); return; }
+  const d = Math.abs(best.beat - bi.beat);
+  best.done = true;
+  best.el && best.el.classList.add('gone');
+  game.hits++;
+  game.combo++;
+  game.best = Math.max(game.best, game.combo);
+  const pts = d < 0.15 ? 100 : 50;
+  game.score += pts + Math.min(game.combo, 20) * 5;
+  setJudge(d < 0.15 ? 'PERFEKT! ✨' : 'Gut! 👍', d < 0.15 ? 'perf' : 'good');
+  if (game.combo % 8 === 0) { onFx(LANE_FX[l]); if (sfx[LANE_FX[l]]) sfx[LANE_FX[l]](); }
+  updHud();
+}
+
+function updHud() {
+  root.querySelector('.rscore').textContent = game.score;
+  root.querySelector('.rcombo').textContent = game.combo;
+}
+
+function gameFrame() {
+  if (!game) return;
+  const bi = beatInfo();
+  if (!bi) return;
+  if (!game.notes) {
+    game.notes = makeNotes(Math.ceil(bi.beat) + 4);
+    game.total = game.notes.length;
+    const lanes = root.querySelectorAll('.rnotes');
+    for (const n of game.notes) {
+      n.el = document.createElement('i');
+      n.el.className = 'rnote';
+      lanes[n.lane].append(n.el);
+    }
+    setJudge('Los geht\'s! 🎶');
+  }
+  const h = root.querySelector('.rlanes').clientHeight;
+  const hitY = h - 40;
+  for (const n of game.notes) {
+    if (!n.el) continue;
+    const y = hitY - (n.beat - bi.beat) * PX_PER_BEAT;
+    n.el.style.transform = `translateY(${y}px)`;
+    if (!n.done && bi.beat - n.beat > 0.45) {
+      n.done = true;
+      n.el.classList.add('missed');
+      game.combo = 0;
+      setJudge('Verpasst 😅', 'miss');
+      updHud();
+    }
+  }
+  const last = game.notes[game.notes.length - 1].beat;
+  if (bi.beat > last + 2) finishGame();
+}
+
+function finishGame() {
+  const g = game;
+  game = null;
+  const pct = g.hits / g.total;
+  const stars = pct >= 0.9 ? 3 : pct >= 0.6 ? 2 : pct >= 0.3 ? 1 : 0;
+  let best = 0;
+  try { best = +localStorage.getItem('tokiboki-dj-best') || 0; } catch (e) { /* egal */ }
+  const record = g.score > best;
+  if (record) try { localStorage.setItem('tokiboki-dj-best', g.score); } catch (e) { /* egal */ }
+  const r = root.querySelector('.rresult');
+  r.innerHTML = `<h2>${stars === 3 ? 'DJ-Legende! 🏆' : stars === 2 ? 'Super Show! 🎉' : stars === 1 ? 'Nicht schlecht! 🎧' : 'Nochmal? 💪'}</h2>
+    <div class="rstars">${[1, 2, 3].map((k) => `<span class="${k <= stars ? 'on' : ''}">⭐</span>`).join('')}</div>
+    <p><b>${g.score}</b> Punkte · ${g.hits}/${g.total} getroffen · beste Kombo ${g.best}</p>
+    ${record ? '<p class="rrec">🎉 Neuer Rekord!</p>' : `<p>Rekord: ${Math.max(best, g.score)}</p>`}
+    <div><button class="rb again">Nochmal</button><button class="rb quit">Fertig</button></div>`;
+  r.classList.remove('hidden');
+  r.querySelector('.again').addEventListener('click', startGame);
+  r.querySelector('.quit').addEventListener('click', endGame);
+  sfx.trumpet();
+  if (stars >= 2) onFx('feuerwerk');
+}
+
+function endGame() {
+  game = null;
+  root.querySelector('.rgame').classList.add('hidden');
+  document.body.classList.remove('rgame-open');
+}
+
 const angles = [0, 0];
 function frame() {
+  gameFrame();
   if (root && !root.classList.contains('hidden')) {
     decks.forEach((d, k) => {
       const el = root.querySelector(`.deck[data-d="${k}"]`);
@@ -326,6 +476,7 @@ export function open() {
 }
 
 export function close() {
+  endGame();
   root.classList.add('hidden');
   document.body.classList.remove('dj-open');
   onClose();

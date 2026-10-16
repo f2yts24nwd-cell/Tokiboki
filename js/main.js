@@ -299,6 +299,9 @@ function dropTarget(o) {
     else if (o.y - s.y <= snap && (!above || s.y > above.y)) above = s;
   }
   const floor = { x1: 0, x2: SC[o.sc].W, y: FLOOR, floor: true };
+  // Im Schwimmbecken gehen Gegenstände nicht unter, sie schwimmen oben
+  const pool = SC[o.sc].pool;
+  if (pool && o.t === 'i' && o.x >= pool.x1 && o.x <= pool.x2 && o.y > 600) return SC[o.sc].surfaces.find((s) => s.items);
   if (!below || below.y > FLOOR) below = floor;
   if (o.y > FLOOR) return floor;
   if (above && (o.y - above.y) <= (below.y - o.y) + (below.floor ? 24 : 0)) return above;
@@ -442,6 +445,7 @@ function swingClass(seat, on, c) {
 
 function leaveSeat(c) {
   const seat = SEATS[c.seat];
+  if (c.order || c.wish) { c.order = null; c.wish = null; const b = sceneEls[c.sc].fx.querySelector(`.order[data-id="${c.id}"]`); if (b) b.remove(); }
   c.seat = null;
   c._slide = null;
   if (seat && seat.toilet && c._pooped) {
@@ -674,7 +678,7 @@ function useTool(c, it, tool) {
       sfx.click(); setTimeout(sfx.click, 120); setTimeout(sfx.click, 240);
       break;
     }
-    case 'haircolor': L.hc = pick(others(A.HAIR_COLORS, L.hc)); sfx.splash(); break;
+    case 'haircolor': L.hc = A.HAIR_COLORS[(A.HAIR_COLORS.indexOf(L.hc) + 1) % A.HAIR_COLORS.length]; sfx.splash(); break;
     case 'shirt': L.style = pick(['tshirt', 'streifen', 'pulli']); L.shirt = pick(others(A.CLOTH_COLORS, L.shirt)); sfx.whoosh(); break;
     case 'dress': L.style = 'kleid'; L.shirt = pick(others(A.CLOTH_COLORS, L.shirt)); sfx.whoosh(); break;
     case 'pants': if (L.style === 'kleid') L.style = 'tshirt'; L.pants = pick(others(A.CLOTH_COLORS, L.pants)); sfx.whoosh(); break;
@@ -702,7 +706,7 @@ function applyToChar(it, c) {
     startFall(it, 160, -400);
     return true;
   }
-  if (inf.food || inf.drink) { eat(c, it); return true; }
+  if (inf.food || inf.drink) { serve(c, it.k); eat(c, it); return true; }
   if (inf.hat) { wear(c, it, 'hat', inf.hat, HAT_EMOJI); return true; }
   if (inf.glasses) { wear(c, it, 'glasses', inf.glasses, GLASS_EMOJI); return true; }
   if (inf.tool) { useTool(c, it, inf.tool); return true; }
@@ -782,7 +786,7 @@ function tapProp(id) {
   const p = PROPS[id];
   const st = state.props[id];
   const e = sceneEls[p.sc].propEls[id];
-  if (!['dj', 'bell', 'confetti', 'swing', 'deco'].includes(p.kind)) remember();
+  if (!['dj', 'bell', 'confetti', 'swing', 'deco', 'quiz', 'animals', 'dive'].includes(p.kind)) remember();
   switch (p.kind) {
     case 'toggle':
       st.on = !st.on;
@@ -889,6 +893,10 @@ function tapProp(id) {
       if (kid) bubble(kid, pick(['Fütterungszeit! 🥕', 'Die Tiere haben Hunger! 🍌']));
       break;
     }
+    case 'quiz':
+      propBump(e);
+      openQuiz();
+      break;
     case 'dj':
       DJ.open();
       sfx.pop();
@@ -1105,6 +1113,7 @@ function tick() {
   checkSupport(sc);
   dayCycle(false);
   weatherTick();
+  gameTick();
   if (state.props.radio.on && sc === 'haus' && tickN % 2 === 0) burst('haus', 680, 220, pick(['🎵', '🎶']), 1, 'up');
   for (const o of objs) {
     if (o.sc !== sc) continue;
@@ -2182,6 +2191,157 @@ async function photoPNG(ph) {
 $('#bPhoto').addEventListener('click', takePhoto);
 $('#bAlbum').addEventListener('click', openAlbum);
 
+// ---------------- Mini-Spiele: Café-Bestellungen & Friseur-Wünsche ----------------
+const CAFE_MENU = ['☕', '🥐', '🍰', '🧁', '🍩', '🍪', '🧃', '🥛'];
+const COLOR_NAMES = { '#3b2416': 'braune', '#111111': 'schwarze', '#f2c94c': 'blonde', '#c8501e': 'rote', '#ff7eb6': 'rosa', '#4f8cff': 'blaue', '#9b5de5': 'lila', '#2ec4b6': 'türkise', '#eeeeee': 'weiße' };
+function games() {
+  if (!state.games) state.games = { cafe: 0, friseur: 0, quiz: 0 };
+  return state.games;
+}
+function seatOf(c) {
+  return c.seat && SEATS[c.seat];
+}
+function orderBubble(c) {
+  const fx = sceneEls[c.sc].fx;
+  let b = fx.querySelector(`.order[data-id="${c.id}"]`);
+  const want = c.order || c.wish;
+  if (!want || c._stored) { if (b) b.remove(); return; }
+  if (!b) {
+    b = div('order');
+    b.dataset.id = c.id;
+    fx.append(b);
+  }
+  if (c.order) b.innerHTML = `<small>Bestellung</small>${c.order.map((k) => `<span>${k}</span>`).join('')}`;
+  else {
+    const w = c.wish;
+    const prev = w.key === 'hc' ? `<i class="sw" style="background:${w.value === 'rainbow' ? 'linear-gradient(135deg,#ff595e,#ffca3a,#8ac926,#1982c4)' : w.value}"></i>` :
+      miniSVG({ ...c.look, hair: w.value, hat: '' }, '-12 -40 144 150', 54);
+    b.innerHTML = `<small>${w.key === 'hc' ? 'Ich möchte ' + (COLOR_NAMES[w.value] || 'diese') + ' Haare!' : 'Ich möchte diese Frisur!'}</small>${prev}`;
+  }
+  const head = localToWorld(c, 60, -10);
+  box(b, head.x, head.y);
+}
+function clearWant(c) {
+  c.order = null;
+  c.wish = null;
+  orderBubble(c);
+}
+function gameTick() {
+  for (const c of Object.values(state.objs)) {
+    if (c.t !== 'c') continue;
+    const st = seatOf(c);
+    if ((c.order && (!st || !st.order)) || (c.wish && (!st || !st.wish))) { clearWant(c); continue; }
+    if (st && c.sc === state.scene && !c.order && !c.wish) {
+      if (st.order && Math.random() < 0.12) {
+        c.order = Array.from({ length: Math.random() < 0.5 ? 1 : 2 }, () => pick(CAFE_MENU));
+        bubble(c, pick(['Ich hätte gern …', 'Hallo! Bestellung bitte!', 'Hunger! 😋']));
+        sfx.ding();
+      } else if (st.wish && Math.random() < 0.12) {
+        c.wish = Math.random() < 0.5
+          ? { key: 'hc', value: pick(A.HAIR_COLORS.filter((x) => x !== c.look.hc)) }
+          : { key: 'hair', value: pick(A.HAIR_STYLES.filter((h) => h[0] !== c.look.hair))[0] };
+        sfx.ding();
+      }
+    }
+    if (c.wish && c.look[c.wish.key] === c.wish.value) {
+      clearWant(c);
+      games().friseur++;
+      celebrate(c, '💇 Wunsch erfüllt!', games().friseur);
+    }
+    if (c.order || c.wish) orderBubble(c);
+  }
+}
+function celebrate(c, text, n) {
+  bubble(c, pick(['Danke! 😍', 'Super, danke!', 'Perfekt! ⭐', 'Lecker! 😋']));
+  setMood(c, 'happy', 2000);
+  bump(c, 'jump');
+  burst(c.sc, c.x, c.y - 200, pick(['⭐', '🪙', '💖']), 8);
+  festConfetti(c.sc, c.x, c.y - 160, 26);
+  sfx.coin();
+  setTimeout(sfx.sparkle, 200);
+  toast(`${text} (${n})`);
+  save();
+}
+// wird beim Essen aufgerufen: Gehört das zur Bestellung?
+function serve(c, k) {
+  if (!c.order) return;
+  const i = c.order.indexOf(k);
+  if (i < 0) { setTimeout(() => bubble(c, 'Das hab ich gar nicht bestellt 😄'), 900); return; }
+  c.order.splice(i, 1);
+  if (!c.order.length) {
+    c.order = null;
+    orderBubble(c);
+    games().cafe++;
+    setTimeout(() => celebrate(c, '☕ Bestellung erledigt!', games().cafe), 800);
+  } else orderBubble(c);
+}
+
+// ---------------- Mini-Spiel: Schul-Quiz der 4A ----------------
+let quiz = null;
+function openQuiz() {
+  unlock();
+  closeDrawer();
+  closeModals();
+  const qs = [];
+  for (const w of Learn.randomWords(3)) {
+    const others = Learn.randomWords(6).map((x) => x.de).filter((d) => d !== w.de);
+    qs.push({ q: `Was heißt <b>„${w.en}“</b>?`, emo: '🇬🇧', say: w.en, right: w.de, opts: [w.de, ...others.slice(0, 2)].sort(() => Math.random() - 0.5) });
+  }
+  for (let k = 0; k < 2; k++) {
+    const a = 2 + Math.floor(Math.random() * 8), b = 2 + Math.floor(Math.random() * 8);
+    const r = a * b;
+    const opts = new Set([r]);
+    while (opts.size < 3) opts.add(r + pick([-a, a, -b, b, 1, -1, 10]));
+    qs.push({ q: `Wie viel ist <b>${a} · ${b}</b>?`, emo: '🧮', right: String(r), opts: [...opts].map(String).sort(() => Math.random() - 0.5) });
+  }
+  quiz = { qs: qs.sort(() => Math.random() - 0.5), i: 0, ok: 0 };
+  renderQuiz();
+  $('#quiz').classList.remove('hidden');
+  sfx.ring();
+}
+function renderQuiz() {
+  const c = $('#quiz .quizc');
+  if (quiz.i >= quiz.qs.length) {
+    const ok = quiz.ok;
+    const stars = ok === 5 ? 2 : ok >= 3 ? 1 : 0;
+    if (stars) Learn.addStars(stars);
+    const nb = ok === 5 ? Learn.checkBadges(['quiz']) : [];
+    games().quiz = Math.max(games().quiz, ok);
+    save();
+    $('#bLearn .nbadge').textContent = '⭐' + Learn.stars();
+    c.innerHTML = `<h2>${ok === 5 ? 'Klassenbeste! 🏆' : ok >= 3 ? 'Gut gemacht! 👏' : 'Übung macht den Meister! 🌱'}</h2>
+      <p class="qbig">${ok} von 5 richtig</p>${stars ? `<p class="qstar">+${stars} ⭐</p>` : ''}
+      ${nb.map((b) => `<p class="qstar">${b.icon} Neues Abzeichen: ${b.name}</p>`).join('')}
+      <button class="btn" data-q="again">Nochmal</button><button class="btn primary" data-q="close">Fertig</button>`;
+    sfx.trumpet();
+    if (ok >= 3) for (const k of Object.values(state.objs)) if (k.t === 'c' && k.sc === 'schule') { bump(k, 'jump'); setMood(k, 'happy', 2000); }
+    festConfetti('schule', state.scroll.schule + VW / 2, 200, ok * 10);
+    return;
+  }
+  const q = quiz.qs[quiz.i];
+  c.innerHTML = `<div class="qtop"><span>Frage ${quiz.i + 1}/5</span><span>${'✅'.repeat(quiz.ok)}</span></div>
+    <div class="qemo">${q.emo}</div><h2>${q.q}</h2>${q.say ? `<button class="lspeak" data-q="say">🔊</button>` : ''}
+    <div class="qopts">${q.opts.map((o) => `<button class="lopt" data-a="${encodeURIComponent(o)}">${o}</button>`).join('')}</div>`;
+  if (q.say) Learn.sayEnglish(q.say);
+}
+$('#quiz').addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b || !quiz) return;
+  if (b.dataset.q === 'close') { $('#quiz').classList.add('hidden'); quiz = null; return; }
+  if (b.dataset.q === 'again') { openQuiz(); return; }
+  if (b.dataset.q === 'say') { Learn.sayEnglish(quiz.qs[quiz.i].say); return; }
+  if (b.dataset.a == null || quiz.lock) return;
+  const q = quiz.qs[quiz.i];
+  const ok = decodeURIComponent(b.dataset.a) === q.right;
+  quiz.lock = true;
+  b.classList.add(ok ? 'right' : 'wrong');
+  if (!ok) $('#quiz .quizc').querySelectorAll('.lopt').forEach((x) => { if (decodeURIComponent(x.dataset.a) === q.right) x.classList.add('right'); });
+  if (ok) { quiz.ok++; sfx.ding(); } else sfx.boing();
+  const kids = Object.values(state.objs).filter((k) => k.t === 'c' && k.sc === 'schule' && k.seat && k.seat !== 'schule:lehrer');
+  if (kids.length) { const k = pick(kids); bubble(k, ok ? pick(['Richtig! 🙌', 'Juhu! ✅', 'Gewusst! 💡']) : pick(['Oh nein! 🙈', 'Hmm … 🤔'])); bump(k, ok ? 'jump' : 'wiggle'); }
+  setTimeout(() => { quiz.lock = false; quiz.i++; renderQuiz(); }, ok ? 700 : 1400);
+});
+
 // ---------------- Rückgängig ----------------
 const undoStack = [];
 function snapshot() {
@@ -2295,6 +2455,7 @@ const TUT = [
   ['🗺️🏠🎡', 'Orte wechseln', 'Unten in der Leiste wechselst du den Ort. Zieh etwas auf einen Ort, dann nimmst du es mit. Im 🗑️ wird es weggeworfen.'],
   ['🧺🔍', 'Die Kiste', 'In der Kiste findest du hunderte Sachen – mit der Suche ganz schnell.'],
   ['↩️📸', 'Zurück & Fotos', 'Oben links holst du Weggeworfenes zurück. Mit 📸 machst du Fotos für dein Album.'],
+  ['☕💇🎧', 'Mini-Spiele', 'Im Café bestellen Gäste etwas, beim Friseur gibt es Wünsche, am DJ-Pult wartet ein Rhythmus-Spiel und in der Schule ein Quiz.'],
   ['🎓⭐', 'Lernen & Freischalten', 'Löse Vokabel-Lektionen, sammle Sterne und schalte coole Sachen frei!'],
 ];
 let tutI = 0;

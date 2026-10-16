@@ -118,6 +118,22 @@ export function stars() {
   return L.stars;
 }
 
+export function addStars(n) {
+  ensureState();
+  L.stars += n;
+  api.save();
+}
+
+/** Ein paar zufällige Vokabeln (für das Schul-Quiz) */
+export function randomWords(n) {
+  const all = UNITS.flatMap((u) => u.words.filter((w) => !u.hint));
+  return shuffle(all).slice(0, n).map((w) => ({ en: enMain(w), de: w[1], emo: w[2], w }));
+}
+
+export function sayEnglish(t) {
+  speak(t);
+}
+
 export function isUnlocked(id) {
   ensureState();
   return L.unlocked.includes(id);
