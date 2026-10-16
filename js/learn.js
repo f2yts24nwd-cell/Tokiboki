@@ -16,7 +16,44 @@ export const REWARDS = [
   { id: 'fluegel', key: 'extra', value: 'fluegel', name: 'Engelsflügel', icon: '🪽', price: 6 },
   { id: 'jetpack', key: 'extra', value: 'jetpack', name: 'Jetpack', icon: '🚀', price: 8 },
   { id: 'glitzer', key: 'extra', value: 'glitzer', name: 'Glitzer-Aura', icon: '💫', price: 8 },
+  // Gegenstände für die Kiste (Tab „Belohnungen“)
+  { id: 'i-einhorn', key: 'item', value: '🦄', name: 'Einhorn', icon: '🦄', price: 5 },
+  { id: 'i-panda', key: 'item', value: '🐼', name: 'Panda zum Mitnehmen', icon: '🐼', price: 3 },
+  { id: 'i-drache', key: 'item', value: '🐉', name: 'Drache', icon: '🐉', price: 7 },
+  { id: 'i-rakete', key: 'item', value: '🚀', name: 'Rakete zum Mitfliegen', icon: '🚀', price: 8 },
+  { id: 'i-ufo', key: 'item', value: '🛸', name: 'Ufo', icon: '🛸', price: 9 },
+  { id: 'i-pokal', key: 'item', value: '🏆', name: 'Goldener Pokal', icon: '🏆', price: 4 },
+  { id: 'i-disco', key: 'item', value: '🪩', name: 'Discokugel', icon: '🪩', price: 4 },
+  { id: 'i-wal', key: 'item', value: '🐳', name: 'Wal fürs Freibad', icon: '🐳', price: 6 },
 ];
+
+/** Abzeichen (Erfolge) */
+export const BADGES = [
+  { id: 'first', icon: '🐣', name: 'Erste Lektion', desc: 'Schließe deine erste Lektion ab' },
+  { id: 'ten', icon: '📚', name: 'Bücherwurm', desc: '10 Lektionen geschafft' },
+  { id: 'fifty', icon: '🏅', name: 'Vokabel-Profi', desc: '50 Lektionen geschafft' },
+  { id: 'perfect', icon: '💯', name: 'Fehlerfrei', desc: 'Eine Lektion ohne Fehler' },
+  { id: 'perfect5', icon: '🌟', name: 'Superstar', desc: '5 Lektionen ohne Fehler' },
+  { id: 'streak3', icon: '🔥', name: 'Dranbleiber', desc: '3 Tage hintereinander gelernt' },
+  { id: 'streak7', icon: '🚀', name: 'Eine Woche!', desc: '7 Tage hintereinander gelernt' },
+  { id: 'xp500', icon: '⚡', name: 'Blitzgescheit', desc: '500 XP gesammelt' },
+  { id: 'xp2000', icon: '🧠', name: 'Wortgenie', desc: '2000 XP gesammelt' },
+  { id: 'unit', icon: '👑', name: 'Unit-König', desc: 'Alle Wörter einer Unit sicher' },
+  { id: 'all', icon: '🗺️', name: 'Weltenbummler', desc: 'In jeder Unit eine Lektion' },
+  { id: 'review', icon: '🔁', name: 'Wiederholer', desc: 'Eine Wiederholung geschafft' },
+  { id: 'week', icon: '🎯', name: 'Wochenziel', desc: 'Ein Wochenziel erreicht' },
+  { id: 'speak', icon: '🎤', name: 'Sprechprofi', desc: '10 Wörter richtig ausgesprochen' },
+  { id: 'shop', icon: '🎁', name: 'Sammler', desc: 'Die erste Belohnung freigeschaltet' },
+  { id: 'quiz', icon: '🏫', name: 'Klassenbeste', desc: 'Das Schul-Quiz ohne Fehler' },
+];
+const WEEK_GOAL = 150;
+const BOX_DAYS = [0, 1, 2, 4, 7, 14];
+
+/** Für die Kiste: freigeschaltete Gegenstände */
+export function unlockedItems() {
+  ensureState();
+  return REWARDS.filter((r) => r.key === 'item' && L.unlocked.includes(r.id)).map((r) => r.value);
+}
 
 /** Welche Editor-Option gehört zu welcher Belohnung? */
 export function rewardFor(key, value) {
@@ -39,6 +76,18 @@ const norm = (s) => s.toLowerCase().trim().replace(/\s+/g, ' ').replace(/[’']/
 const enMain = (w) => w[0].split('/')[0];
 const enAll = (w) => w[0].split('/').map(norm);
 const today = () => new Date().toISOString().slice(0, 10);
+const addDays = (d, n) => new Date(new Date(d).getTime() + n * 86400000).toISOString().slice(0, 10);
+function weekId() {
+  const d = new Date();
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - day);
+  const y0 = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+  return t.getUTCFullYear() + '-W' + Math.ceil(((t - y0) / 86400000 + 1) / 7);
+}
+const WU = new Map();
+UNITS.forEach((u) => u.words.forEach((w) => WU.set(w, u)));
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 let api; // { getState, save, sfx, unlock, mascot, onTry }
 let root;
@@ -58,6 +107,10 @@ function ensureState() {
   const st = api.getState();
   if (!st.learn) st.learn = { stars: 0, xp: 0, streak: 0, lastDay: '', unlocked: [], words: {}, lessons: {} };
   L = st.learn;
+  if (!L.badges) L.badges = [];
+  if (!L.perfect) L.perfect = 0;
+  if (!L.spoken) L.spoken = 0;
+  if (!L.week || L.week.id !== weekId()) L.week = { id: weekId(), xp: 0, done: false };
 }
 
 export function stars() {
@@ -71,7 +124,49 @@ export function isUnlocked(id) {
 }
 
 function wkey(u, w) {
-  return u.id + ':' + w[0];
+  return (WU.get(w) || u).id + ':' + w[0];
+}
+
+/** Wörter, die heute wiederholt werden sollten (Karteikasten-Prinzip) */
+function dueWords() {
+  const t = today();
+  const out = [];
+  for (const u of UNITS) for (const w of u.words) {
+    const r = L.words[wkey(u, w)];
+    if (r && (r.c || r.w) && (r.due || '') <= t) out.push(w);
+  }
+  return out;
+}
+
+function award(id) {
+  if (L.badges.includes(id)) return null;
+  L.badges.push(id);
+  return BADGES.find((b) => b.id === id);
+}
+
+/** Prüft alle Abzeichen und gibt die neuen zurück. */
+export function checkBadges(extra = []) {
+  ensureState();
+  const total = Object.values(L.lessons).reduce((a, b) => a + b, 0);
+  const got = [];
+  const tryA = (cond, id) => { if (cond) { const b = award(id); if (b) got.push(b); } };
+  tryA(total >= 1, 'first');
+  tryA(total >= 10, 'ten');
+  tryA(total >= 50, 'fifty');
+  tryA(L.perfect >= 1, 'perfect');
+  tryA(L.perfect >= 5, 'perfect5');
+  tryA(streakAlive() >= 3, 'streak3');
+  tryA(streakAlive() >= 7, 'streak7');
+  tryA(L.xp >= 500, 'xp500');
+  tryA(L.xp >= 2000, 'xp2000');
+  tryA(UNITS.some((u) => known(u) === u.words.length), 'unit');
+  tryA(UNITS.every((u) => L.lessons[u.id]), 'all');
+  tryA((L.lessons.review || 0) >= 1, 'review');
+  tryA(L.week.done, 'week');
+  tryA(L.spoken >= 10, 'speak');
+  tryA(L.unlocked.length >= 1, 'shop');
+  for (const id of extra) tryA(true, id);
+  return got;
 }
 
 function known(u) {
@@ -91,6 +186,7 @@ export function open(which = 'path') {
 }
 
 function close() {
+  stopMic();
   root.classList.add('hidden');
   document.body.classList.remove('learn-open');
   stopSpeech();
@@ -109,14 +205,21 @@ function header() {
     <div class="lstat"><span class="fire">🔥</span><b>${streakAlive()}</b><i>Tage</i></div>
     <div class="lstat"><span>⭐</span><b>${L.stars}</b><i>Sterne</i></div>
     <div class="lstat"><span>⚡</span><b>${L.xp}</b><i>XP</i></div>
+    <div class="lweek" title="Wochenziel"><span>🎯</span><div><i>Wochenziel ${Math.min(L.week.xp, WEEK_GOAL)}/${WEEK_GOAL} XP</i><div class="lbar"><i style="width:${Math.min(100, (L.week.xp / WEEK_GOAL) * 100)}%;--c:#ff9600"></i></div></div></div>
   </div>
-  <div class="ltabs"><button class="ltab${tab === 'path' ? ' sel' : ''}" data-act="tab" data-tab="path">📚 Lernen</button><button class="ltab${tab === 'shop' ? ' sel' : ''}" data-act="tab" data-tab="shop">🎁 Belohnungen</button></div>`;
+  <div class="ltabs"><button class="ltab${tab === 'path' ? ' sel' : ''}" data-act="tab" data-tab="path">📚 Lernen</button><button class="ltab${tab === 'shop' ? ' sel' : ''}" data-act="tab" data-tab="shop">🎁 Belohnungen</button><button class="ltab${tab === 'badges' ? ' sel' : ''}" data-act="tab" data-tab="badges">🏅 Abzeichen <small>${L.badges.length}/${BADGES.length}</small></button></div>`;
 }
 
 function renderHub() {
   let body = '';
   if (tab === 'path') {
-    body = `<div class="lpath">${UNITS.map((u, i) => {
+    const due = dueWords().length;
+    const review = `<div class="lunit lreview" style="--c:#ce82ff;--off:0px">
+        <button class="lnode" data-act="review"><span>🔁</span>${L.lessons.review ? `<em>👑${Math.min(5, L.lessons.review)}</em>` : ''}</button>
+        <div class="linfo"><b>Wiederholen</b><small>${due ? `${due} Wort${due === 1 ? '' : 'e'} warten auf dich – so bleiben sie im Kopf!` : 'Alles frisch im Kopf! Morgen gibt es neue Wiederholungen.'}</small></div>
+        <button class="lgo${due ? '' : ' off'}" data-act="review">${due ? 'Los! ▶' : '✓'}</button>
+      </div>`;
+    body = `<div class="lpath">${review}${UNITS.map((u, i) => {
       const k = known(u);
       const done = L.lessons[u.id] || 0;
       const pct = Math.round((k / u.words.length) * 100);
@@ -127,16 +230,22 @@ function renderHub() {
         <button class="lgo" data-act="start" data-unit="${u.id}">Los! ▶</button>
       </div>`;
     }).join('')}</div>`;
+  } else if (tab === 'badges') {
+    body = `<p class="lshopinfo">Sammle alle Abzeichen! 🏅</p><div class="lbadges">${BADGES.map((b) => {
+      const have = L.badges.includes(b.id);
+      return `<div class="lbadge${have ? ' have' : ''}"><span>${have ? b.icon : '🔒'}</span><b>${b.name}</b><small>${b.desc}</small></div>`;
+    }).join('')}</div>`;
   } else {
     const look = api.previewLook();
     body = `<p class="lshopinfo">Löse Lektionen und sammle ⭐ – damit schaltest du coole Sachen für deine Figuren frei!</p>
     <div class="lshop">${REWARDS.map((r) => {
       const have = L.unlocked.includes(r.id);
       const can = L.stars >= r.price;
+      const prev = r.key === 'item' ? `<span class="litem">${r.value}</span>` : charSVG({ ...look, [r.key]: r.value }, false).replace('viewBox="0 0 120 210" width="120" height="210"', 'viewBox="-20 -60 160 280" width="110" height="150"');
       return `<div class="lreward${have ? ' have' : ''}">
-        <div class="lprev">${charSVG({ ...look, [r.key]: r.value }, false).replace('viewBox="0 0 120 210" width="120" height="210"', 'viewBox="-20 -60 160 280" width="110" height="150"')}</div>
+        <div class="lprev">${prev}</div>
         <b>${r.icon} ${r.name}</b>
-        ${have ? `<button class="lbuy try" data-act="try" data-id="${r.id}">Anziehen</button>`
+        ${have ? `<button class="lbuy try" data-act="try" data-id="${r.id}">${r.key === 'item' ? 'In die Welt' : 'Anziehen'}</button>`
         : `<button class="lbuy${can ? '' : ' no'}" data-act="buy" data-id="${r.id}">${can ? 'Freischalten' : '🔒'} · ${r.price} ⭐</button>`}
       </div>`;
     }).join('')}</div>`;
@@ -157,7 +266,8 @@ function pickWords(u, n) {
 }
 
 function buildLesson(u) {
-  const words = pickWords(u, 6);
+  const words = u.review ? u.words.slice(0, 6) : pickWords(u, 6);
+  while (words.length < 6) words.push(words[words.length % Math.max(1, words.length)] || u.pool[0]);
   const single = words.filter((w) => !enMain(w).includes(' ') && enMain(w).length <= 11);
   const canSpeak = 'speechSynthesis' in window;
   const ex = [];
@@ -169,18 +279,34 @@ function buildLesson(u) {
   ex.push(single[1] ? { t: 'type', w: single[1] } : { t: 'de2en', w: words[3] });
   ex.push({ t: 'de2en', w: words[4] });
   ex.push(single[2] ? { t: 'tiles', w: single[2] } : { t: 'en2de', w: words[5] });
+  if (SR && !L.noMic && Math.random() < 0.7) ex.splice(5, 0, { t: 'speak', w: words[Math.floor(Math.random() * 6)] });
   return { u, ex, i: 0, mistakes: 0, correct: 0, requeued: 0, answered: false };
 }
 
+function reviewUnit() {
+  let words = shuffle(dueWords());
+  if (words.length < 4) {
+    const seen = [];
+    for (const u of UNITS) for (const w of u.words) { const r = L.words[wkey(u, w)]; if (r) seen.push({ w, s: r.c - r.w * 2 }); }
+    seen.sort((a, b) => a.s - b.s);
+    for (const x of seen) if (words.length < 6 && !words.includes(x.w)) words.push(x.w);
+  }
+  if (!words.length) return null;
+  words = words.slice(0, 6);
+  const pool = [...new Set(words.flatMap((w) => WU.get(w).words))];
+  return { id: 'review', title: 'Wiederholen', icon: '🔁', color: '#ce82ff', words, pool, review: true };
+}
+
 function startLesson(uid) {
-  const u = UNITS.find((x) => x.id === uid);
+  const u = uid === 'review' ? reviewUnit() : UNITS.find((x) => x.id === uid);
+  if (!u) { api.sfx.boing(); flashMsg('Mach erst ein paar Lektionen – dann gibt es was zu wiederholen!'); return; }
   lesson = buildLesson(u);
   api.sfx.whooshUp ? api.sfx.whooshUp() : api.sfx.whoosh();
   renderEx();
 }
 
 function distractors(u, w, n, field) {
-  const pool = u.words.filter((x) => x !== w).map((x) => (field === 'en' ? enMain(x) : x[1]));
+  const pool = (u.pool || u.words).filter((x) => x !== w).map((x) => (field === 'en' ? enMain(x) : x[1]));
   return shuffle([...new Set(pool)]).slice(0, n);
 }
 
@@ -197,6 +323,80 @@ function speak(text) {
     s.speak(ut);
   } catch (e) { /* keine Sprachausgabe */ }
 }
+let rec = null;
+function stopMic() {
+  try { if (rec) rec.abort(); } catch (e) { /* egal */ }
+  rec = null;
+}
+function listenMic(btn) {
+  if (!SR) return;
+  stopSpeech();
+  stopMic();
+  const e = lesson.ex[lesson.i];
+  const heard = root.querySelector('.lheard');
+  try {
+    rec = new SR();
+    rec.lang = 'en-GB';
+    rec.interimResults = false;
+    rec.maxAlternatives = 5;
+  } catch (err) {
+    heard.textContent = 'Das Mikrofon geht hier leider nicht.';
+    return;
+  }
+  btn.classList.add('on');
+  heard.textContent = 'Ich höre zu … 👂';
+  let done = false;
+  rec.onresult = (ev) => {
+    done = true;
+    const alts = [...ev.results[0]].map((a) => norm(a.transcript.replace(/[.!?,]/g, '')));
+    const target = enAll(e.w);
+    const ok = alts.some((a) => target.some((t) => a === t || a.includes(t) || (t.length > 4 && a.replace(/ /g, '') === t.replace(/ /g, ''))));
+    btn.classList.remove('on');
+    heard.innerHTML = `Ich habe gehört: <b>„${alts[0] || '…'}“</b>`;
+    if (ok) {
+      L.spoken++;
+      lesson.sel = e.right;
+      speakResult(true);
+    } else {
+      e.tries = (e.tries || 0) + 1;
+      if (e.tries >= 2) speakResult(false);
+      else { api.sfx.boing(); heard.innerHTML += '<br>Probier es nochmal! 💪'; }
+    }
+  };
+  rec.onerror = (ev) => {
+    btn.classList.remove('on');
+    if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') {
+      heard.textContent = 'Kein Zugriff aufs Mikrofon – du kannst die Übung überspringen.';
+      L.noMic = true;
+    } else heard.textContent = 'Nichts gehört – tipp nochmal aufs Mikrofon!';
+  };
+  rec.onend = () => { btn.classList.remove('on'); if (!done && heard.textContent.startsWith('Ich höre')) heard.textContent = 'Nichts gehört – tipp nochmal aufs Mikrofon!'; };
+  try { rec.start(); } catch (err) { btn.classList.remove('on'); }
+}
+function speakResult(ok) {
+  const e = lesson.ex[lesson.i];
+  lesson.answered = true;
+  record(e.w, ok);
+  const foot = root.querySelector('.lfoot');
+  const btn = root.querySelector('.lcheck');
+  root.querySelector('.lmic').disabled = true;
+  if (ok) {
+    lesson.correct++;
+    foot.classList.add('ok');
+    root.querySelector('.lfeedback').innerHTML = `<b>✓ ${rand(PRAISE)} Super ausgesprochen!</b>`;
+    api.sfx.ding();
+  } else {
+    foot.classList.add('bad');
+    root.querySelector('.lfeedback').innerHTML = `<b>Fast!</b><span>Hör es dir nochmal an: <strong>${enMain(e.w)}</strong></span>`;
+    api.sfx.boing();
+    speak(enMain(e.w));
+  }
+  btn.style.visibility = 'visible';
+  btn.disabled = false;
+  btn.textContent = 'WEITER';
+  api.save();
+}
+
 function stopSpeech() {
   try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) { /* egal */ }
 }
@@ -246,6 +446,13 @@ function renderEx() {
     q = 'Schreib es auf Englisch!';
     body = `<div class="lcard"><span class="lemo">${e.w[2]}</span><b>${e.w[1]}</b></div>
       <input class="linput" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Englisches Wort …">`;
+  } else if (e.t === 'speak') {
+    e.right = enMain(e.w);
+    q = 'Sprich nach! 🎤';
+    body = `<div class="lcard"><span class="lemo">${e.w[2]}</span><b>${enMain(e.w)}</b><button class="lspeak" data-act="say" data-say="${enMain(e.w)}">🔊</button></div>
+      <button class="lmic" data-act="mic">🎤<span>Tippen und sprechen</span></button><div class="lheard"></div>
+      <button class="lskip" data-act="skipmic">Ich kann gerade nicht sprechen</button>`;
+    setTimeout(() => speak(enMain(e.w)), 350);
   } else if (e.t === 'pairs') {
     q = 'Finde die Paare!';
     e.left = shuffle(e.ws.map((w) => ({ k: w[0], txt: enMain(w) })));
@@ -259,7 +466,7 @@ function renderEx() {
     <h2 class="lq">${q}</h2>
     <div class="lbody">${body}</div>
     ${L2.i === 0 ? mascotBubble(rand(['Los geht\'s! 🚀', 'Auf die Plätze, fertig, Englisch! 🇬🇧', 'Ich glaub an dich! 💪'])) : (L2.i === 4 ? mascotBubble(rand(CHEER)) : '')}
-    <div class="lfoot"><div class="lfeedback"></div><button class="lcheck" data-act="check" ${e.t === 'pairs' ? 'style="visibility:hidden"' : 'disabled'}>PRÜFEN</button></div>
+    <div class="lfoot"><div class="lfeedback"></div><button class="lcheck" data-act="check" ${e.t === 'pairs' || e.t === 'speak' ? 'style="visibility:hidden"' : 'disabled'}>PRÜFEN</button></div>
   </div>`;
   if (e.t === 'tiles') renderTiles();
   if (e.t === 'type') {
@@ -295,6 +502,8 @@ function record(w, ok) {
   const k = wkey(lesson.u, w);
   const r = L.words[k] || { c: 0, w: 0 };
   if (ok) r.c++; else r.w++;
+  r.box = ok ? Math.min(5, (r.box || 0) + 1) : 0;
+  r.due = addDays(today(), BOX_DAYS[r.box]);
   L.words[k] = r;
 }
 
@@ -338,6 +547,7 @@ function check() {
 }
 
 function next() {
+  stopMic();
   lesson.i++;
   if (lesson.i >= lesson.ex.length) return finish();
   renderEx();
@@ -350,12 +560,21 @@ function finish() {
   L.stars += earned;
   L.xp += xp;
   L.lessons[u.id] = (L.lessons[u.id] || 0) + 1;
+  if (lesson.mistakes === 0) L.perfect++;
+  L.week.xp += xp;
+  let weekBonus = false;
+  if (!L.week.done && L.week.xp >= WEEK_GOAL) {
+    L.week.done = true;
+    L.stars += 3;
+    weekBonus = true;
+  }
   const t = today();
   if (L.lastDay !== t) {
     const d = L.lastDay ? (new Date(t) - new Date(L.lastDay)) / 86400000 : 99;
     L.streak = d === 1 ? L.streak + 1 : 1;
     L.lastDay = t;
   }
+  const newBadges = checkBadges();
   api.save();
   api.sfx.trumpet();
   setTimeout(() => api.sfx.sparkle(), 500);
@@ -367,6 +586,8 @@ function finish() {
     <div class="lstars">${[1, 2, 3].map((n) => `<span class="${n <= earned ? 'on' : ''}" style="animation-delay:${n * 0.25}s">⭐</span>`).join('')}</div>
     <div class="lsum"><div><b>+${earned}</b><i>Sterne</i></div><div><b>+${xp}</b><i>XP</i></div><div><b>${acc}%</b><i>richtig</i></div><div><b>🔥 ${streakAlive()}</b><i>Tage-Serie</i></div></div>
     ${mascotBubble(earned === 3 ? 'Perfekt! Keinen einzigen Fehler! 🏆' : earned === 2 ? 'Richtig gut gemacht! 💪' : 'Übung macht den Meister! 🌱')}
+    ${weekBonus ? '<p class="lnew">🎯 Wochenziel geschafft! <b>+3 ⭐ Bonus</b></p>' : ''}
+    ${newBadges.map((b) => `<div class="lnewbadge"><span>${b.icon}</span><div><small>Neues Abzeichen!</small><b>${b.name}</b></div></div>`).join('')}
     ${affordable.length ? `<p class="lnew">Du kannst jetzt <b>${affordable[0].icon} ${affordable[0].name}</b> freischalten!</p>` : ''}
     <div class="lres-btns"><button class="lbig alt" data-act="again" data-unit="${u.id}">Noch eine Lektion</button><button class="lbig" data-act="tab" data-tab="shop">🎁 Belohnungen</button></div>
   </div>`;
@@ -383,6 +604,7 @@ function buy(id) {
   }
   L.stars -= r.price;
   L.unlocked.push(id);
+  checkBadges();
   api.save();
   api.sfx.sparkle();
   setTimeout(() => api.sfx.trumpet(), 300);
@@ -390,9 +612,9 @@ function buy(id) {
   root.innerHTML = `<div class="lwrap lresult">
     <div class="lconfetti">${Array.from({ length: 40 }, (_, i) => `<i style="--x:${Math.random() * 100}%;--d:${Math.random() * 1.2}s;--c:${['#ff595e', '#ffca3a', '#8ac926', '#1982c4', '#ff6fb5', '#9b5de5'][i % 6]}"></i>`).join('')}</div>
     <h1>Freigeschaltet! ${r.icon}</h1>
-    <div class="lunlock">${charSVG({ ...look, [r.key]: r.value }, false).replace('viewBox="0 0 120 210" width="120" height="210"', 'viewBox="-30 -70 180 300" width="220" height="300"')}</div>
-    <p class="lnew"><b>${r.name}</b> gibt es jetzt im Figuren-Editor.</p>
-    <div class="lres-btns"><button class="lbig alt" data-act="tab" data-tab="shop">Zurück zum Shop</button><button class="lbig" data-act="try" data-id="${r.id}">Gleich anziehen ✨</button></div>
+    <div class="lunlock">${r.key === 'item' ? `<span class="litem big">${r.value}</span>` : charSVG({ ...look, [r.key]: r.value }, false).replace('viewBox="0 0 120 210" width="120" height="210"', 'viewBox="-30 -70 180 300" width="220" height="300"')}</div>
+    <p class="lnew"><b>${r.name}</b> ${r.key === 'item' ? 'findest du jetzt in der Kiste unter ⭐.' : 'gibt es jetzt im Figuren-Editor.'}</p>
+    <div class="lres-btns"><button class="lbig alt" data-act="tab" data-tab="shop">Zurück zum Shop</button><button class="lbig" data-act="try" data-id="${r.id}">${r.key === 'item' ? 'Gleich ausprobieren ✨' : 'Gleich anziehen ✨'}</button></div>
   </div>`;
 }
 
@@ -412,6 +634,7 @@ function onClick(ev) {
   if (act === 'close') return close();
   if (act === 'tab') { tab = b.dataset.tab; api.sfx.click(); return renderHub(); }
   if (act === 'start' || act === 'again') return startLesson(b.dataset.unit);
+  if (act === 'review') return startLesson('review');
   if (act === 'quit') { lesson = null; stopSpeech(); api.sfx.click(); return renderHub(); }
   if (act === 'say') return speak(b.dataset.say);
   if (act === 'buy') return buy(b.dataset.id);
@@ -420,6 +643,13 @@ function onClick(ev) {
   const e = lesson.ex[lesson.i];
   if (act === 'check') return check();
   if (lesson.answered) return;
+  if (act === 'mic') return listenMic(b);
+  if (act === 'skipmic') {
+    stopMic();
+    lesson.ex.splice(lesson.i, 1);
+    if (lesson.i >= lesson.ex.length) return finish();
+    return renderEx();
+  }
   if (act === 'pick') {
     lesson.sel = decodeURIComponent(b.dataset.v);
     root.querySelectorAll('.lopt').forEach((x) => x.classList.toggle('sel', x === b));

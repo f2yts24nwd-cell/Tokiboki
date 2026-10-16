@@ -979,3 +979,31 @@ body.lite .scene .waves, body.lite .scene .caustic, body.lite .scene .slidewater
 @keyframes carR { from { transform: translateX(-150px); } to { transform: translateX(1950px); } }
 #map .waveg { animation: waves 2s linear infinite; }
 @keyframes plane { from { transform: translateX(-400px); } 60%, to { transform: translateX(2100px); } }
+
+/* ---------- Lernen: Wochenziel, Wiederholen, Abzeichen, Sprechen ---------- */
+.lweek { flex: 1; display: flex; align-items: center; gap: 8px; background: #fff7e6; border: 2px solid #ffd79a; border-radius: 16px; padding: 6px 12px; min-width: 0; }
+.lweek span { font-size: 24px; }
+.lweek > div { flex: 1; min-width: 0; }
+.lweek i { font-style: normal; font-size: 12px; font-weight: 800; color: #c77700; display: block; margin-bottom: 3px; white-space: nowrap; }
+.lweek .lbar { height: 10px; }
+.ltab small { font-size: 12px; color: #aaa; }
+.lreview { background: #faf0ff; border-color: #e8c7ff; }
+.lgo.off { background: #e5e5e5; color: #999; box-shadow: 0 5px 0 #cfcfcf; }
+.lbadges { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; padding: 10px 0 24px; }
+.lbadge { border: 2px solid #e5e5e5; border-bottom-width: 5px; border-radius: 20px; padding: 12px 8px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 4px; opacity: .55; }
+.lbadge.have { opacity: 1; border-color: #ffd79a; background: #fff7e6; }
+.lbadge span { font-size: 44px; }
+.lbadge b { font-size: 15px; }
+.lbadge small { font-size: 12px; color: #888; font-weight: 700; }
+.litem { font-size: 96px; line-height: 1; }
+.litem.big { font-size: 180px; display: inline-block; animation: popin .6s ease-out; }
+.lnewbadge { display: flex; align-items: center; gap: 14px; margin: 6px auto; padding: 10px 22px; border-radius: 20px; background: #fff7e6; border: 2px solid #ffd79a; animation: popin .5s ease-out; }
+.lnewbadge span { font-size: 48px; }
+.lnewbadge small { display: block; color: #c77700; font-weight: 800; }
+.lnewbadge b { font-size: 20px; }
+.lmic { width: 150px; height: 150px; border-radius: 50%; background: #ff4b4b; color: #fff; font-size: 64px; box-shadow: 0 8px 0 #c93a3a; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.lmic span { font-size: 13px; font-weight: 800; margin-top: 4px; }
+.lmic.on { animation: micpulse .8s ease-in-out infinite alternate; }
+@keyframes micpulse { from { box-shadow: 0 0 0 0 rgba(255, 75, 75, .5), 0 8px 0 #c93a3a; } to { box-shadow: 0 0 0 26px rgba(255, 75, 75, 0), 0 8px 0 #c93a3a; } }
+.lheard { min-height: 26px; font-size: 18px; font-weight: 700; color: #777; text-align: center; }
+.lskip { color: #1cb0f6; font-weight: 800; font-size: 15px; text-decoration: underline; }

@@ -1368,12 +1368,14 @@ const drawer = $('#drawer');
 let drawerTab = 0;
 function drawerCats() {
   const cats = A.DRAWER.slice();
+  const won = Learn.unlockedItems();
+  if (won.length) cats.push(['⭐', 'Belohnungen', won]);
   cats.push(['⏱️', 'Zuletzt', (state.recent || []).slice()]);
   cats.push(['🔍', 'Suchen', null]);
   return cats;
 }
 function allDrawerItems() {
-  return [...new Set(A.DRAWER.flatMap((c) => c[2]))];
+  return [...new Set(A.DRAWER.flatMap((c) => c[2]).concat(Learn.unlockedItems()))];
 }
 function addRecent(k) {
   state.recent = [k, ...(state.recent || []).filter((x) => x !== k)].slice(0, 24);
@@ -1385,7 +1387,7 @@ function renderDrawer() {
   tabs.innerHTML = '';
   cats.forEach(([icon, name], i) => {
     const b = document.createElement('button');
-    b.className = 'tab' + (i === drawerTab ? ' sel' : '') + (i >= A.DRAWER.length ? ' mini' : '');
+    b.className = 'tab' + (i === drawerTab ? ' sel' : '') + (i >= cats.length - 2 ? ' mini' : '');
     b.innerHTML = `<b>${icon}</b><i>${name}</i>`;
     b.addEventListener('click', () => { drawerTab = i; sfx.click(); renderDrawer(); });
     tabs.append(b);
@@ -2395,6 +2397,14 @@ function init() {
       return A.charSVG(c ? c.look : A.randomLook(), false).replace('viewBox="0 0 120 210" width="120" height="210"', 'viewBox="-10 -30 140 170" width="90" height="110"');
     },
     onTry: (r) => {
+      if (r.key === 'item') {
+        remember();
+        const o = spawnItem(state.scene, r.value, state.scroll[state.scene] + VW / 2, 200, 0, -200);
+        burst(o.sc, o.x, 240, '✨', 12);
+        sfx.sparkle();
+        updateLearnBadge();
+        return;
+      }
       const c = anyChar();
       if (!c) return;
       if (c.sc !== state.scene) switchScene(c.sc, true);
