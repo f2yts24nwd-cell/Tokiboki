@@ -893,3 +893,36 @@ input { -webkit-user-select: text; user-select: text; touch-action: manipulation
 #drawer .tab b { font-size: 24px; }
 #drawer .tab i { font-size: 11px; }
 #drawer .tab.mini { flex: 0 0 54px; }
+
+/* ---------- Wetter ---------- */
+#weather { position: fixed; inset: 0; pointer-events: none; z-index: 18; display: none; overflow: hidden; }
+body.wx-out #weather, body.map-open #weather { display: block; }
+body.map-open #weather { z-index: 36; }
+body.learn-open #weather, body.dj-open #weather { display: none; }
+.wxl { position: absolute; left: 0; right: 0; top: -300px; bottom: 0; display: none; will-change: transform; }
+body[data-wx="rain"] .rain, body[data-wx="snow"] .snow { display: block; }
+.rain { animation: wxfall .42s linear infinite; }
+.rain.r2 { background-size: 200px 200px; animation-duration: .62s; opacity: .55; top: -200px; }
+.snow { animation: wxsnow 6s linear infinite; }
+.snow.s2 { background-size: 190px 190px; animation-duration: 9s; opacity: .7; top: -190px; }
+.rain.r2 { animation-name: wxfall2; }
+.snow.s2 { animation-name: wxsnow2; }
+@keyframes wxfall { to { transform: translate(-40px, 300px); } }
+@keyframes wxfall2 { to { transform: translate(-28px, 200px); } }
+@keyframes wxsnow { 0% { transform: translate(0, 0); } 50% { transform: translate(24px, 150px); } 100% { transform: translate(0, 300px); } }
+@keyframes wxsnow2 { 0% { transform: translate(0, 0); } 50% { transform: translate(-20px, 95px); } 100% { transform: translate(0, 190px); } }
+.rainbow { position: absolute; left: 50%; top: 2%; width: min(900px, 90vw); transform: translateX(-50%); display: none; animation: popin 1s ease-out; }
+body[data-wx="rainbow"] .rainbow { display: block; }
+body.wx-out[data-wx="rain"] #stage .scene.active .bg { filter: brightness(.78) saturate(.8); }
+body.wx-out[data-wx="snow"] #stage .scene.active .bg { filter: brightness(.95) saturate(.75) hue-rotate(-8deg); }
+body.map-open[data-wx="rain"] #map svg { filter: brightness(.82) saturate(.8); }
+.scene.wx-snow .layer.bg::after { content: ''; position: absolute; left: 0; right: 0; top: 686px; height: 44px; background: linear-gradient(#fff, #e3f0ff); border-radius: 30px 30px 0 0; box-shadow: 0 -2px 8px rgba(255, 255, 255, .8); }
+body.lite .wxl.r2, body.lite .wxl.s2 { display: none !important; }
+
+/* ---------- Haustiere & Fahrzeuge ---------- */
+.o.i.flip > span { scale: -1 1; }
+
+.o.i.walk > span { animation: petwalk .3s ease-in-out infinite alternate; }
+@keyframes petwalk { from { translate: 0 0; rotate: -4deg; } to { translate: 0 -12px; rotate: 4deg; } }
+.o.i.driving > span { animation: drivebob .16s ease-in-out infinite alternate; }
+@keyframes drivebob { from { translate: 0 0; } to { translate: 0 -4px; } }

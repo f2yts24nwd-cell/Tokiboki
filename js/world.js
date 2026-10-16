@@ -1066,7 +1066,7 @@ export const SCENES = [
     zones: OFFICES.flatMap((d, i) => [{ kind: 'desk', seat: `buero:${i}a`, prop: `mon${i}a` }, { kind: 'desk', seat: `buero:${i}b`, prop: `mon${i}b` }]),
   },
   {
-    id: 'festival', name: 'Festival', icon: '🎡', W: 3000, ceil: 90, dusk: true, bg: festivalBG(), props: festivalProps, fg: festivalFG,
+    id: 'festival', name: 'Festival', icon: '🎡', W: 3000, ceil: 90, dusk: true, outdoor: true, bg: festivalBG(), props: festivalProps, fg: festivalFG,
     glows: [{ x: 265, y: 230, r: 260 }, { x: 1300, y: 270, r: 380 }, { x: 830, y: 330, r: 200 }, { x: 1770, y: 330, r: 200 }, { x: 2280, y: 420, r: 220 }, { x: 2700, y: 330, r: 300 }, { x: 2760, y: 560, r: 200 }],
     surfaces: [
       { x1: 700, x2: 1170, y: 520 }, { x1: 1430, x2: 1900, y: 520 }, { x1: 1170, x2: 1430, y: 520 },
@@ -1076,7 +1076,7 @@ export const SCENES = [
     zones: [],
   },
   {
-    id: 'park', name: 'Park', icon: '🌳', W: 2600, ceil: 110, bg: parkBG(), props: parkProps, fg: parkFG,
+    id: 'park', name: 'Park', icon: '🌳', W: 2600, ceil: 110, outdoor: true, bg: parkBG(), props: parkProps, fg: parkFG,
     glows: [{ x: 950, y: 400, r: 260 }, { x: 1800, y: 400, r: 260 }],
     surfaces: [
       { x1: 1060, x2: 1110, y: 418 },

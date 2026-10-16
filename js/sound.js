@@ -187,6 +187,36 @@ export const sfx = {
     tone({ f: 90, f2: 40, t: 0.6, v: 0.35 });
   },
   whooshUp: () => noise({ t: 0.7, v: 0.2, f: 400, f2: 5000, q: 1.2 }),
+  elephant: () => {
+    tone({ type: 'sawtooth', f: 330, f2: 520, t: 0.25, v: 0.12, lp: 1800 });
+    tone({ type: 'sawtooth', f: 520, f2: 300, t: 0.5, v: 0.12, lp: 1800, delay: 0.22 });
+  },
+  roar: () => {
+    noise({ t: 0.7, v: 0.3, f: 300, f2: 120, q: 1.5 });
+    tone({ type: 'sawtooth', f: 120, f2: 70, t: 0.7, v: 0.15, lp: 500 });
+  },
+  monkey: () => {
+    for (let i = 0; i < 4; i++) tone({ type: 'triangle', f: 700 + i * 120, f2: 1300, t: 0.08, v: 0.13, delay: i * 0.1 });
+  },
+  neigh: () => {
+    for (let i = 0; i < 5; i++) tone({ type: 'sawtooth', f: 900 - i * 80, f2: 700 - i * 60, t: 0.09, v: 0.08, lp: 2200, delay: i * 0.08 });
+  },
+  honk: () => {
+    tone({ type: 'square', f: 392, t: 0.16, v: 0.08, lp: 1500 });
+    tone({ type: 'square', f: 494, t: 0.16, v: 0.06, lp: 1500 });
+    tone({ type: 'square', f: 392, t: 0.22, v: 0.08, lp: 1500, delay: 0.22 });
+    tone({ type: 'square', f: 494, t: 0.22, v: 0.06, lp: 1500, delay: 0.22 });
+  },
+  engine: () => {
+    for (let i = 0; i < 6; i++) tone({ type: 'sawtooth', f: 70 + i * 6, f2: 90 + i * 8, t: 0.16, v: 0.1, lp: 400, delay: i * 0.12 });
+  },
+  bell2: () => [1568, 1568].forEach((f, i) => tone({ f, t: 0.25, v: 0.12, delay: i * 0.15 })),
+  rocket: () => noise({ t: 1.6, v: 0.3, f: 200, f2: 3000, q: 0.6 }),
+  shutter: () => {
+    noise({ t: 0.05, v: 0.35, f: 3000, q: 1 });
+    noise({ t: 0.06, v: 0.3, f: 1800, q: 1, delay: 0.08 });
+  },
+  rain: () => noise({ t: 1.2, v: 0.08, f: 4000, q: 0.3, type: 'highpass' }),
   tv: () => [784, 988, 1175].forEach((f, i) => tone({ type: 'square', f, t: 0.1, v: 0.05, lp: 3000, delay: i * 0.08 })),
 };
 

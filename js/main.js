@@ -141,7 +141,7 @@ function buildScene(s) {
 }
 
 const info = (o) => A.itemInfo(o.k);
-const poseOf = (o) => (o.seat && SEATS[o.seat] ? POSE[SEATS[o.seat].pose] : POSE.stand);
+const poseOf = (o) => (o.ride ? POSE.sit : o.seat && SEATS[o.seat] ? POSE[SEATS[o.seat].pose] : POSE.stand);
 
 function makeEl(o) {
   const e = document.createElement('div');
@@ -227,6 +227,7 @@ function switchScene(id, silent) {
   document.querySelectorAll('.nb.place').forEach((b) => b.classList.toggle('active', b.dataset.target === id));
   setScroll(state.scroll[id]);
   updateStored(id);
+  applyWeather();
   if (!silent) {
     toast(SC[id].icon + ' ' + SC[id].name);
     sfx.whoosh();
@@ -481,6 +482,8 @@ function seatFor(c) {
 }
 
 function trySeat(c) {
+  const v = vehicleFor(c);
+  if (v) { ride(c, v); return true; }
   let best = null;
   let bd = 110;
   for (const st of SC[c.sc].seats) {
@@ -691,6 +694,8 @@ function applyToChar(it, c) {
   if (inf.hat) { wear(c, it, 'hat', inf.hat, HAT_EMOJI); return true; }
   if (inf.glasses) { wear(c, it, 'glasses', inf.glasses, GLASS_EMOJI); return true; }
   if (inf.tool) { useTool(c, it, inf.tool); return true; }
+  if (canFollow(it)) { befriend(c, it); return true; }
+  if (inf.vehicle) return false;
   if (inf.size <= 95 && !inf.floaty) { hold(c, it); return true; }
   return false;
 }
@@ -736,6 +741,10 @@ function tapObj(o) {
     burst(o.sc, o.x, o.y - 40, '💥', 4);
     sfx.pop();
     removeObj(o, false);
+    return;
+  }
+  if (inf.vehicle) {
+    driveVehicle(o);
     return;
   }
   bump(o, 'wiggle');
@@ -1055,11 +1064,12 @@ function tick() {
   const sc = state.scene;
   checkSupport(sc);
   dayCycle(false);
+  weatherTick();
   if (state.props.radio.on && sc === 'haus' && tickN % 2 === 0) burst('haus', 680, 220, pick(['🎵', '🎶']), 1, 'up');
   for (const o of objs) {
     if (o.sc !== sc) continue;
     if (o.t === 'c' && state.night && o.seat === 'haus:bett' && tickN % 4 === 0) burst(sc, o.x - 90, o.y - 60, '💤', 1, 'up');
-    if (o.t === 'i' && !o.hold && !o._dragging && !o._stored && !falling.has(o) && info(o).pet && !info(o).floaty && Math.random() < 0.05) {
+    if (o.t === 'i' && !o.hold && !o._dragging && !o._stored && !falling.has(o) && info(o).pet && !info(o).floaty && !o._walk && Math.random() < 0.05) {
       startFall(o, rand(-170, 170), -560);
     }
   }
@@ -1151,6 +1161,8 @@ function beginDrag(d) {
     o.y = p.y;
   }
   if (o.t === 'c' && o.seat) leaveSeat(o);
+  if (o.t === 'c' && o.ride) o.ride = null;
+  if (o.t === 'i') { o._drive = null; o._fly = null; }
   falling.delete(o);
   o._vx = o._vy = 0;
   if (o.t === 'i') checkSupport(o.sc);
@@ -1247,6 +1259,8 @@ function endDrag(d, cx, cy) {
   } else {
     const c = charAt(o);
     if (c && applyToChar(o, c)) return;
+    const pet = (info(o).food || info(o).drink) && petAt(o);
+    if (pet) { feedPet(pet, o); return; }
   }
   sfx.drop();
   autoOpen(o);
@@ -1631,6 +1645,7 @@ function mountAll() {
     if (c.holding && (!state.objs[c.holding] || state.objs[c.holding].hold !== c.id)) c.holding = null;
     if (c.seat && (!SEATS[c.seat] || SEATS[c.seat].sc !== c.sc)) c.seat = null;
     if (c.seat && SEATS[c.seat].pose === 'slide') { c.seat = null; c.y = 600; }
+    if (c.ride && (!state.objs[c.ride] || !info(state.objs[c.ride]).vehicle)) c.ride = null;
     mount(c);
   }
   for (const o of all) {
@@ -1651,9 +1666,256 @@ function mountAll() {
   }
   for (const o of all) {
     if (o.t === 'c' && o.seat && SEATS[o.seat].pose === 'swing') swingClass(SEATS[o.seat], true, o);
-    if (!o.hold && !o.seat) startFall(o);
+    if (!o.hold && !o.seat && !o.ride) startFall(o);
   }
   SCENES.forEach((s) => updateStored(s.id));
+}
+
+// ---------------- Wetter (draußen) ----------------
+const WX = ['sun', 'rain', 'snow', 'rainbow'];
+const WX_ICON = { sun: '☀️', rain: '🌧️', snow: '❄️', rainbow: '🌈' };
+const WX_NAME = { sun: 'Sonne', rain: 'Regen', snow: 'Schnee', rainbow: 'Regenbogen' };
+function initWeather() {
+  let rain = '';
+  let snow = '';
+  for (let i = 0; i < 46; i++) rain += `<path d='M${(i * 73) % 300} ${(i * 131) % 300} l-5 20' stroke='rgba(225,238,255,.8)' stroke-width='2' stroke-linecap='round'/>`;
+  for (let i = 0; i < 30; i++) snow += `<circle cx='${(i * 97) % 300}' cy='${(i * 59) % 300}' r='${2.5 + (i % 3) * 1.6}' fill='white' opacity='.92'/>`;
+  const uri = (t) => `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'>${t}</svg>`)}")`;
+  const arcs = ['#ff595e', '#ff924c', '#ffca3a', '#8ac926', '#1982c4', '#6a4c93'].map((c, i) => `<path d="M${60 + i * 22} 520 A${440 - i * 22} ${440 - i * 22} 0 0 1 ${940 - i * 22} 520" fill="none" stroke="${c}" stroke-width="24" opacity=".55"/>`).join('');
+  const w = div('');
+  w.id = 'weather';
+  w.innerHTML = '<div class="wxl rain"></div><div class="wxl rain r2"></div><div class="wxl snow"></div><div class="wxl snow s2"></div>' +
+    `<svg class="rainbow" viewBox="0 0 1000 520" preserveAspectRatio="xMidYMax meet">${arcs}</svg>`;
+  w.querySelectorAll('.rain').forEach((e) => (e.style.backgroundImage = uri(rain)));
+  w.querySelectorAll('.snow').forEach((e) => (e.style.backgroundImage = uri(snow)));
+  document.body.append(w);
+}
+function applyWeather() {
+  const w = state.weather || 'sun';
+  const out = !!SC[state.scene].outdoor;
+  document.body.dataset.wx = w;
+  document.body.classList.toggle('wx-out', out);
+  for (const sc of SCENES) sceneEls[sc.id].root.classList.toggle('wx-snow', !!sc.outdoor && w === 'snow');
+  $('#bWeather').classList.toggle('hidden', !out);
+  $('#bWeather b').textContent = WX_ICON[w];
+}
+$('#bWeather').addEventListener('click', () => {
+  unlock();
+  remember();
+  state.weather = WX[(WX.indexOf(state.weather || 'sun') + 1) % WX.length];
+  applyWeather();
+  toast(WX_ICON[state.weather] + ' ' + WX_NAME[state.weather]);
+  if (state.weather === 'rain') sfx.rain(); else sfx.sparkle();
+  save();
+});
+function weatherTick() {
+  const w = state.weather || 'sun';
+  const sc = SC[state.scene];
+  if (!sc.outdoor || w === 'sun' || Math.random() > 0.06) return;
+  const kids = Object.values(state.objs).filter((o) => o.t === 'c' && o.sc === sc.id && !o.seat && !o.ride && !o._dragging);
+  if (!kids.length) return;
+  const c = pick(kids);
+  const umbrella = c.holding && state.objs[c.holding] && state.objs[c.holding].k === '☂️';
+  const say = {
+    rain: umbrella ? ['Gut, dass ich einen Schirm hab! ☂️', 'Plitsch platsch! 💦'] : ['Huch, ich werd nass! 💦', 'Hat wer einen Schirm? ☂️', 'Brr! 🌧️'],
+    snow: ['Schnee! ⛄', 'Juhu, Schneeballschlacht! ❄️', 'Brr, ist das kalt! 🧣'],
+    rainbow: ['Ein Regenbogen! 🌈', 'Wie schön! 🌈'],
+  }[w];
+  bubble(c, pick(say));
+  setMood(c, w === 'rain' && !umbrella ? 'o' : 'happy', 1200);
+}
+
+// ---------------- Haustiere folgen ihrer Figur ----------------
+const canFollow = (o) => o.t === 'i' && info(o).pet && !info(o).floaty && !['🐠', '🐬', '🐳'].includes(o.k);
+function befriend(c, it) {
+  it.follow = c.id;
+  it.x = clamp(c.x - 90, 30, SC[c.sc].W - 30);
+  place(it);
+  startFall(it, 0, -420);
+  bubble(c, pick(['Komm mit! 🐾', 'Mein Freund! ❤️', 'Wir gehen spazieren! 🐾']));
+  burst(c.sc, it.x, it.y - 60, '❤️', 5, 'up');
+  const snd = info(it).pet;
+  if (sfx[snd]) sfx[snd]();
+  setMood(c, 'happy', 1500);
+  save();
+}
+function stepPets(dt) {
+  const byOwner = {};
+  for (const o of Object.values(state.objs)) {
+    if (!o.follow) continue;
+    const c = state.objs[o.follow];
+    if (!c || c.t !== 'c') { o.follow = null; continue; }
+    const k = (byOwner[c.id] = (byOwner[c.id] || 0) + 1) - 1;
+    if (o._dragging || o.hold || falling.has(o) || o._stored) continue;
+    const e = els.get(o.id);
+    if (!e) continue;
+    if (c.sc !== o.sc) {
+      o.sc = c.sc;
+      sceneEls[o.sc].objs.append(e);
+      o.x = clamp(c.x - 100, 30, SC[o.sc].W - 30);
+      o.y = 300;
+      place(o);
+      startFall(o);
+      continue;
+    }
+    const side = c.x >= o.x ? -1 : 1;
+    const tx = clamp(c.x + side * (80 + k * 60), 30, SC[o.sc].W - 30);
+    const dx = tx - o.x;
+    if (Math.abs(dx) > 16) {
+      o.x += Math.sign(dx) * Math.min(Math.abs(dx) * 3, 340) * dt;
+      o._walk = true;
+      e.classList.add('walk');
+      e.classList.toggle('flip', dx > 0);
+      place(o);
+      if (!supported(o)) startFall(o);
+    } else if (o._walk) {
+      o._walk = false;
+      e.classList.remove('walk');
+      save();
+    }
+  }
+}
+function petAt(it) {
+  let best = null;
+  let bd = 70;
+  for (const o of Object.values(state.objs)) {
+    if (o === it || o.t !== 'i' || o.sc !== it.sc || !info(o).pet || o.hold) continue;
+    const d = Math.hypot(o.x - it.x, o.y - info(o).size / 2 - (it.y - info(it).size / 2));
+    if (d < bd) { bd = d; best = o; }
+  }
+  return best;
+}
+function feedPet(pet, food) {
+  const e = els.get(food.id);
+  delete state.objs[food.id];
+  els.delete(food.id);
+  e.classList.add('eaten');
+  e.style.transform = `translate(${pet.x - 20}px,${pet.y - info(pet).size * 0.6}px) scale(.15)`;
+  setTimeout(() => e.remove(), 320);
+  sfx.chomp();
+  setTimeout(() => {
+    if (!state.objs[pet.id]) return;
+    bump(pet, 'jump');
+    const snd = info(pet).pet;
+    if (sfx[snd]) sfx[snd]();
+    burst(pet.sc, pet.x, pet.y - info(pet).size, '❤️', 4, 'up');
+  }, 400);
+  save();
+}
+
+// ---------------- Fahrzeuge ----------------
+const riderOf = (v) => Object.values(state.objs).find((o) => o.t === 'c' && o.ride === v.id);
+function vehicleFor(c) {
+  for (const v of Object.values(state.objs)) {
+    if (v.t !== 'i' || v.sc !== c.sc || !info(v).vehicle || v.hold || v._dragging) continue;
+    const r = riderOf(v);
+    if (r && r !== c) continue;
+    const sz = info(v).size;
+    if (Math.abs(c.x - v.x) < sz * 0.55 && c.y > v.y - sz - 130 && c.y < v.y + 50) return v;
+  }
+  return null;
+}
+function seatOffset(v) {
+  const sz = info(v).size;
+  const bike = ['🚲', '🛴', '🛵'].includes(v.k);
+  return { dx: (v._dir || -1) * sz * (bike ? 0.02 : 0.1), dy: bike ? sz * 0.5 : sz * 0.36 };
+}
+function posRider(c, v) {
+  const off = seatOffset(v);
+  c.x = v.x + off.dx;
+  c.y = v.y - off.dy;
+  if (v._fly) c.y = v.y - off.dy;
+  place(c);
+}
+function ride(c, v) {
+  c.ride = v.id;
+  c.seat = null;
+  falling.delete(c);
+  c.z = ++state.ztop;
+  v.z = ++state.ztop;
+  place(v);
+  posRider(c, v);
+  setMood(c, 'happy', 1500);
+  sfx.honk();
+  bubble(c, pick(['Tschüss! 👋', 'Los geht\'s! 🚀', 'Brumm brumm! 🚗', 'Anschnallen! 😎']));
+  save();
+}
+function driveVehicle(v) {
+  const W = SC[v.sc].W;
+  const sz = info(v).size;
+  if (v.k === '🚀') {
+    v._fly = { t: 0, x0: v.x, y0: v.y };
+    falling.delete(v);
+    sfx.rocket();
+    return;
+  }
+  if (v.k === '🛸') {
+    v._fly = { t: 0, x0: v.x, y0: v.y, ufo: true, tx: clamp(v.x + rand(-500, 500), sz, W - sz) };
+    falling.delete(v);
+    sfx.laser();
+    return;
+  }
+  let dir = v._dir || -1;
+  if ((dir < 0 && v.x < sz + 40) || (dir > 0 && v.x > W - sz - 40)) dir = -dir;
+  v._dir = dir;
+  v._drive = { left: clamp(rand(500, 800), 0, W) };
+  const e = els.get(v.id);
+  e.classList.toggle('flip', dir > 0);
+  e.classList.add('driving');
+  sfx.engine();
+  setTimeout(sfx.honk, 300);
+}
+function stepVehicles(dt) {
+  for (const v of Object.values(state.objs)) {
+    if (v.t !== 'i' || !info(v).vehicle) continue;
+    if (v._dragging || v.hold) { v._drive = null; }
+    if (v._drive) {
+      const W = SC[v.sc].W;
+      const sz = info(v).size;
+      const step = 420 * dt;
+      v.x += v._dir * step;
+      v._drive.left -= step;
+      if (v.x < sz / 2 || v.x > W - sz / 2 || v._drive.left <= 0) {
+        v.x = clamp(v.x, sz / 2, W - sz / 2);
+        v._drive = null;
+        const e = els.get(v.id);
+        if (e) e.classList.remove('driving');
+        save();
+      }
+      place(v);
+      if (!supported(v) && !falling.has(v)) startFall(v, v._dir * 200, 0);
+      if (v.sc === state.scene && Math.random() < 0.08) burst(v.sc, v.x - v._dir * sz * 0.5, v.y - 20, '💨', 1, 'up');
+    }
+    if (v._fly) {
+      const f = v._fly;
+      f.t += dt;
+      if (f.ufo) {
+        const k = Math.min(1, f.t / 2.4);
+        v.x = f.x0 + (f.tx - f.x0) * (0.5 - Math.cos(k * Math.PI) / 2);
+        v.y = f.y0 - Math.sin(k * Math.PI) * 260 + Math.sin(f.t * 9) * 8;
+        if (k >= 1) { v.y = f.y0; v._fly = null; startFall(v); save(); }
+      } else {
+        // Rakete: hoch hinaus, kurz weg, dann sanft zurück
+        if (f.t < 1.4) v.y = f.y0 - Math.pow(f.t, 2.2) * 520;
+        else if (f.t < 2.2) v.y = -400;
+        else if (f.t < 3.6) v.y = f.y0 - (1 - (f.t - 2.2) / 1.4) * 700;
+        else { v.y = f.y0; v._fly = null; startFall(v); bump(v); sfx.land(); save(); }
+        if (f.t < 1.4 && v.sc === state.scene && Math.random() < 0.5) burst(v.sc, v.x, v.y + 10, pick(['🔥', '💨', '✨']), 1, 'out');
+      }
+      place(v);
+    }
+  }
+  for (const c of Object.values(state.objs)) {
+    if (c.t !== 'c' || !c.ride) continue;
+    const v = state.objs[c.ride];
+    if (!v || c._dragging) { c.ride = null; if (!c._dragging) startFall(c); continue; }
+    if (v.sc !== c.sc) {
+      c.sc = v.sc;
+      sceneEls[c.sc].objs.append(els.get(c.id));
+    }
+    if (c.z >= v.z) { v.z = ++state.ztop; place(v); }
+    posRider(c, v);
+  }
 }
 
 // ---------------- Rückgängig ----------------
@@ -1806,6 +2068,7 @@ function init() {
   setMuted(state.muted);
   document.body.insertAdjacentHTML('afterbegin', GLOBAL_DEFS);
   SCENES.forEach(buildScene);
+  initWeather();
   mountAll();
   layout();
   switchScene(state.scene, true);
@@ -1825,6 +2088,8 @@ function init() {
     last = t;
     stepFalling(dt);
     stepSlides(dt);
+    stepPets(dt);
+    stepVehicles(dt);
     festivalFrame();
     for (const d of drags.values()) {
       if (d.active && d.auto && d.o.sc === state.scene) {
