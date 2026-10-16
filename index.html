@@ -26,11 +26,20 @@
     <button class="nb tool learnbtn" id="bLearn"><b>🎓</b><i>Lernen</i><span class="nbadge"></span></button>
     <button class="nb tool" id="bNight"><b>🌙</b><i>Nacht</i></button>
     <button class="nb tool trash" id="bTrash" data-target="trash"><b>🗑️</b><i>Weg</i></button>
-    <button class="nb tool small" id="bSet"><b>⚙️</b></button>
   </nav>
+
+  <div id="topbar">
+    <div class="tl"><button class="tb" id="bUndo" aria-label="Rückgängig"><b>↩️</b></button></div>
+    <div class="tr">
+      <button class="tb hidden" id="bWeather" aria-label="Wetter"><b>☀️</b></button>
+      <button class="tb hidden" id="bPhoto" aria-label="Foto"><b>📸</b></button>
+      <button class="tb" id="bSet" aria-label="Einstellungen"><b>⚙️</b></button>
+    </div>
+  </div>
 
   <div id="drawer" class="hidden">
     <div class="tabs"></div>
+    <div class="dsearch hidden"><input type="search" id="dSearch" placeholder="🔍 Suchen: z. B. Pizza, Hund, Ball …" autocomplete="off" autocorrect="off" spellcheck="false"></div>
     <button class="x" id="drawerClose" aria-label="Schließen">✕</button>
     <div class="grid"></div>
     <p class="hint">Antippen oder in die Welt ziehen</p>
@@ -47,6 +56,7 @@
   <div id="editor" class="modal hidden">
     <div class="card ed">
       <div class="ed-left">
+        <input type="text" id="edName" maxlength="14" placeholder="Name …" autocomplete="off" autocorrect="off" spellcheck="false">
         <div class="ed-prev"></div>
         <button class="btn" id="edRandom">🎲 Zufall</button>
         <button class="btn primary" data-close>Fertig ✓</button>
@@ -58,15 +68,46 @@
   <div id="settings" class="modal hidden">
     <div class="card set">
       <h2>Einstellungen</h2>
-      <button class="btn" id="sSound">🔊 Ton ist an</button>
-      <button class="btn" id="sReset">🔄 Welt neu starten</button>
-      <div id="resetAsk" class="hidden">
-        <p>Alles zurück auf Anfang?</p>
-        <button class="btn danger" id="sResetYes">Ja</button>
-        <button class="btn" id="sResetNo">Nein</button>
+      <div class="setgrid">
+        <div class="setcol">
+          <h3>🔊 Ton</h3>
+          <button class="btn" id="sSound">🔊 Ton ist an</button>
+          <label class="slider"><span>🎵 Musik</span><input type="range" min="0" max="100" id="vMusic"></label>
+          <label class="slider"><span>💥 Geräusche</span><input type="range" min="0" max="100" id="vSfx"></label>
+          <label class="slider"><span>🗣️ Stimme</span><input type="range" min="0" max="100" id="vVoice"></label>
+          <h3>🌗 Tag &amp; Nacht</h3>
+          <div class="seg" id="sCycle">
+            <button data-v="off">Selbst</button><button data-v="game">Alle 5 Min.</button><button data-v="clock">Echte Uhr</button>
+          </div>
+          <button class="btn" id="sLite">🐢 Spar-Modus: aus</button>
+        </div>
+        <div class="setcol">
+          <h3>🧰 Spielwelt</h3>
+          <button class="btn" id="sTut">❓ Anleitung zeigen</button>
+          <button class="btn" id="sClean">🧹 Diesen Ort aufräumen</button>
+          <button class="btn" id="sExport">💾 Spielstand sichern</button>
+          <button class="btn" id="sImport">📂 Spielstand laden</button>
+          <input type="file" id="sImportFile" accept=".json,application/json" class="hidden">
+          <button class="btn" id="sReset">🔄 Welt neu starten</button>
+          <div id="resetAsk" class="hidden">
+            <p>Alles zurück auf Anfang?</p>
+            <button class="btn danger" id="sResetYes">Ja</button>
+            <button class="btn" id="sResetNo">Nein</button>
+          </div>
+        </div>
       </div>
-      <p class="small">Tipp: In Safari auf <b>Teilen</b> ⬆️ → <b>Zum Home-Bildschirm</b> tippen. Dann startet das Spiel wie eine App und funktioniert auch ohne Internet. Ist kein Ton zu hören, den Stummschalter am iPad prüfen.</p>
+      <p class="small">Spielstand sichern: Die Datei kannst du in „Dateien“ ablegen und auf einem anderen iPad wieder laden.<br>Tipp: In Safari auf <b>Teilen</b> ⬆️ → <b>Zum Home-Bildschirm</b> tippen. Dann startet das Spiel wie eine App und funktioniert auch ohne Internet. Ist kein Ton zu hören, den Stummschalter am iPad prüfen.</p>
       <button class="btn primary" data-close>Weiterspielen</button>
+    </div>
+  </div>
+
+  <div id="tut" class="modal hidden">
+    <div class="card tut">
+      <div class="tut-art"></div>
+      <h2 class="tut-h"></h2>
+      <p class="tut-p"></p>
+      <div class="tut-dots"></div>
+      <div><button class="btn" id="tutSkip">Überspringen</button><button class="btn primary" id="tutNext">Weiter ▶</button></div>
     </div>
   </div>
 

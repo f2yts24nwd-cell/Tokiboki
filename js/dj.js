@@ -102,11 +102,11 @@ function process(e) {
 
 function ensureNode() {
   unlock();
-  const { ctx, master } = getAudio();
+  const { ctx, music } = getAudio();
   if (!ctx || node) return;
   node = ctx.createScriptProcessor(2048, 1, 2);
   node.onaudioprocess = process;
-  node.connect(master);
+  node.connect(music);
 }
 
 export function stopAll() {

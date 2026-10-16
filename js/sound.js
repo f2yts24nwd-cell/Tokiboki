@@ -3,6 +3,9 @@ let ctx = null;
 let master = null;
 let muted = false;
 let noiseBuf = null;
+let sfxBus = null;
+let musicBus = null;
+const vol = { sfx: 0.8, music: 0.8 };
 
 export function setMuted(m) {
   muted = m;
@@ -10,8 +13,15 @@ export function setMuted(m) {
   if (m) music(false);
 }
 
+/** Lautstärken 0…1 für Geräusche und Musik (DJ-Pult, Radio). */
+export function setVolumes(v) {
+  Object.assign(vol, v);
+  if (sfxBus) sfxBus.gain.value = vol.sfx * 1.25;
+  if (musicBus) musicBus.gain.value = vol.music * 1.25;
+}
+
 export function getAudio() {
-  return { ctx, master };
+  return { ctx, master, music: musicBus };
 }
 
 export function unlock() {
@@ -22,6 +32,11 @@ export function unlock() {
     master = ctx.createGain();
     master.gain.value = muted ? 0 : 0.7;
     master.connect(ctx.destination);
+    sfxBus = ctx.createGain();
+    musicBus = ctx.createGain();
+    sfxBus.connect(master);
+    musicBus.connect(master);
+    setVolumes({});
     noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
     const d = noiseBuf.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
@@ -29,7 +44,7 @@ export function unlock() {
   if (ctx.state !== 'running') ctx.resume().catch(() => {});
 }
 
-function tone({ type = 'sine', f = 440, f2 = null, t = 0.15, v = 0.3, delay = 0, attack = 0.005, lp = null }) {
+function tone({ type = 'sine', f = 440, f2 = null, t = 0.15, v = 0.3, delay = 0, attack = 0.005, lp = null, bus = null }) {
   if (!ctx || muted) return;
   const now = ctx.currentTime + delay;
   const o = ctx.createOscillator();
@@ -46,9 +61,9 @@ function tone({ type = 'sine', f = 440, f2 = null, t = 0.15, v = 0.3, delay = 0,
     fl.type = 'lowpass';
     fl.frequency.value = lp;
     g.connect(fl);
-    fl.connect(master);
+    fl.connect(bus || sfxBus);
   } else {
-    g.connect(master);
+    g.connect(bus || sfxBus);
   }
   o.start(now);
   o.stop(now + t + 0.05);
@@ -70,7 +85,7 @@ function noise({ t = 0.2, v = 0.3, delay = 0, f = 1000, f2 = null, q = 1, type =
   g.gain.exponentialRampToValueAtTime(0.0001, now + t);
   src.connect(fl);
   fl.connect(g);
-  g.connect(master);
+  g.connect(sfxBus);
   src.start(now);
   src.stop(now + t + 0.05);
 }
@@ -188,8 +203,8 @@ export function music(on) {
   let step = 0;
   musicTimer = setInterval(() => {
     if (!ctx || muted) return;
-    tone({ type: 'triangle', f: MEL[step % MEL.length], t: 0.22, v: 0.08 });
-    if (step % 2 === 0) tone({ type: 'sine', f: BASS[(step / 2) % BASS.length], t: 0.4, v: 0.12 });
+    tone({ type: 'triangle', f: MEL[step % MEL.length], t: 0.22, v: 0.08, bus: musicBus });
+    if (step % 2 === 0) tone({ type: 'sine', f: BASS[(step / 2) % BASS.length], t: 0.4, v: 0.12, bus: musicBus });
     step++;
   }, 260);
 }

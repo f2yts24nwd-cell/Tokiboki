@@ -1,4 +1,5 @@
-import { sfx, unlock, setMuted, music } from './sound.js';
+import { sfx, unlock, setMuted, music, setVolumes } from './sound.js';
+import { searchItems, nameOf } from './names.js';
 import * as A from './art.js';
 import { SCENES, H, initialObjects, GLOBAL_DEFS } from './world.js';
 import { createMap } from './map.js';
@@ -709,10 +710,11 @@ function tapObj(o) {
     bump(o, 'jump');
     sfx.talk();
     setMood(o, 'happy', 900);
-    bubble(o, pick(['Hallo!', 'Hihi!', '😊', '❤️', '🎵', '🌈', '⭐', 'Juhu!', '😋', 'Hey!']));
+    bubble(o, Math.random() < 0.3 ? `Ich bin ${ensureName(o)}!` : pick(['Hallo!', 'Hihi!', '😊', '❤️', '🎵', '🌈', '⭐', 'Juhu!', '😋', 'Hey!']));
     return;
   }
   const inf = info(o);
+  if (o.k === '🎁' || o.k === '🎈' || (o.k === '🥚' && (o._taps || 0) >= 2)) remember();
   if (o.k === '🎁') {
     transformItem(o, pick(A.GIFT_TOYS));
     burst(o.sc, o.x, o.y - 40, '🎉', 6);
@@ -759,6 +761,7 @@ function tapProp(id) {
   const p = PROPS[id];
   const st = state.props[id];
   const e = sceneEls[p.sc].propEls[id];
+  if (!['dj', 'bell', 'confetti', 'swing', 'deco'].includes(p.kind)) remember();
   switch (p.kind) {
     case 'toggle':
       st.on = !st.on;
@@ -1051,6 +1054,7 @@ function tick() {
   }
   const sc = state.scene;
   checkSupport(sc);
+  dayCycle(false);
   if (state.props.radio.on && sc === 'haus' && tickN % 2 === 0) burst('haus', 680, 220, pick(['🎵', '🎶']), 1, 'up');
   for (const o of objs) {
     if (o.sc !== sc) continue;
@@ -1133,6 +1137,7 @@ window.addEventListener('pointercancel', (e) => pointerEnd(e, true));
 
 function beginDrag(d) {
   const o = d.o;
+  if (!d.fromDrawer) remember();
   d.active = true;
   o._dragging = true;
   o._stored = false;
@@ -1307,19 +1312,49 @@ function toast(text) {
 // Kiste (Gegenstände)
 const drawer = $('#drawer');
 let drawerTab = 0;
+function drawerCats() {
+  const cats = A.DRAWER.slice();
+  cats.push(['⏱️', 'Zuletzt', (state.recent || []).slice()]);
+  cats.push(['🔍', 'Suchen', null]);
+  return cats;
+}
+function allDrawerItems() {
+  return [...new Set(A.DRAWER.flatMap((c) => c[2]))];
+}
+function addRecent(k) {
+  state.recent = [k, ...(state.recent || []).filter((x) => x !== k)].slice(0, 24);
+}
 function renderDrawer() {
+  const cats = drawerCats();
+  if (drawerTab >= cats.length) drawerTab = 0;
   const tabs = drawer.querySelector('.tabs');
   tabs.innerHTML = '';
-  A.DRAWER.forEach(([icon, name], i) => {
+  cats.forEach(([icon, name], i) => {
     const b = document.createElement('button');
-    b.className = 'tab' + (i === drawerTab ? ' sel' : '');
+    b.className = 'tab' + (i === drawerTab ? ' sel' : '') + (i >= A.DRAWER.length ? ' mini' : '');
     b.innerHTML = `<b>${icon}</b><i>${name}</i>`;
     b.addEventListener('click', () => { drawerTab = i; sfx.click(); renderDrawer(); });
     tabs.append(b);
   });
-  const grid = drawer.querySelector('.grid');
-  grid.innerHTML = A.DRAWER[drawerTab][2].map((k) => `<div class="di" data-k="${k}">${k}</div>`).join('');
+  const cat = cats[drawerTab];
+  const searching = !cat[2];
+  drawer.querySelector('.dsearch').classList.toggle('hidden', !searching);
+  renderDrawerGrid();
+  if (searching) setTimeout(() => $('#dSearch').focus(), 50);
 }
+function renderDrawerGrid() {
+  const cat = drawerCats()[drawerTab];
+  let list = cat[2];
+  let empty = '';
+  if (!list) {
+    const q = $('#dSearch').value;
+    list = searchItems(q, allDrawerItems());
+    empty = q.trim() ? 'Nichts gefunden 🤔' : 'Tippe oben ein, was du suchst';
+  } else if (!list.length) empty = 'Hier erscheinen die Sachen, die du zuletzt benutzt hast';
+  const grid = drawer.querySelector('.grid');
+  grid.innerHTML = list.length ? list.map((k) => `<div class="di" data-k="${k}" title="${nameOf(k)}">${k}</div>`).join('') : `<p class="dempty">${empty}</p>`;
+}
+$('#dSearch').addEventListener('input', renderDrawerGrid);
 function openDrawer() {
   closeModals();
   renderDrawer();
@@ -1336,6 +1371,8 @@ drawer.querySelector('.grid').addEventListener('pointerdown', (e) => {
   unlock();
   e.preventDefault();
   const k = di.dataset.k;
+  remember();
+  addRecent(k);
   const size = A.itemInfo(k).size;
   const w = clientToWorld(e.clientX, e.clientY);
   const o = newObj({ t: 'i', sc: state.scene, k, x: w.x, y: w.y + size / 2 });
@@ -1361,6 +1398,7 @@ function applyNight() {
 }
 $('#bNight').addEventListener('click', () => {
   unlock();
+  if (state.cycle !== 'off') { state.cycle = 'off'; toast('Tag & Nacht: jetzt von Hand'); }
   state.night = !state.night;
   applyNight();
   sfx.sparkle();
@@ -1391,7 +1429,7 @@ function openFigList() {
   closeModals();
   const g = figList.querySelector('.figs');
   const chars = Object.values(state.objs).filter((o) => o.t === 'c');
-  g.innerHTML = chars.map((c) => `<button class="fig" data-id="${c.id}">${miniSVG(c.look, '-10 -40 140 260', 96)}<i>${SC[c.sc].iconHTML || SC[c.sc].icon}</i></button>`).join('') +
+  g.innerHTML = chars.map((c) => `<button class="fig" data-id="${c.id}">${miniSVG(c.look, '-10 -40 140 260', 96)}<i>${SC[c.sc].iconHTML || SC[c.sc].icon}</i><em>${escapeHTML(ensureName(c))}</em></button>`).join('') +
     '<button class="fig new" data-new="1"><b>＋</b><i>Neue Figur</i></button>';
   figList.classList.remove('hidden');
   sfx.pop();
@@ -1400,6 +1438,7 @@ figList.querySelector('.figs').addEventListener('click', (e) => {
   const b = e.target.closest('.fig');
   if (!b) return;
   if (b.dataset.new) {
+    remember();
     const c = newObj({ t: 'c', sc: state.scene, x: state.scroll[state.scene] + VW / 2, y: 300, look: A.randomLook(), seat: null });
     startFall(c);
     burst(c.sc, c.x, c.y - 100, '✨', 8);
@@ -1457,6 +1496,7 @@ editor.querySelector('.ed-opts').addEventListener('click', (e) => {
     Learn.open('shop');
     return;
   }
+  remember();
   editing.look[b.dataset.k] = b.dataset.v;
   rerenderChar(editing);
   renderEditor();
@@ -1465,6 +1505,7 @@ editor.querySelector('.ed-opts').addEventListener('click', (e) => {
 });
 $('#edRandom').addEventListener('click', () => {
   if (!editing) return;
+  remember();
   editing.look = A.randomLook();
   rerenderChar(editing);
   renderEditor();
@@ -1472,9 +1513,18 @@ $('#edRandom').addEventListener('click', () => {
   save();
 });
 
+const escapeHTML = (t) => String(t).replace(/[&<>"']/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
+$('#edName').addEventListener('input', (e) => {
+  if (!editing) return;
+  editing.name = e.target.value.trim().slice(0, 14);
+  save();
+});
+$('#edName').addEventListener('keydown', (e) => { if (e.key === 'Enter') e.target.blur(); });
+
 function openEditor(c) {
   closeModals();
   editing = c;
+  $('#edName').value = ensureName(c);
   renderEditor();
   editor.classList.remove('hidden');
 }
@@ -1483,6 +1533,14 @@ function openEditor(c) {
 const settings = $('#settings');
 function renderSettings() {
   $('#sSound').textContent = state.muted ? '🔇 Ton ist aus' : '🔊 Ton ist an';
+  $('#vMusic').value = state.vol.music;
+  $('#vSfx').value = state.vol.sfx;
+  $('#vVoice').value = state.vol.voice;
+  document.querySelectorAll('#sCycle button').forEach((b) => b.classList.toggle('sel', b.dataset.v === state.cycle));
+  $('#sLite').textContent = state.lite ? '🐢 Spar-Modus: an' : '🐇 Spar-Modus: aus';
+}
+function applyVolumes() {
+  setVolumes({ music: state.vol.music / 100, sfx: state.vol.sfx / 100 });
 }
 $('#bSet').addEventListener('click', () => {
   unlock();
@@ -1501,6 +1559,62 @@ $('#sSound').addEventListener('click', () => {
   sfx.pop();
   save();
 });
+for (const [id, key] of [['#vMusic', 'music'], ['#vSfx', 'sfx'], ['#vVoice', 'voice']]) {
+  $(id).addEventListener('input', (e) => {
+    state.vol[key] = +e.target.value;
+    applyVolumes();
+    save();
+  });
+  $(id).addEventListener('change', () => (key === 'sfx' ? sfx.pop() : null));
+}
+$('#sCycle').addEventListener('click', (e) => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  state.cycle = b.dataset.v;
+  state.cycleT = Date.now();
+  dayCycle(true);
+  renderSettings();
+  sfx.click();
+  save();
+});
+$('#sLite').addEventListener('click', () => {
+  state.lite = !state.lite;
+  document.body.classList.toggle('lite', !!state.lite);
+  renderSettings();
+  sfx.click();
+  save();
+});
+$('#sTut').addEventListener('click', openTutorial);
+$('#sClean').addEventListener('click', () => { closeModals(); cleanScene(state.scene); toast('🧹 Aufgeräumt!'); });
+$('#sExport').addEventListener('click', exportSave);
+$('#sImport').addEventListener('click', () => $('#sImportFile').click());
+$('#sImportFile').addEventListener('change', (e) => { if (e.target.files[0]) importSave(e.target.files[0]); e.target.value = ''; });
+$('#tutNext').addEventListener('click', () => {
+  sfx.pop();
+  if (tutI < TUT.length - 1) { tutI++; renderTut(); } else endTutorial();
+});
+$('#tutSkip').addEventListener('click', () => { sfx.click(); endTutorial(); });
+$('#bUndo').addEventListener('click', undo);
+
+// Tag & Nacht automatisch: alle 5 Minuten (3½ Tag, 1½ Nacht) oder nach der echten Uhr
+function dayCycle(force) {
+  let night = state.night;
+  if (state.cycle === 'clock') {
+    const h = new Date().getHours();
+    night = h >= 20 || h < 7;
+  } else if (state.cycle === 'game') {
+    const t = ((Date.now() - (state.cycleT || 0)) / 1000) % 300;
+    night = t >= 210;
+  } else return;
+  if (night !== state.night || force) {
+    if (night !== state.night) {
+      state.night = night;
+      applyNight();
+      if (!force) toast(night ? '🌙 Gute Nacht!' : '☀️ Guten Morgen!');
+      save();
+    }
+  }
+}
 $('#sReset').addEventListener('click', () => $('#resetAsk').classList.remove('hidden'));
 $('#sResetNo').addEventListener('click', () => $('#resetAsk').classList.add('hidden'));
 $('#sResetYes').addEventListener('click', () => {
@@ -1510,12 +1624,7 @@ $('#sResetYes').addEventListener('click', () => {
 });
 $('#rotateOk').addEventListener('click', () => document.body.classList.add('rotate-ok'));
 
-// ---------------- Start ----------------
-function init() {
-  state = load();
-  setMuted(state.muted);
-  document.body.insertAdjacentHTML('afterbegin', GLOBAL_DEFS);
-  SCENES.forEach(buildScene);
+function mountAll() {
   const all = Object.values(state.objs);
   for (const c of all) {
     if (c.t !== 'c') continue;
@@ -1545,6 +1654,159 @@ function init() {
     if (!o.hold && !o.seat) startFall(o);
   }
   SCENES.forEach((s) => updateStored(s.id));
+}
+
+// ---------------- Rückgängig ----------------
+const undoStack = [];
+function snapshot() {
+  return JSON.stringify({ objs: state.objs, props: state.props, next: state.next, ztop: state.ztop }, (k, v) => (k.startsWith('_') ? undefined : v));
+}
+function remember() {
+  const snap = snapshot();
+  if (undoStack[undoStack.length - 1] === snap) return;
+  undoStack.push(snap);
+  if (undoStack.length > 40) undoStack.shift();
+  $('#bUndo').classList.remove('off');
+}
+function rebuildWorld(snap) {
+  for (const e of els.values()) e.remove();
+  els.clear();
+  falling.clear();
+  drags.clear();
+  for (const s of SCENES) {
+    const sw = sceneEls[s.id].propEls.schaukel;
+    if (sw) sw.classList.remove('swing0', 'swing1');
+  }
+  music(false);
+  Object.assign(state, snap);
+  mountAll();
+  applyNight();
+  save();
+}
+function undo() {
+  unlock();
+  if (!undoStack.length) { toast('Nichts zum Zurückholen'); sfx.boing(); return; }
+  rebuildWorld(JSON.parse(undoStack.pop()));
+  if (!undoStack.length) $('#bUndo').classList.add('off');
+  sfx.whoosh();
+  toast('↩️ Zurück!');
+}
+
+// ---------------- Namen ----------------
+const NAMES_KIDS = ['Mia', 'Ben', 'Emma', 'Leon', 'Lina', 'Noah', 'Ella', 'Paul', 'Mila', 'Finn', 'Lea', 'Elias', 'Ida', 'Jonas', 'Lia', 'Luis', 'Nele', 'Tom', 'Zoe', 'Max', 'Ava', 'Ole', 'Maja', 'Jan', 'Sophie', 'Emil'];
+function ensureName(c) {
+  if (!c.name) {
+    const used = new Set(Object.values(state.objs).map((o) => o.name));
+    c.name = pick(NAMES_KIDS.filter((n) => !used.has(n))) || pick(NAMES_KIDS);
+  }
+  return c.name;
+}
+
+// ---------------- Spielstand sichern / laden ----------------
+async function exportSave() {
+  saveNow();
+  const data = localStorage.getItem(SAVE_KEY) || JSON.stringify(state);
+  const d = new Date();
+  const name = `tokiboki-${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}.json`;
+  const blob = new Blob([data], { type: 'application/json' });
+  try {
+    const file = new File([blob], name, { type: 'application/json' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: 'Tokiboki Spielstand' });
+      toast('💾 Gesichert!');
+      return;
+    }
+  } catch (e) {
+    if (e && e.name === 'AbortError') return;
+  }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.append(a);
+  a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  toast('💾 Gesichert!');
+}
+function importSave(file) {
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const s = JSON.parse(r.result);
+      if (!s || s.v !== 1 || !s.objs) throw new Error('kein Spielstand');
+      localStorage.setItem(SAVE_KEY, JSON.stringify(s));
+      toast('📂 Geladen!');
+      setTimeout(() => location.reload(), 500);
+    } catch (e) {
+      toast('😕 Das ist kein Tokiboki-Spielstand');
+      sfx.boing();
+    }
+  };
+  r.readAsText(file);
+}
+
+// ---------------- Ort aufräumen ----------------
+function cleanScene(sc) {
+  remember();
+  for (const o of Object.values(state.objs)) {
+    if (o.sc !== sc || o.t !== 'i') continue;
+    if (o.hold && state.objs[o.hold]) continue;
+    removeObj(o, false);
+  }
+  for (const o of initialObjects().filter((x) => x.sc === sc && x.t === 'i')) newObj(o);
+  for (const p of SC[sc].props) if (p.kind === 'container') { state.props[p.id].open = false; applyProp(p.id); }
+  updateStored(sc);
+  burst(sc, state.scroll[sc] + VW / 2, 300, '✨', 12);
+  sfx.sparkle();
+  save();
+}
+
+// ---------------- Anleitung ----------------
+const TUT = [
+  ['👋', 'Willkommen in Tokiboki!', 'Hier kannst du alles anfassen, ausprobieren und Geschichten spielen.'],
+  ['<span class="tut-hand">👆</span><span class="tut-obj">🧸</span>', 'Ziehen & Ablegen', 'Halte eine Figur oder einen Gegenstand mit dem Finger fest und zieh ihn herum. Eine <b>Leuchtlinie</b> zeigt dir, wo er landet.'],
+  ['🍎➡️🙂', 'Figuren verwöhnen', 'Zieh Essen, Hüte, Brillen oder Spielsachen direkt auf eine Figur. Figuren kannst du auf Stühle, Betten und Schaukeln setzen.'],
+  ['💡🍳🚿', 'Alles antippen', 'Tippe Möbel an: Lampen, Herd, Dusche, Radio, Kühlschrank … Auf dem Herd wird Essen gekocht!'],
+  ['🗺️🏠🎡', 'Orte wechseln', 'Unten in der Leiste wechselst du den Ort. Zieh etwas auf einen Ort, dann nimmst du es mit. Im 🗑️ wird es weggeworfen.'],
+  ['🧺🔍', 'Die Kiste', 'In der Kiste findest du hunderte Sachen – mit der Suche ganz schnell.'],
+  ['↩️📸', 'Zurück & Fotos', 'Oben links holst du Weggeworfenes zurück. Mit 📸 machst du Fotos für dein Album.'],
+  ['🎓⭐', 'Lernen & Freischalten', 'Löse Vokabel-Lektionen, sammle Sterne und schalte coole Sachen frei!'],
+];
+let tutI = 0;
+function openTutorial() {
+  closeModals();
+  closeDrawer();
+  tutI = 0;
+  renderTut();
+  $('#tut').classList.remove('hidden');
+}
+function renderTut() {
+  const [art, h, p] = TUT[tutI];
+  const t = $('#tut');
+  t.querySelector('.tut-art').innerHTML = art;
+  t.querySelector('.tut-h').textContent = h;
+  t.querySelector('.tut-p').innerHTML = p;
+  t.querySelector('.tut-dots').innerHTML = TUT.map((_, i) => `<i class="${i === tutI ? 'on' : ''}"></i>`).join('');
+  $('#tutNext').textContent = tutI === TUT.length - 1 ? 'Los geht\'s! 🚀' : 'Weiter ▶';
+  $('#tutSkip').classList.toggle('hidden', tutI === TUT.length - 1);
+}
+function endTutorial() {
+  $('#tut').classList.add('hidden');
+  state.tutDone = true;
+  save();
+}
+
+// ---------------- Start ----------------
+function init() {
+  state = load();
+  state.vol = Object.assign({ music: 80, sfx: 80, voice: 100 }, state.vol);
+  if (!state.cycle) state.cycle = 'off';
+  document.body.classList.toggle('lite', !!state.lite);
+  applyVolumes();
+  $('#bUndo').classList.add('off');
+  setMuted(state.muted);
+  document.body.insertAdjacentHTML('afterbegin', GLOBAL_DEFS);
+  SCENES.forEach(buildScene);
+  mountAll();
   layout();
   switchScene(state.scene, true);
   applyNight();
@@ -1579,7 +1841,12 @@ function init() {
   requestAnimationFrame(loop);
   const map = createMap({
     scenes: SCENES,
-    go: (id) => { closeDrawer(); closeModals(); switchScene(id, state.scene === id); },
+    go: (id) => {
+      closeDrawer();
+      closeModals();
+      switchScene(id, state.scene === id);
+      if (!state.tutDone) setTimeout(openTutorial, 700);
+    },
     chars: () => Object.values(state.objs).filter((o) => o.t === 'c'),
     isNight: () => state.night,
     sfx,
@@ -1614,13 +1881,10 @@ function init() {
       updateLearnBadge();
     },
     onClose: updateLearnBadge,
+    voiceVol: () => state.vol.voice / 100,
   });
   updateLearnBadge();
   $('#bLearn').addEventListener('click', () => { unlock(); closeDrawer(); closeModals(); Learn.open('path'); });
-  if (!localStorage.getItem('kunterbunt-hint')) {
-    setTimeout(() => { if (!document.body.classList.contains('map-open')) toast('Zieh alles herum! 👆'); }, 600);
-    try { localStorage.setItem('kunterbunt-hint', '1'); } catch (e) { /* egal */ }
-  }
   if (DEBUG) window.__dbg = { state, SC, startFall, newObj, falling, sceneEls, removeObj, setScroll, switchScene, place, snapDrop, dropTarget, checkSupport, supported, endDrag, beginDrag, moveDrag, els, get VW() { return VW; } };
   else if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {});
 }

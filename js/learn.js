@@ -193,6 +193,7 @@ function speak(text) {
     const v = s.getVoices().find((x) => /en-GB/i.test(x.lang)) || s.getVoices().find((x) => /^en/i.test(x.lang));
     if (v) ut.voice = v;
     ut.rate = 0.85;
+    ut.volume = api.voiceVol ? api.voiceVol() : 1;
     s.speak(ut);
   } catch (e) { /* keine Sprachausgabe */ }
 }

@@ -834,3 +834,62 @@ body.learn-open #nav, body.learn-open #drawer { display: none; }
 .dropring { width: 90px; height: 34px; border-radius: 50%; border: 5px solid #fff; box-shadow: 0 0 14px 4px rgba(255, 111, 181, .8); animation: dlpulse .7s ease-in-out infinite alternate; }
 @keyframes dlpulse { from { opacity: .55; } to { opacity: 1; } }
 .o.c.target svg.cs { filter: drop-shadow(0 0 6px #fff) drop-shadow(0 0 14px #ffca3a); }
+
+/* ---------- Obere Knöpfe ---------- */
+#topbar { position: fixed; left: 0; right: 0; top: calc(10px + env(safe-area-inset-top)); display: flex; justify-content: space-between; padding: 0 calc(12px + env(safe-area-inset-left)) 0 calc(12px + env(safe-area-inset-left)); pointer-events: none; z-index: 19; }
+#topbar > div { display: flex; gap: 8px; }
+.tb { pointer-events: auto; width: 56px; height: 56px; border-radius: 50%; background: var(--ui); box-shadow: 0 4px 14px rgba(40, 20, 80, .25); display: flex; align-items: center; justify-content: center; transition: transform .15s, opacity .2s; }
+.tb b { font-size: 28px; font-weight: normal; line-height: 1; }
+.tb:active { transform: scale(.9); }
+.tb.off { opacity: .45; }
+body.map-open #topbar, body.learn-open #topbar, body.dj-open #topbar, body.photo-open #topbar { display: none; }
+
+/* ---------- Einstellungen ---------- */
+.setgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 24px; text-align: left; }
+.setcol { display: flex; flex-direction: column; align-items: stretch; }
+.setcol h3 { margin: 10px 4px 4px; font-size: 18px; }
+.set .setcol .btn { min-width: 0; margin: 4px 0; }
+.slider { display: flex; align-items: center; gap: 10px; padding: 6px 4px; font-weight: 800; font-size: 16px; }
+.slider span { flex: 0 0 120px; }
+.slider input { flex: 1; height: 36px; accent-color: #8ac926; }
+.seg { display: flex; gap: 4px; background: #f1ecff; border-radius: 18px; padding: 4px; margin: 4px 0; }
+.seg button { flex: 1; min-height: 46px; border-radius: 14px; font-weight: 800; font-size: 15px; }
+.seg button.sel { background: #ffe066; box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .08); }
+@media (max-width: 760px) { .setgrid { grid-template-columns: 1fr; } }
+
+/* ---------- Anleitung ---------- */
+.card.tut { max-width: 560px; }
+.tut-art { font-size: 72px; height: 120px; display: flex; align-items: center; justify-content: center; gap: 6px; position: relative; }
+.tut-hand { position: absolute; font-size: 56px; animation: tuthand 2s ease-in-out infinite; z-index: 2; }
+.tut-obj { animation: tutobj 2s ease-in-out infinite; }
+@keyframes tuthand { 0%, 10% { transform: translate(-90px, 50px); } 50%, 60% { transform: translate(70px, 30px); } 100% { transform: translate(-90px, 50px); } }
+@keyframes tutobj { 0%, 10% { transform: translate(-90px, 0); } 50%, 60% { transform: translate(70px, -20px); } 100% { transform: translate(-90px, 0); } }
+.tut-p { font-size: 20px; line-height: 1.45; margin: 4px 10px 14px; }
+.tut-dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 8px; }
+.tut-dots i { width: 12px; height: 12px; border-radius: 50%; background: #e3dcf5; }
+.tut-dots i.on { background: #8ac926; transform: scale(1.25); }
+
+/* ---------- Kiste: Suche ---------- */
+.tab.mini { flex: 0 0 64px; }
+.tab.mini i { display: none; }
+.dsearch { margin-top: 10px; }
+.dsearch input { width: 100%; height: 52px; border-radius: 18px; border: 3px solid #e3dcf5; padding: 0 18px; font-size: 20px; font-weight: 700; font-family: inherit; outline: none; }
+.dsearch input:focus { border-color: #8ac926; }
+.dempty { grid-column: 1 / -1; text-align: center; font-weight: 800; opacity: .55; padding: 18px 0; margin: 0; }
+
+
+/* ---------- Namen ---------- */
+.fig em { position: absolute; left: 8px; top: 6px; font-style: normal; font-weight: 800; font-size: 15px; background: rgba(255, 255, 255, .85); border-radius: 10px; padding: 1px 8px; }
+#edName { width: 220px; height: 46px; border-radius: 16px; border: 3px solid #e3dcf5; text-align: center; font-size: 22px; font-weight: 800; font-family: inherit; margin-bottom: 8px; outline: none; }
+#edName:focus { border-color: #ffca3a; }
+
+/* ---------- Spar-Modus ---------- */
+body.lite .o.i::after, body.lite .o.c::after, body.lite .glow, body.lite .shade { display: none !important; }
+body.lite .scene .bg *, body.lite .scene .props svg *, body.lite .mcloud, body.lite .fgp * { animation: none !important; }
+body.lite svg.cs, body.lite .o.c.target svg.cs { filter: none !important; }
+body.lite .scene { filter: none !important; }
+input { -webkit-user-select: text; user-select: text; touch-action: manipulation; }
+#drawer .tab { flex-direction: column; gap: 0; min-width: 0; height: 58px; }
+#drawer .tab b { font-size: 24px; }
+#drawer .tab i { font-size: 11px; }
+#drawer .tab.mini { flex: 0 0 54px; }
