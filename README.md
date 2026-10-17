@@ -18,6 +18,7 @@ Auf dem iPad in Safari öffnen → Teilen ⬆️ → „Zum Home-Bildschirm“.
 - Mini-Spiele: Café-Bestellungen, Friseur-Wünsche, Rhythmus-Spiel am DJ-Pult, Quiz der 4A (Buzzer auf dem Lehrerpult)
 - Bedienung: ↩️ Rückgängig, Kisten-Suche und „Zuletzt benutzt“, Namen für Figuren, Anleitung
 - Einstellungen: Lautstärke (Musik, Geräusche, Stimme), Spar-Modus für ältere iPads, Ort aufräumen, Spielstand als Datei sichern und laden
+- Spielzeit-Begrenzung: nach 10 Minuten wackelt der Bildschirm mit einer Warnung, nach 15 Minuten 10 Sekunden Countdown, danach Sperrbildschirm bis zum nächsten Tag. Eltern-Bereich (mit Rechenaufgabe) unter ⚙️ → „Spielzeit“: Zeiten ändern, ausschalten, +15 Min. freigeben
 - Geräusche (WebAudio), automatisches Speichern im Browser
 
 ## Technik

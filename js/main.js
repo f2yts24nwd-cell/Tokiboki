@@ -5,6 +5,7 @@ import { SCENES, H, initialObjects, GLOBAL_DEFS } from './world.js';
 import { createMap } from './map.js';
 import * as DJ from './dj.js';
 import * as Learn from './learn.js';
+import { initPlaytime, openParents } from './playtime.js';
 
 const SAVE_KEY = 'kunterbunt-welt-v1';
 const DEBUG = location.search.includes('debug');
@@ -1650,6 +1651,7 @@ $('#sLite').addEventListener('click', () => {
   save();
 });
 $('#sTut').addEventListener('click', openTutorial);
+$('#sTime').addEventListener('click', () => { closeModals(); openParents(true); });
 $('#sClean').addEventListener('click', () => { closeModals(); cleanScene(state.scene); toast('🧹 Aufgeräumt!'); });
 $('#sExport').addEventListener('click', exportSave);
 $('#sImport').addEventListener('click', () => $('#sImportFile').click());
@@ -2583,6 +2585,21 @@ function init() {
   });
   updateLearnBadge();
   $('#bLearn').addEventListener('click', () => { unlock(); closeDrawer(); closeModals(); Learn.open('path'); });
+  initPlaytime({
+    sfx,
+    unlock,
+    stopAll: () => {
+      music(false);
+      state.props.radio.on = false;
+      applyProp('radio');
+      DJ.stopAll();
+      DJ.close();
+      try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) { /* egal */ }
+      closeDrawer();
+      closeModals();
+      saveNow();
+    },
+  });
   if (DEBUG) window.__dbg = { state, SC, startFall, newObj, falling, sceneEls, removeObj, setScroll, switchScene, place, snapDrop, dropTarget, checkSupport, supported, endDrag, beginDrag, moveDrag, els, get VW() { return VW; } };
   else if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {});
 }
